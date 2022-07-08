@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/relation-op-api.ejs",
+      "linkedForm": "formAddEditApiOp"
+    },
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "op_id"
+      },
+      {
+        "type": "text",
+        "name": "api_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "ApiCode",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "t_op_api",
+                "column": "id"
+              },
+              {
+                "table": "t_op_api",
+                "column": "code"
+              },
+              {
+                "table": "t_op_api",
+                "column": "api_hit_serial"
+              }
+            ],
+            "table": {
+              "name": "t_op_api"
+            },
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "t_op_api.op_id",
+                  "field": "t_op_api.op_id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_GET.op_id}}",
+                  "data": {
+                    "table": "t_op_api",
+                    "column": "op_id",
+                    "type": "number"
+                  },
+                  "operation": "="
+                },
+                {
+                  "id": "t_op_api.api_id",
+                  "field": "t_op_api.api_id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_GET.api_id}}",
+                  "data": {
+                    "table": "t_op_api",
+                    "column": "api_id",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT id, code, api_hit_serial\nFROM t_op_api\nWHERE op_id = :P1 /* {{$_GET.op_id}} */ AND api_id = :P2 /* {{$_GET.api_id}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.op_id}}"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P2",
+                "value": "{{$_GET.api_id}}"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "text"
+          },
+          {
+            "name": "code",
+            "type": "text"
+          },
+          {
+            "name": "api_hit_serial",
+            "type": "number"
+          }
+        ],
+        "outputType": "object",
+        "type": "dbconnector_single"
+      }
+    ]
+  }
+}

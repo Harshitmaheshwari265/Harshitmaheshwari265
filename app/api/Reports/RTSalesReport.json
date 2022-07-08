@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/sales-report-dt.ejs",
+      "linkedForm": "formRTSales"
+    },
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "dt_id"
+      },
+      {
+        "type": "text",
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "name": "todate"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "RtSales",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "select murt.user_id, murt.user_fname,  murt.user_mobile, sum(trt.amount::float) as success_amt from tt_recharge_trans trt \nleft join m_users murt on (murt.id = trt.user_id) \nleft join m_users mudt on (mudt.id = murt.ds_id::int) \nleft join m_service ms on (ms.id = trt.service_id) \nwhere trt.status ='SUCCESS' and ms.service_name !='Wallet' and ms.service_name !='AEPS' and mudt.user_id = @dt_id and trt.tr_date between @fromdate and @todate group by murt.user_id, murt.user_fname, murt.user_mobile;",
+            "params": [
+              {
+                "name": "@dt_id",
+                "value": "{{$_GET.dt_id}}",
+                "test": "DT201"
+              },
+              {
+                "name": "@fromdate",
+                "value": "{{$_GET.fromdate}}",
+                "test": "2022-05-31 00:00:00"
+              },
+              {
+                "name": "@todate",
+                "value": "{{$_GET.todate}}",
+                "test": "2022-05-31 23:59:59"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "user_id",
+            "type": "text"
+          },
+          {
+            "name": "user_fname",
+            "type": "text"
+          },
+          {
+            "name": "user_mobile",
+            "type": "text"
+          },
+          {
+            "name": "success_amt",
+            "type": "number"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

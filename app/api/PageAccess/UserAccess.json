@@ -1,0 +1,155 @@
+[
+  {
+    "name": "",
+    "module": "auth",
+    "action": "restrict",
+    "options": {
+      "provider": "securityLogin",
+      "permissions": [
+        "write"
+      ],
+      "loginUrl": "login",
+      "forbiddenUrl": "403-forbidden"
+    }
+  },
+  {
+    "name": "identity",
+    "module": "auth",
+    "action": "identify",
+    "options": {
+      "provider": "securityLogin"
+    },
+    "output": true,
+    "meta": []
+  },
+  {
+    "name": "",
+    "module": "core",
+    "action": "condition",
+    "options": {
+      "if": "{{identity}}",
+      "then": {
+        "steps": [
+          {
+            "name": "CheckUser",
+            "module": "dbconnector",
+            "action": "single",
+            "options": {
+              "connection": "postgres_gcpServer",
+              "sql": {
+                "type": "SELECT",
+                "columns": [
+                  {
+                    "table": "m_users",
+                    "column": "id",
+                    "aggregate": "COUNT",
+                    "alias": "access"
+                  }
+                ],
+                "groupBy": [],
+                "table": {
+                  "name": "m_users"
+                },
+                "joins": [],
+                "wheres": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "id": "m_users.id",
+                      "field": "m_users.id",
+                      "type": "double",
+                      "operator": "equal",
+                      "value": "{{identity}}",
+                      "data": {
+                        "table": "m_users",
+                        "column": "id",
+                        "type": "number"
+                      },
+                      "operation": "="
+                    },
+                    {
+                      "id": "m_users.user_type",
+                      "field": "m_users.user_type",
+                      "type": "double",
+                      "operator": "equal",
+                      "value": 0,
+                      "data": {
+                        "table": "m_users",
+                        "column": "user_type",
+                        "type": "number"
+                      },
+                      "operation": "="
+                    },
+                    {
+                      "id": "m_users.u_status",
+                      "field": "m_users.u_status",
+                      "type": "string",
+                      "operator": "equal",
+                      "value": "1",
+                      "data": {
+                        "table": "m_users",
+                        "column": "u_status",
+                        "type": "text"
+                      },
+                      "operation": "="
+                    }
+                  ],
+                  "conditional": null,
+                  "valid": true
+                },
+                "query": "SELECT COUNT(id) AS access\nFROM m_users\nWHERE id = :P1 /* {{identity}} */ AND user_type = 0 AND u_status = '1'",
+                "params": [
+                  {
+                    "operator": "equal",
+                    "type": "expression",
+                    "name": ":P1",
+                    "value": "{{identity}}"
+                  }
+                ],
+                "primary": "id"
+              }
+            },
+            "output": true,
+            "meta": [
+              {
+                "type": "number",
+                "name": "access"
+              }
+            ],
+            "outputType": "object"
+          },
+          {
+            "name": "",
+            "module": "core",
+            "action": "condition",
+            "options": {
+              "if": "{{CheckUser.access == 0}}",
+              "then": {
+                "steps": {
+                  "name": "Redirect",
+                  "module": "core",
+                  "action": "redirect",
+                  "options": {
+                    "url": "/403-forbidden"
+                  }
+                }
+              }
+            },
+            "outputType": "boolean"
+          }
+        ]
+      },
+      "else": {
+        "steps": {
+          "name": "redirect",
+          "module": "core",
+          "action": "redirect",
+          "options": {
+            "url": "/login"
+          }
+        }
+      }
+    },
+    "outputType": "boolean"
+  }
+]

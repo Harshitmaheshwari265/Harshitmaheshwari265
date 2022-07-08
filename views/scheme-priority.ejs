@@ -1,0 +1,199 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="schemepriority" appConnect="local" components="{dmxDataTraversal:{},dmxBootstrap5Modal:{}}" -->
+<meta name="ac:route" content="/scheme-priority/:id">
+<script is="dmx-flow" id="flowFetchScheme" type="text/dmx-flow">{
+    condition: {
+        if: "{{(modalSchemePriority.formAddEditSchPriority.ForUserType.value)}}",
+        then: {
+            steps: {
+                run: {action: "{{scSchemType.load({})}}"}
+            }
+        }
+    }
+}</script>
+<script is="dmx-flow" id="flowFetchUser" type="text/dmx-flow">{
+  condition: {
+    if: "{{(modalSchemePriority.formAddEditSchPriority.UserTypeSelf.value)}}",
+    then: {
+      steps: {
+        run: {action: "{{scUserSchemPrio.load({})}}"}
+      }
+    }
+  }
+}</script>
+<dmx-value id="varSchemeUserId" dmx-bind:value="<%= $_PARAM.id %>"></dmx-value>
+<dmx-serverconnect id="scSchemePriority" url="api/Scheme/FetchSchemePriority" dmx-param:user_id="varSchemeUserId.value"></dmx-serverconnect>
+<dmx-data-view id="dvSchemePriority" pageSize="100" page="10" dmx-bind:data="scSchemePriority.data.SchemePriority"></dmx-data-view>
+<dmx-data-detail id="ddSchemePriority" key="id" dmx-bind:data="dvSchemePriority.data"></dmx-data-detail>
+<dmx-serverconnect id="scUserSchemPrio" url="api/Scheme/FetchSchPrioUser" dmx-param:user_type="modalSchemePriority.formAddEditSchPriority.UserTypeSelf.value" noload></dmx-serverconnect>
+<dmx-serverconnect id="scSchemType" url="api/Scheme/FetchSchemeType" dmx-param:for_user_type="modalSchemePriority.formAddEditSchPriority.ForUserType.value" noload></dmx-serverconnect>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 id="SchemePriority" class="text-center align-self-center">SW Infotech Scheme Priority</h1>
+                <button id="btnAdd" class="btn btn-primary" dmx-on:click="modalSchemePriority.show(); ddSchemePriority.select(0); modalSchemePriority.formAddEditSchPriority.reset()">Add Scheme Priority</button>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-sm sw-font-11">
+            <thead>
+                <tr>
+                    <th>Sl. No.</th>
+                    <th>User Name</th>
+                    <th>For User Type</th>
+                    <th>Scheme1</th>
+                    <th>Scheme2</th>
+                    <th>Scheme3</th>
+                    <th>Scheme4</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="dvSchemePriority.data" id="tableRepeat1">
+                <tr>
+                    <td>{{$index+1}}</td>
+                    <td dmx-text="user_fname.titlecase()+' '+user_mobile+' ('+user_type+')'"></td>
+                    <td dmx-text="for_user_type"></td>
+                    <td dmx-text="scheme1"></td>
+                    <td dmx-text="scheme2"></td>
+                    <td dmx-text="scheme3"></td>
+                    <td dmx-text="scheme4"></td>
+                    <td>
+                        <a class="dropdown-item sw-col-dr" href="#" dmx-on:click="ddSchemePriority.select(id)" data-bs-toggle="modal" data-bs-target="#modalDelSchemePrio"><i class="far fa-trash-alt" title="Delete Scheme Priority"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!-- Modal Delete Scheme Priority -->
+<div class="modal fade" id="modalDelSchemePrio" is="dmx-bs5-modal" tabindex="-1" nokeyboard="true" nocloseonclick="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Scheme Priority</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h3>Do you want to delete this Scheme Priority?</h3>
+                <form is="dmx-serverconnect-form" id="formDelSchPrio" method="post" action="api/Scheme/DeleteSchemePrio" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formDelSchPrio.data.DeleteUsers ? scNotif.success('User Deleted') : ''; modalDelSchemePrio.hide();formDelSchPrio.reset(); scSchemePriority.load()" dmx-on:error="scNotif.warning('An error occurred'); modalDelSchemePrio.hide();formDelSchPrio.reset()">
+                    <input type="hidden" name="schemeprioid" dmx-bind:value="ddSchemePriority.data.id">
+                    <table class="table table-striped table-bordered table-sm">
+                        <tr>
+                            <td>User Name</td>
+                            <td>For User Type</td>
+                            <td>Scheme1</td>
+                            <td>Scheme2</td>
+                            <td>Scheme3</td>
+                            <td>Scheme4</td>
+                        </tr>
+                        <tr>
+                            <td>{{ddSchemePriority.data.user_fname.titlecase()}}-{{ddSchemePriority.data.user_mobile}}</td>
+                            <td>{{ddSchemePriority.data.for_user_type}}</td>
+                            <td>{{ddSchemePriority.data.scheme1}}</td>
+                            <td>{{ddSchemePriority.data.scheme2}}</td>
+                            <td>{{ddSchemePriority.data.scheme3}}</td>
+                            <td>{{ddSchemePriority.data.scheme4}}</td>
+                        </tr>
+                    </table>
+                    <div class="mb-3 row">
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">Delete<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Add Scheme Priority -->
+<div class="modal fade" id="modalSchemePriority" is="dmx-bs5-modal" tabindex="-1" nokeyboard="true" nocloseonclick="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ddSchemePriority.data.id ? 'Edit Scheme Priority' : 'Add Scheme Priority'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form is="dmx-serverconnect-form" id="formAddEditSchPriority" method="post" action="api/Scheme/SchemePriorityAddEdit" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAddEditSchPriority.data.SchemePriorityAddEdit ? scNotif.success('New Scheme Priority Added') : scNotif.success('Scheme Priority Updated'); formAddEditSchPriority.reset(); scSchemePriority.load()" dmx-on:error="scNotif.warning('An error occurred');">
+                    <div class="mb-3 row">
+                        <label for="inp_name" class="col-sm-2 col-form-label">User Type:</label>
+                        <div class="col-sm-10">
+                            <select id="UserTypeSelf" name="user_type" class="form-control form-select" dmx-on:changed="flowFetchUser.run()" required="">
+                                <option value="">Select</option>
+                                <option value="1">MDT</option>
+                                <option value="2">DT</option>
+                                <option value="3">RT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_services_type" class="col-sm-2 col-form-label">Target User</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_target_user" name="target_user_id" aria-describedby="inp_target_user_help" dmx-bind:options="scUserSchemPrio.data.UserDetails" optiontext="user_mobile+' || '+user_fname+' || '+user_type" optionvalue="id" required="">
+                                <option value="">Select </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_service_desc" class="col-sm-2 col-form-label">For User Type :</label>
+                        <div class="col-sm-10">
+                            <select id="ForUserType" name="for_user_type" class="form-control form-select" dmx-bind:options="scUserSchemPrio.data.GetUserType" optiontext="for_user_type_name" optionvalue="for_user_type_id" dmx-on:changed="flowFetchScheme.run()" required="">
+                                <option value="">Select</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_scheme_type1" class="col-sm-2 col-form-label">Target Scheme1 *</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_target_scheme1" name="target_scheme1" aria-describedby="inp_target_scheme_help" dmx-bind:options="scSchemType.data.GetSchemes" optiontext="scheme_name" optionvalue="id" required="" dmx-bind:value="scSchemType.data.GetSchemes[0].id">
+                                <option value="">Select </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_scheme_type2" class="col-sm-2 col-form-label">Target Scheme2</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_target_scheme2" name="target_scheme2" aria-describedby="inp_target_scheme_help" dmx-bind:options="scSchemType.data.GetSchemes" optiontext="scheme_name" optionvalue="id" dmx-bind:value="scSchemType.data.GetSchemes[1].id">
+                                <option value="">Select </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_scheme_type3" class="col-sm-2 col-form-label">Target Scheme3</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_target_scheme3" name="target_scheme3" aria-describedby="inp_target_scheme_help" dmx-bind:options="scSchemType.data.GetSchemes" optiontext="scheme_name" optionvalue="id" dmx-bind:value="scSchemType.data.GetSchemes[2].id">
+                                <option value="">Select </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_scheme_type4" class="col-sm-2 col-form-label">Target Scheme4</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_target_scheme4" name="target_scheme4" aria-describedby="inp_target_scheme_help" dmx-bind:options="scSchemType.data.GetSchemes" optiontext="scheme_name" optionvalue="id" dmx-bind:value="scSchemType.data.GetSchemes[3].id">
+                                <option value="">Select </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-2">&nbsp;</div>
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">Submit<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

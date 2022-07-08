@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "user_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "SchemePriority",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "select tsu.id, tsu.user_id, mut1.user_type as for_user_type, ms.scheme_name as scheme1, ms2.scheme_name as scheme2, ms3.scheme_name as scheme3, \n ms4.scheme_name as scheme4, ms5.scheme_name as scheme5, ms6.scheme_name as scheme6, mu.user_fname, mu.user_mobile, mut.user_type \nfrom t_scheme_user tsu\nleft join m_users mu on mu.id = tsu.user_id \nleft join m_scheme ms on ms.id = tsu.scheme1 \nleft join m_scheme ms2 on ms2.id = tsu.scheme2 \nleft join m_scheme ms3 on ms3.id = tsu.scheme3 \nleft join m_scheme ms4 on ms4.id = tsu.scheme4 \nleft join m_scheme ms5 on ms5.id = tsu.scheme5 \nleft join m_scheme ms6 on ms6.id = tsu.scheme6 \nleft join m_scheme ms7 on ms7.id = tsu.scheme7 \nleft join m_user_type mut on mut.id = mu.user_type \nleft join m_user_type mut1 on mut1.id = tsu.for_user_type\nWHERE tsu.user_id=@user ORDER BY tsu.updated_on DESC;",
+            "params": [
+              {
+                "name": "@user",
+                "value": "{{$_GET.user_id}}",
+                "test": "108"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "user_id",
+            "type": "number"
+          },
+          {
+            "name": "for_user_type",
+            "type": "text"
+          },
+          {
+            "name": "scheme1",
+            "type": "text"
+          },
+          {
+            "name": "scheme2",
+            "type": "text"
+          },
+          {
+            "name": "scheme3",
+            "type": "text"
+          },
+          {
+            "name": "scheme4",
+            "type": "text"
+          },
+          {
+            "name": "scheme5",
+            "type": "text"
+          },
+          {
+            "name": "scheme6",
+            "type": "text"
+          },
+          {
+            "name": "user_fname",
+            "type": "text"
+          },
+          {
+            "name": "user_mobile",
+            "type": "text"
+          },
+          {
+            "name": "user_type",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

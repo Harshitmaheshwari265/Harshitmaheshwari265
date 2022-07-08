@@ -1,0 +1,137 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "service_id"
+      },
+      {
+        "type": "text",
+        "name": "op_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.op_id!=0}}",
+          "then": {
+            "steps": {
+              "name": "GetRandomAPI",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "query": "SELECT t_random_root.id, t_random_root.created_on::text, m_api.api_name, m_api.api_code, m_op.operator_name, m_service.service_name, m_user.user_fname FROM t_random_root\nLEFT JOIN m_api AS m_api ON (m_api.id = t_random_root.api_id) \nLEFT JOIN m_operator AS m_op ON (m_op.id = t_random_root.op_id) \nLEFT JOIN m_service AS m_service ON (m_service.id = t_random_root.service_id) \nLEFT JOIN m_users AS m_user ON (m_user.id = t_random_root.created_by)\nWHERE t_random_root.service_id = @service AND t_random_root.op_id = @op AND m_api.status = 1 AND m_op.status = 1",
+                  "params": [
+                    {
+                      "name": "@service",
+                      "value": "{{$_GET.service_id}}",
+                      "test": ""
+                    },
+                    {
+                      "name": "@op",
+                      "value": "{{$_GET.op_id}}",
+                      "test": ""
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [],
+              "outputType": "array"
+            }
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.op_id==0}}",
+          "then": {
+            "steps": {
+              "name": "GetRandomAPI",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "query": "SELECT t_random_root.id, t_random_root.created_on::text, m_api.api_name, m_api.api_code, m_op.operator_name, m_service.service_name, m_user.user_fname\nFROM t_random_root\nLEFT JOIN m_api AS m_api ON (m_api.id = t_random_root.api_id) \nLEFT JOIN m_operator AS m_op ON (m_op.id = t_random_root.op_id) \nLEFT JOIN m_service AS m_service ON (m_service.id = t_random_root.service_id) \nLEFT JOIN m_users AS m_user ON (m_user.id = t_random_root.created_by)\nWHERE t_random_root.service_id = @service AND m_api.status = 1 AND m_op.status = 1",
+                  "params": [
+                    {
+                      "name": "@service",
+                      "value": "{{$_GET.service_id}}",
+                      "test": "1"
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "id",
+                  "type": "number"
+                },
+                {
+                  "name": "created_on",
+                  "type": "text"
+                },
+                {
+                  "name": "api_name",
+                  "type": "text"
+                },
+                {
+                  "name": "api_code",
+                  "type": "text"
+                },
+                {
+                  "name": "operator_name",
+                  "type": "text"
+                },
+                {
+                  "name": "service_name",
+                  "type": "text"
+                },
+                {
+                  "name": "user_fname",
+                  "type": "text"
+                }
+              ],
+              "outputType": "array"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

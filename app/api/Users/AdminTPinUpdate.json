@@ -1,0 +1,215 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/security-update.ejs",
+      "linkedForm": "formTPINUpdate"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "oldtpin",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "oldtpin"
+      },
+      {
+        "type": "text",
+        "fieldName": "newtpin",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "newtpin"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "GetoldTpin",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_users",
+                "column": "user_tpin",
+                "alias": "olddbtpin"
+              }
+            ],
+            "table": {
+              "name": "m_users"
+            },
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_users.id",
+                  "field": "m_users.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{identity}}",
+                  "data": {
+                    "table": "m_users",
+                    "column": "id",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT user_tpin AS olddbtpin\nFROM m_users\nWHERE id = :P1 /* {{identity}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{identity}}"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "text",
+            "name": "olddbtpin"
+          }
+        ],
+        "outputType": "object",
+        "disabled": true
+      },
+      {
+        "name": "validate",
+        "module": "validator",
+        "action": "validate",
+        "options": {
+          "data": [
+            {
+              "name": "validate_1",
+              "value": "{{$_POST.oldtpin.toString()}}",
+              "rules": {
+                "db:exists": {
+                  "param": {
+                    "connection": "postgres_gcpServer",
+                    "table": "m_users",
+                    "column": "user_tpin"
+                  },
+                  "message": "Old T-Pin Mismatched"
+                }
+              },
+              "fieldName": "user_tpin"
+            }
+          ]
+        }
+      },
+      {
+        "name": "update",
+        "module": "dbupdater",
+        "action": "update",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "update",
+            "values": [
+              {
+                "table": "m_users",
+                "column": "user_tpin",
+                "type": "text",
+                "value": "{{$_POST.newtpin}}"
+              }
+            ],
+            "table": "m_users",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "id",
+                  "field": "id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{identity}}",
+                  "data": {
+                    "column": "id"
+                  },
+                  "operation": "="
+                },
+                {
+                  "id": "u_status",
+                  "field": "u_status",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "1",
+                  "data": {
+                    "column": "u_status"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "UPDATE m_users\nSET user_tpin = :P1 /* {{$_POST.newtpin}} */\nWHERE id = :P2 /* {{identity}} */ AND u_status = '1'",
+            "params": [
+              {
+                "name": ":P1",
+                "type": "expression",
+                "value": "{{$_POST.newtpin}}"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P2",
+                "value": "{{identity}}"
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ],
+        "output": true
+      }
+    ]
+  }
+}

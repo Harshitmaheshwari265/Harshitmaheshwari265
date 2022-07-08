@@ -1,0 +1,123 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="androidhelpdesk" appConnect="local" components="{dmxDataTraversal:{},dmxBootstrap5Modal:{}}" -->
+<meta name="ac:route" content="/android-help-desk">
+
+<dmx-serverconnect id="scAndroidHelp" url="api/Android/GetHelpDesk"></dmx-serverconnect>
+<dmx-data-detail id="ddAndroidHelp" dmx-bind:data="content.scAndroidHelp.data.GetHelp.data" key="id"></dmx-data-detail>
+<div class="container">
+    <div class="row">
+        <div class="col-12 col-md-auto me-auto ps-4">
+            <h1 id="Operator" class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">Android Help Desk<span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scAndroidHelp.state.executing"></span></h1>
+        </div>
+        <div class="col-auto order-2 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+            <button id="btnAdd" class="btn btn-primary" dmx-on:click="modalAndroidHelp.show(); ddAndroidHelp.select(0);">Add</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover table-sm text-center  sw-font-11">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>For User</th>
+                        <th>Support Email</th>
+                        <th>Support Mobile</th>
+                        <th>Sales Mobile</th>
+                        <th>Sales Email</th>
+                        <th>Status</th>
+                        <th>Created on</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="scAndroidHelp.data.GetHelp.data" id="tableRepeat1">
+                    <tr>
+                        <td dmx-text="$index+1"></td>
+                        <td dmx-text="user_type==3?'RT':user_type==2?'DT':user_type==1?'MDT':user_type==4?'API User':'NA'"></td>
+                        <td dmx-text="support_email1"></td>
+                        <td dmx-text="support_mobile"></td>
+                        <td dmx-text="sales_mobile1"></td>
+                        <td dmx-text="sales_email2"></td>
+                        <td dmx-text="status==1?'Active':'Inactive'" dmx-class:text-primary="status==1" dmx-class:text-secondary="status!=1"></td>
+                        <td dmx-text="created_on.formatDate('dd-MM-yyyy hh:mm:ss A')"></td>
+                        <td><a class="dropdown-item" href="#" dmx-on:click="ddAndroidHelp.select(id)" data-bs-toggle="modal" data-bs-target="#modalAndroidHelp"><i class="fas fa-edit sw-col-ar" title="Edit Operator"></i></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Modal Add Images -->
+<div class="modal fade" id="modalAndroidHelp" is="dmx-bs5-modal" tabindex="-1" nocloseonclick="true" nokeyboard="true" nofocus="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ddAndroidHelp.data.id ? 'Edit Help DesK' : 'Add A New Helpline'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" dmx-on:click="formAddEditHelp.reset()"></button>
+            </div>
+            <div class="modal-body">
+                <form is="dmx-serverconnect-form" id="formAddEditHelp" method="post" action="api/Android/AddEditHelpDesk" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="scNotif.success(lastError.response); formAddEditHelp.reset(); scAndroidHelp.load()" dmx-on:error="scNotif.warning('An error occurred');" dmx-on:forbidden="scNotif.warning(lastError.response)" dmx-on:unauthorized="scNotif.warning(lastError.response)" dmx-on:invalid="scNotif.warning(lastError.message)">
+                    <input type="hidden" name="AndroidTableId" dmx-bind:value="ddAndroidHelp.data.id?ddAndroidHelp.data.id:0">
+                    <div class="mb-3 row">
+                        <label for="inp_name" class="col-sm-2 col-form-label">For User Type</label>
+                        <div class="col-sm-10">
+                            <select class="form-control form-select" name="user_type" id="user_type" dmx-bind:value="ddAndroidHelp.data.user_type" required="">
+                                <option value="">Select</option>
+                                <option value="0">All</option>
+                                <option value="3">RT</option>
+                                <option value="2">DT</option>
+                                <option value="1">MDT</option>
+                                <option value="10">DT &MDT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_image_type" class="col-sm-2 col-form-label">Support Email</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="text" name="support_email" id="support_email" dmx-bind:value="ddAndroidHelp.data.support_email1">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_image_type" class="col-sm-2 col-form-label">Support Mobile</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="number" name="support_mobile" id="support_mobile" dmx-bind:value="ddAndroidHelp.data.support_mobile">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_image_type" class="col-sm-2 col-form-label">Sales Email</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="text" name="sales_email" id="sales_email" dmx-bind:value="ddAndroidHelp.data.sales_email2">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_image_type" class="col-sm-2 col-form-label">Sales Mobile</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="number" name="sales_mobile" id="sales_mobile" dmx-bind:value="ddAndroidHelp.data.sales_mobile1">
+                        </div>
+                    </div>
+                    <div class="mb-3 row mx-0">
+                        <div class="mb-3 col-6 px-0 row">
+                            <label for="inp_status" class="col-5 col-form-label">Status</label>
+                            <div class="col-sm-7">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="SwitchCheckStatus" dmx-bind:checked="ddAndroidHelp.data.status == 1" dmx-bind:value="SwitchCheckStatus.checked ? 1 : 0">
+                                    <input type="hidden" name="status" dmx-bind:value="SwitchCheckStatus.checked">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3 col-6 px-0 row">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-2">&nbsp;</div>
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">Save<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" dmx-on:click="formAddEditOperator.reset()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

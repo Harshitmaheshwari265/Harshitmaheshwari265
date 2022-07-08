@@ -1,0 +1,1399 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/recharge-history.ejs",
+      "linkedForm": "formCheck"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "trans_id",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "trans_id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "REMOTE_ADDR"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "getTransDetails",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "tt_recharge_trans",
+                "column": "status"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "api_id"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "api_logs"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "tr_id"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "api_ref"
+              },
+              {
+                "table": "m_api",
+                "column": "username"
+              },
+              {
+                "table": "m_api",
+                "column": "api_password"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "opening_balance"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "amount"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "net_amt"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "user_id"
+              },
+              {
+                "table": "mu",
+                "column": "balance_amt"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "user_number"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "comm_per"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "comm_val"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "comm_amt"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "other_charge"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "charge_per"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "charge_amt"
+              }
+            ],
+            "table": {
+              "name": "tt_recharge_trans"
+            },
+            "joins": [
+              {
+                "table": "m_api",
+                "column": "*",
+                "alias": "m_api",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "m_api",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "tt_recharge_trans",
+                        "column": "api_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                },
+                "primary": "id"
+              },
+              {
+                "table": "m_users",
+                "column": "*",
+                "alias": "mu",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "mu",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "tt_recharge_trans",
+                        "column": "user_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "query": "SELECT tt_recharge_trans.status, tt_recharge_trans.api_id, tt_recharge_trans.api_logs, tt_recharge_trans.tr_id, tt_recharge_trans.api_ref, m_api.username, m_api.api_password, tt_recharge_trans.opening_balance, tt_recharge_trans.amount, tt_recharge_trans.net_amt, tt_recharge_trans.user_id, mu.balance_amt, tt_recharge_trans.user_number, tt_recharge_trans.comm_per, tt_recharge_trans.comm_val, tt_recharge_trans.comm_amt, tt_recharge_trans.other_charge, tt_recharge_trans.charge_per, tt_recharge_trans.charge_amt\nFROM tt_recharge_trans\nINNER JOIN m_api AS m_api ON (m_api.id = tt_recharge_trans.api_id) LEFT JOIN m_users AS mu ON (mu.id = tt_recharge_trans.user_id)\nWHERE tt_recharge_trans.id = :P1 /* {{$_POST.trans_id}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.trans_id}}"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "tt_recharge_trans.id",
+                  "field": "tt_recharge_trans.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.trans_id}}",
+                  "data": {
+                    "table": "tt_recharge_trans",
+                    "column": "id",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "primary": "id"
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "text",
+            "name": "status"
+          },
+          {
+            "type": "number",
+            "name": "api_id"
+          },
+          {
+            "type": "text",
+            "name": "api_logs"
+          },
+          {
+            "type": "text",
+            "name": "tr_id"
+          },
+          {
+            "type": "text",
+            "name": "api_ref"
+          },
+          {
+            "type": "text",
+            "name": "username"
+          },
+          {
+            "type": "text",
+            "name": "api_password"
+          },
+          {
+            "type": "text",
+            "name": "opening_balance"
+          },
+          {
+            "type": "text",
+            "name": "amount"
+          },
+          {
+            "type": "text",
+            "name": "net_amt"
+          },
+          {
+            "type": "number",
+            "name": "user_id"
+          },
+          {
+            "type": "text",
+            "name": "balance_amt"
+          },
+          {
+            "type": "text",
+            "name": "user_number"
+          },
+          {
+            "type": "text",
+            "name": "comm_per"
+          },
+          {
+            "type": "text",
+            "name": "comm_val"
+          },
+          {
+            "type": "text",
+            "name": "comm_amt"
+          },
+          {
+            "type": "text",
+            "name": "other_charge"
+          },
+          {
+            "type": "text",
+            "name": "charge_per"
+          },
+          {
+            "type": "text",
+            "name": "charge_amt"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{getTransDetails.api_logs == 'MA'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "apiMA",
+                "module": "api",
+                "action": "send",
+                "options": {
+                  "url": "http://corp.moneyart.in/TransactionStatus",
+                  "params": {
+                    "token": "{{getTransDetails.api_password}}",
+                    "clientTransactionID": "{{getTransDetails.tr_id}}"
+                  },
+                  "method": "POST"
+                },
+                "output": false
+              },
+              {
+                "name": "setStat",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiMA.data.StatusCode}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "apiStatus",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{setStat==1? 'SUCCESS' : setStat==2? 'PENDING' : setStat==0? 'FAILED' :  getTransDetails.status}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "api_ref",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiMA.data.Data.TxnRef}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "remark",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiMA.data.Message}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{getTransDetails.api_logs == 'MRO'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "apiMRO",
+                "module": "api",
+                "action": "send",
+                "options": {
+                  "url": "https://mrobotics.in/api/order_id_status",
+                  "method": "POST",
+                  "params": {
+                    "api_token": "{{getTransDetails.api_password}}",
+                    "order_id": "{{getTransDetails.tr_id}}"
+                  }
+                },
+                "output": false
+              },
+              {
+                "name": "setStat",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiMRO.data.status}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "apiStatus",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{setStat=='success'? 'SUCCESS' : setStat=='pending'? 'PENDING' : setStat=='failure'? 'FAILED' :  getTransDetails.status}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "api_ref",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiMRO.data.tnx_id}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "remark",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiMRO.data.response}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{getTransDetails.api_logs == 'AMBI'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "apiAM",
+                "module": "api",
+                "action": "send",
+                "options": {
+                  "url": "http://status.ambikamultiservices.com/API/StatusCheck",
+                  "params": {
+                    "UserID": "{{getTransDetails.username}}",
+                    "Token": "{{getTransDetails.api_password}}",
+                    "RPID": "{{getTransDetails.api_ref}}",
+                    "AGENTID": "{{getTransDetails.tr_id}}",
+                    "Format": "1"
+                  }
+                },
+                "output": false
+              },
+              {
+                "name": "setStat",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiAM.data.status}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "apiStatus",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{setStat == 2 ? 'SUCCESS' : setStat == 1 ? 'PENDING' : setStat == 3 ? 'FAILED' :  getTransDetails.status}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "api_ref",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiAM.data.rpid}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "remark",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiAM.data.msg}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{getTransDetails.api_logs=='SN'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "apiSN",
+                "module": "api",
+                "action": "send",
+                "options": {
+                  "url": "http://sonakshiworld.com/apiservice.asmx/GetRechargeStatus",
+                  "params": {
+                    "apiToken": "{{getTransDetails.api_password}}",
+                    "reqid": "{{getTransDetails.tr_id}}"
+                  }
+                },
+                "output": false
+              },
+              {
+                "name": "xml",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiSN.data.xmlToJSON()}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "apiStatus",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{xml.Result.status[0]}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "api_ref",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{xml.Result.field1[0]}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "remark",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{xml.Result.remark[0]}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{getTransDetails.api_logs=='UH'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "apiUH",
+                "module": "api",
+                "action": "send",
+                "options": {
+                  "url": "https://utilityhub.app/API/StatusCheck",
+                  "params": {
+                    "UserID": "{{getTransDetails.username}}",
+                    "Token": "{{getTransDetails.api_password}}",
+                    "RPID": "{{getTransDetails.api_ref}}",
+                    "AGENTID": "{{getTransDetails.tr_id}}",
+                    "Format": "1"
+                  }
+                },
+                "output": false
+              },
+              {
+                "name": "setStat",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiUH.data.status}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "apiStatus",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{setStat == 2 ? 'SUCCESS' : setStat == 1 ? 'PENDING' : setStat == 3 ? 'FAILED' :  getTransDetails.status}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "api_ref",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiAM.data.rpid}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "remark",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiAM.data.msg}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{getTransDetails.api_logs=='DMEP'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "AuthCode",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "65c43ccd6a7b41c884"
+                },
+                "meta": [],
+                "outputType": "text"
+              },
+              {
+                "name": "MessageCode",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "E06017"
+                },
+                "meta": [],
+                "outputType": "text"
+              },
+              {
+                "name": "ReqId",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{UUID.md5(123456).substr(1, 15)}}"
+                },
+                "meta": [],
+                "outputType": "text"
+              },
+              {
+                "name": "apiDMEP",
+                "module": "api",
+                "action": "send",
+                "options": {
+                  "url": "https://ezymoney.myezypay.in/RemitMoney/mtransfer",
+                  "method": "POST",
+                  "dataType": "x-www-form-urlencoded",
+                  "data": {
+                    "msg": "{{MessageCode+'~'+AuthCode+'~'+ReqId+'~'+getTransDetails.tr_id+'~0~0'}}"
+                  }
+                },
+                "output": false
+              },
+              {
+                "name": "setStat",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiDMEP.data.split('~')[5]}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "apiStatus",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiDMEP.data.split('~')[5]}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "api_ref",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiDMEP.data.split('~')[2]}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "remark",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{apiDMEP.data.split('~')[6]}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{apiStatus=='SUCCESS'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateRechTrans",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{apiStatus}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "operator_ref",
+                        "type": "text",
+                        "value": "{{remark}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "api_ref",
+                        "type": "text",
+                        "value": "{{api_ref}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "live",
+                        "type": "text",
+                        "value": "{{'Push'}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "updated_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      }
+                    ],
+                    "table": "tt_recharge_trans",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.trans_id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "UPDATE tt_recharge_trans\nSET status = :P1 /* {{apiStatus}} */, operator_ref = :P2 /* {{remark}} */, api_ref = :P3 /* {{api_ref}} */, live = :P4 /* {{'Push'}} */, updated_on = :P5 /* {{NOW}} */\nWHERE id = :P6 /* {{$_POST.trans_id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{apiStatus}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{remark}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{api_ref}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{'Push'}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P6",
+                        "value": "{{$_POST.trans_id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": false
+              },
+              {
+                "name": "updatettBalance",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_balance",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{apiStatus}}"
+                      }
+                    ],
+                    "table": "tt_balance",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "pay_ref_id",
+                          "field": "pay_ref_id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.trans_id}}",
+                          "data": {
+                            "column": "pay_ref_id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "UPDATE tt_balance\nSET status = :P1 /* {{apiStatus}} */\nWHERE pay_ref_id = :P2 /* {{$_POST.trans_id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{apiStatus}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{$_POST.trans_id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": false
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{apiStatus=='FAILED'||apiStatus=='REFUND'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateRechTrans",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'FAILED'}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "closing_balance",
+                        "type": "text",
+                        "value": "{{getTransDetails.opening_balance}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "api_ref",
+                        "type": "text",
+                        "value": "{{api_ref}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "operator_ref",
+                        "type": "text",
+                        "value": "{{remark}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "live",
+                        "type": "text",
+                        "value": "{{'Push'}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "updated_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      }
+                    ],
+                    "table": "tt_recharge_trans",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.trans_id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "UPDATE tt_recharge_trans\nSET status = :P1 /* {{'FAILED'}} */, closing_balance = :P2 /* {{getTransDetails.opening_balance}} */, api_ref = :P3 /* {{api_ref}} */, operator_ref = :P4 /* {{remark}} */, live = :P5 /* {{'Push'}} */, updated_on = :P6 /* {{NOW}} */\nWHERE id = :P7 /* {{$_POST.trans_id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{'FAILED'}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{getTransDetails.opening_balance}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{api_ref}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{remark}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{'Push'}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P7",
+                        "value": "{{$_POST.trans_id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": false
+              },
+              {
+                "name": "updatettBalance",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_balance",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'FAILED'}}"
+                      }
+                    ],
+                    "table": "tt_balance",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "pay_ref_id",
+                          "field": "pay_ref_id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.trans_id}}",
+                          "data": {
+                            "column": "pay_ref_id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "UPDATE tt_balance\nSET status = :P1 /* {{'FAILED'}} */\nWHERE pay_ref_id = :P2 /* {{$_POST.trans_id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{'FAILED'}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{$_POST.trans_id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": false
+              },
+              {
+                "name": "RTOldBal",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{getTransDetails.balance_amt.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": false
+              },
+              {
+                "name": "NetAmt",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{getTransDetails.net_amt.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": false
+              },
+              {
+                "name": "RTNewBal",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{RTOldBal.toNumber()+NetAmt.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": false
+              },
+              {
+                "name": "AddRefund",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "tt_balance",
+                        "column": "user_id",
+                        "type": "number",
+                        "value": "{{getTransDetails.user_id}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "old_balance",
+                        "type": "text",
+                        "value": "{{RTOldBal}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "amount",
+                        "type": "text",
+                        "value": "{{getTransDetails.amount}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "new_balance",
+                        "type": "text",
+                        "value": "{{RTNewBal}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "transaction_type",
+                        "type": "text",
+                        "value": "{{'Recharge Refund'}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "tr_date",
+                        "type": "text",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "ip_address",
+                        "type": "text",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "crdr_type",
+                        "type": "text",
+                        "value": "{{'Credit'}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "pay_ref_id",
+                        "type": "number",
+                        "value": "{{$_POST.trans_id}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "remarks",
+                        "type": "text",
+                        "value": "{{'Number: '+getTransDetails.user_number+' | Amount: '+getTransDetails.amount+' | Recharge Refund '+$_POST.trans_id+' | Comm Per: '+getTransDetails.comm_per+' | Comm Val: '+getTransDetails.comm_val+' Charge Per: '+getTransDetails.charge_per+' | Charge Val: '+getTransDetails.other_charge+' | GST: 00.00 | TDS: 00.00 | Net Amt. '+getTransDetails.net_amt}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "created_by",
+                        "type": "number",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "created_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "netamt",
+                        "type": "text",
+                        "value": "{{NetAmt}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'ADDREFUND'}}"
+                      }
+                    ],
+                    "table": "tt_balance",
+                    "returning": "id",
+                    "query": "INSERT INTO tt_balance\n(user_id, old_balance, amount, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on, netamt, status) VALUES (:P1 /* {{getTransDetails.user_id}} */, :P2 /* {{RTOldBal}} */, :P3 /* {{getTransDetails.amount}} */, :P4 /* {{RTNewBal}} */, :P5 /* {{'Recharge Refund'}} */, :P6 /* {{NOW}} */, :P7 /* {{$_SERVER.REMOTE_ADDR}} */, :P8 /* {{'Credit'}} */, :P9 /* {{$_POST.trans_id}} */, :P10 /* {{'Number: '+getTransDetails.user_number+' | Amount: '+getTransDetails.amount+' | Recharge Refund '+$_POST.trans_id+' | Comm Per: '+getTransDetails.comm_per+' | Comm Val: '+getTransDetails.comm_val+' Charge Per: '+getTransDetails.charge_per+' | Charge Val: '+getTransDetails.other_charge+' | GST: 00.00 | TDS: 00.00 | Net Amt. '+getTransDetails.net_amt}} */, :P11 /* {{identity}} */, :P12 /* {{NOW}} */, :P13 /* {{NetAmt}} */, :P14 /* {{'ADDREFUND'}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{getTransDetails.user_id}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{RTOldBal}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{getTransDetails.amount}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{RTNewBal}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{'Recharge Refund'}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "name": ":P8",
+                        "type": "expression",
+                        "value": "{{'Credit'}}"
+                      },
+                      {
+                        "name": ":P9",
+                        "type": "expression",
+                        "value": "{{$_POST.trans_id}}"
+                      },
+                      {
+                        "name": ":P10",
+                        "type": "expression",
+                        "value": "{{'Number: '+getTransDetails.user_number+' | Amount: '+getTransDetails.amount+' | Recharge Refund '+$_POST.trans_id+' | Comm Per: '+getTransDetails.comm_per+' | Comm Val: '+getTransDetails.comm_val+' Charge Per: '+getTransDetails.charge_per+' | Charge Val: '+getTransDetails.other_charge+' | GST: 00.00 | TDS: 00.00 | Net Amt. '+getTransDetails.net_amt}}"
+                      },
+                      {
+                        "name": ":P11",
+                        "type": "expression",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "name": ":P12",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P13",
+                        "type": "expression",
+                        "value": "{{NetAmt}}"
+                      },
+                      {
+                        "name": ":P14",
+                        "type": "expression",
+                        "value": "{{'ADDREFUND'}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": false
+              },
+              {
+                "name": "RTUserUp",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "m_users",
+                        "column": "balance_amt",
+                        "type": "text",
+                        "value": "{{RTNewBal}}"
+                      }
+                    ],
+                    "table": "m_users",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{getTransDetails.user_id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{RTNewBal}} */\nWHERE id = :P2 /* {{getTransDetails.user_id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{RTNewBal}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{getTransDetails.user_id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": false
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

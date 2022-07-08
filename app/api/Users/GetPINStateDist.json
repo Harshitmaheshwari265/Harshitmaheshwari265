@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "pincode"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "api",
+        "module": "api",
+        "action": "send",
+        "options": {
+          "url": "https://api.postalpincode.in/pincode/{{$_GET.pincode}}"
+        },
+        "output": false
+      },
+      {
+        "name": "PinAPI",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{api.data[0].PostOffice}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,376 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/android-help-desk.ejs",
+      "linkedForm": "formAddEditHelp"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "AndroidTableId",
+        "name": "AndroidTableId"
+      },
+      {
+        "type": "text",
+        "fieldName": "support_email",
+        "name": "support_email"
+      },
+      {
+        "type": "number",
+        "fieldName": "support_mobile",
+        "options": {
+          "rules": {
+            "core:number": {}
+          }
+        },
+        "name": "support_mobile"
+      },
+      {
+        "type": "text",
+        "fieldName": "sales_email",
+        "name": "sales_email"
+      },
+      {
+        "type": "number",
+        "fieldName": "sales_mobile",
+        "options": {
+          "rules": {
+            "core:number": {}
+          }
+        },
+        "name": "sales_mobile"
+      },
+      {
+        "type": "text",
+        "fieldName": "SwitchCheckStatus",
+        "name": "SwitchCheckStatus"
+      },
+      {
+        "type": "text",
+        "fieldName": "status",
+        "name": "status"
+      },
+      {
+        "type": "text",
+        "fieldName": "user_type",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "user_type"
+      },
+      {
+        "type": "number",
+        "name": "created_by"
+      },
+      {
+        "type": "number",
+        "name": "id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.AndroidTableId!=0}}",
+          "then": {
+            "steps": {
+              "name": "HelpUp",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "android_contact",
+                      "column": "user_type",
+                      "type": "number",
+                      "value": "{{$_POST.user_type}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "support_email1",
+                      "type": "text",
+                      "value": "{{$_POST.support_email}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "sales_email2",
+                      "type": "text",
+                      "value": "{{$_POST.sales_email}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "support_mobile",
+                      "type": "text",
+                      "value": "{{$_POST.support_mobile}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "sales_mobile1",
+                      "type": "text",
+                      "value": "{{$_POST.sales_mobile}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "status",
+                      "type": "text",
+                      "value": "{{$_POST.status == 'true' ? 1 : 0}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "android_contact",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.AndroidTableId}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "returning": "id",
+                  "query": "UPDATE android_contact\nSET user_type = :P1 /* {{$_POST.user_type}} */, support_email1 = :P2 /* {{$_POST.support_email}} */, sales_email2 = :P3 /* {{$_POST.sales_email}} */, support_mobile = :P4 /* {{$_POST.support_mobile}} */, sales_mobile1 = :P5 /* {{$_POST.sales_mobile}} */, status = :P6 /* {{$_POST.status == 'true' ? 1 : 0}} */, created_by = :P7 /* {{identity}} */, created_on = :P8 /* {{NOW}} */\nWHERE id = :P9 /* {{$_POST.AndroidTableId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.user_type}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.support_email}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.sales_email}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.support_mobile}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.sales_mobile}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{$_POST.status == 'true' ? 1 : 0}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P9",
+                      "value": "{{$_POST.AndroidTableId}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.AndroidTableId==0}}",
+          "then": {
+            "steps": {
+              "name": "AddHelpDesk",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "android_contact",
+                      "column": "user_type",
+                      "type": "number",
+                      "value": "{{$_POST.user_type}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "support_email1",
+                      "type": "text",
+                      "value": "{{$_POST.support_email}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "sales_email2",
+                      "type": "text",
+                      "value": "{{$_POST.sales_email}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "support_mobile",
+                      "type": "text",
+                      "value": "{{$_POST.support_mobile}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "sales_mobile1",
+                      "type": "text",
+                      "value": "{{$_POST.sales_mobile}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "status",
+                      "type": "text",
+                      "value": "{{$_POST.status == 'true' ? 1 : 0}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "android_contact",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "android_contact",
+                  "returning": "id",
+                  "query": "INSERT INTO android_contact\n(user_type, support_email1, sales_email2, support_mobile, sales_mobile1, status, created_by, created_on) VALUES (:P1 /* {{$_POST.user_type}} */, :P2 /* {{$_POST.support_email}} */, :P3 /* {{$_POST.sales_email}} */, :P4 /* {{$_POST.support_mobile}} */, :P5 /* {{$_POST.sales_mobile}} */, :P6 /* {{$_POST.status == 'true' ? 1 : 0}} */, :P7 /* {{identity}} */, :P8 /* {{NOW}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.user_type}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.support_email}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.sales_email}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.support_mobile}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.sales_mobile}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{$_POST.status == 'true' ? 1 : 0}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

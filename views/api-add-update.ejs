@@ -1,0 +1,177 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="apiaddupdate" appConnect="local" components="{dmxDataTraversal:{},dmxBootstrap5Modal:{}}" -->
+<meta name="ac:route" content="/api-add-update">
+<dmx-serverconnect id="scAPIs" url="api/APIS/FetchAPIs" dmx-param:api_type="selectAPIType.value"></dmx-serverconnect>
+<dmx-data-view id="dvAPIs" dmx-bind:data="scAPIs.data.FetchAPI.data" filter="(api_name.lowercase().contains(formSearchUser.Search.value.lowercase()) || api_code.contains(formSearchUser.Search.value) || username.lowercase().contains(formSearchUser.Search.value.lowercase()) || api_password.contains(formSearchUser.Search.value))"></dmx-data-view>
+<dmx-data-detail id="ddAPIs" key="api_id" dmx-bind:data="dvAPIs.data"></dmx-data-detail>
+
+<header>
+    <div class="container">
+        <div class="row align-items-center justify-content-between px-4 mb-3 sd-secondary-header mx-0">
+            <div class="col-12 col-md-auto me-auto">
+                <h1 class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">
+                    SW Infotech APIs
+                    <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scAPIs.state.executing"></span>
+                </h1>
+            </div>
+            <div class="col-auto order-2 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2"><select id="selectAPIType" class="form-control form-select">
+                    <option value="0">All</option>
+                    <option value="Recharge">Recharge</option>
+                    <option value="AEPS">AEPS</option>
+                    <option value="BBPS">BBPS</option>
+                    <option value="DMT">DMT</option>
+                    <option value="UPI">UPI</option>
+                    <option value="SMS">SMS</option>
+                    <option value="Whatsapp">Whatsapp</option>
+                </select>
+            </div>
+            <div class="col-auto order-2 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+                <button id="btnAdd" class="btn btn-primary" dmx-on:click="modalAddAPIs.show(); ddAPIs.select(0);">Add API</button>
+            </div>
+            <div class="col-auto order-1 order-md-3 d-flex align-items-center justify-content-center">
+                <form id="formSearchUser" class="sd-search-form">
+                    <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                        <input type="text" class="form-control sd-search-input rounded-pill" id="Search" name="Search" placeholder="Search">
+                        <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-sm  sw-font-11">
+            <thead>
+                <tr>
+                    <th>Sl. No.</th>
+                    <th>Provider Name</th>
+                    <th>API Type</th>
+                    <th>Available Balance</th>
+                    <th>API Code</th>
+                    <th>API URL</th>
+                    <th>Username</th>
+                    <th>Password/ Token</th>
+                    <th>Responce Type</th>
+                    <th>Status</th>
+                    <th>Created By/ On</th>
+                    <th>Updated By/ On</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody is="dmx-repeat" dmx-generator="bs5table" id="tableRepeat1" dmx-bind:repeat="dvAPIs.data" key="'id'">
+                <tr>
+                    <td>{{$index+1}}</td>
+                    <td dmx-text="api_name.titlecase()"></td>
+                    <td dmx-text="api_type"></td>
+                    <td dmx-text="api_code == 'MA' ? scAPIs.data.apiBalanceMA : api_code == 'SN' ? scAPIs.data.apiBalanceSN : '' "></td>
+                    <td dmx-text="api_code"></td>
+                    <td dmx-text="api_url"></td>
+                    <td dmx-text="username"></td>
+                    <td dmx-text="api_password"></td>
+                    <td dmx-text="blank2"></td>
+                    <td dmx-text="status == 1 ? 'Active' : 'Inactive'" dmx-class:table-primary="status == 1" dmx-class:table-danger="status == 0"></td>
+                    <td dmx-text="created_by+' ('+created_on.formatDate('dd-MM-yyyy HH:mm:ss')+')'"></td>
+                    <td dmx-text="updated_by+' ('+updated_on+')'"></td>
+                    <td>
+                        <a class="dropdown-item" href="#" dmx-on:click="ddAPIs.select(api_id)" data-bs-toggle="modal" data-bs-target="#modalAddAPIs"><i class="fas fa-edit sw-col-ar" title="Edit APIs"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!-- Modal Add APIs -->
+<div class="modal fade" id="modalAddAPIs" is="dmx-bs5-modal" tabindex="-1" nokeyboard="true" nocloseonclick="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ddAPIs.data.api_id ? 'Edit APIs' : 'Add APIs'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form is="dmx-serverconnect-form" id="formAddEditapi" method="post" action="api/APIS/ApiAddEdit" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAddEditapi.data.AddEditAPIs ? scNotif.success('New API Details Added') : scNotif.success('Api Details Updated'); modalAddAPIs.hide();formAddEditapi.reset();browserMain.goto('api-add-update')" dmx-on:error="scNotif.warning('An error occurred'); modalAddAPIs.hide();formAddEditapi.reset()">
+                    <input type="hidden" name="ApiId" dmx-bind:value="ddAPIs.data.api_id">
+                    <div class="mb-3 row">
+                        <label for="inp_name" class="col-sm-2 col-form-label">Api Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_api_name" name="name" aria-describedby="inp_name_help" placeholder="E.g: SONAKSHI/ SWI" maxlength="100" required="" data-msg-required="api Name is required." dmx-bind:value="ddAPIs.data.api_name">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_APIs_type" class="col-sm-2 col-form-label">API Code</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_api_code" name="api_code" aria-describedby="inp_api_code_help" placeholder="Enter api Code " maxlength="200" required="" data-msg-required="Api Code id is required." dmx-bind:value="ddAPIs.data.api_code">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_api_url" class="col-sm-2 col-form-label">Api URL</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_api_url" name="api_url" aria-describedby="inp_api_url_help" placeholder="E.g: " maxlength="100" required="" data-msg-required="api URL is required." dmx-bind:value="ddAPIs.data.api_url">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_api_username" class="col-sm-2 col-form-label">Api Username</label>
+                        <div class="col-sm-10">
+                            <textarea type="text" class="form-control" id="inp_APIs_username" name="username" aria-describedby="inp_api_username_help" placeholder="Enter api Username" maxlength="200" dmx-bind:value="ddAPIs.data.username"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_api_pass" class="col-sm-2 col-form-label">Api Pass/ Token</label>
+                        <div class="col-sm-10">
+                            <textarea type="text" class="form-control" id="inp_APIs_pass" name="password" aria-describedby="inp_api_pass_help" placeholder="Enter api Password" maxlength="200" dmx-bind:value="ddAPIs.data.api_password"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_status" class="col-sm-2 col-form-label">Responce Type</label>
+                        <div class="col-sm-10">
+                            <div class="form-check form-switch">
+                                <select type="text" class="form-control form-select" id="inp_response" name="response_type" aria-describedby="inp_response_help" maxlength="50" data-msg-required="Response type is required." dmx-bind:value="ddAPIs.data.blank2">
+                                    <option value="">Select</option>
+                                    <option value="JSON">JSON</option>
+                                    <option value="XML">XML</option>
+
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_status" class="col-sm-2 col-form-label">API For</label>
+                        <div class="col-sm-10">
+                            <div class="form-check form-switch">
+                                <select type="text" class="form-control form-select" id="inp_api_type" name="api_type" aria-describedby="inp_api_type_help" maxlength="50" data-msg-required="API type is required." dmx-bind:value="ddAPIs.data.api_type">
+                                    <option value="">Select</option>
+                                    <option value="Recharge">Recharge</option>
+                                    <option value="SMS">SMS</option>
+                                    <option value="BBPS">BBPS</option>
+                                    <option value="AEPS">AEPS</option>
+                                    <option value="DMT">DMT</option>
+                                    <option value="UPI">UPI</option>
+                                    <option value="Whatsapp">Whatsapp</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_status" class="col-sm-2 col-form-label">Status</label>
+                        <div class="col-sm-10">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="SwitchCheckStatus" name="api_status" dmx-bind:checked="ddAPIs.data.status == 1" dmx-bind:unchecked="ddAPIs.data.status == 0" dmx-bind:value="SwitchCheckStatus.checked ? 1 : 0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-2">&nbsp;</div>
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">Save<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

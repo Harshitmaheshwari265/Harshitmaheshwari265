@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "name": "todate"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "GetPayReq",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "SELECT payment_req_self.id, payment_req_self.user_name as req_user_id, payment_req_self.amount, payment_req_self.order_id, payment_req_self.request_time::text as tr_date, payment_req_self.client_req_id as tr_no,\npayment_req_self.payment_mode, payment_req_self.pay_type, payment_req_self.status, payment_req_self.response, payment_req_self.payment_url, payment_req_self.message, payment_req_self.pay_type, payment_req_self.expiry_date, mu.user_fname AS req_user_name, mu.user_mobile AS req_user_mobile, mu.balance_amt AS req_user_balance\nFROM payment_req_self\nLEFT JOIN m_users AS mu ON (mu.id = payment_req_self.req_user_id)\nWHERE payment_req_self.pay_user_id = @identity AND payment_req_self.request_time BETWEEN @fromdate AND @todate order by payment_req_self.id DESC",
+            "params": [
+              {
+                "name": "@identity",
+                "value": "{{identity}}",
+                "test": "12"
+              },
+              {
+                "name": "@fromdate",
+                "value": "{{$_GET.fromdate}}",
+                "test": "2022-05-21 00:00:00"
+              },
+              {
+                "name": "@todate",
+                "value": "{{$_GET.todate}}",
+                "test": "2022-06-26 23:59:59"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "amount",
+            "type": "text"
+          },
+          {
+            "name": "order_id",
+            "type": "text"
+          },
+          {
+            "name": "tr_date",
+            "type": "text"
+          },
+          {
+            "name": "tr_no",
+            "type": "text"
+          },
+          {
+            "name": "payment_mode",
+            "type": "text"
+          },
+          {
+            "name": "pay_type",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "number"
+          },
+          {
+            "name": "response",
+            "type": "text"
+          },
+          {
+            "name": "payment_url",
+            "type": "text"
+          },
+          {
+            "name": "message",
+            "type": "text"
+          },
+          {
+            "name": "expiry_date",
+            "type": "text"
+          },
+          {
+            "name": "req_user_name",
+            "type": "text"
+          },
+          {
+            "name": "req_user_mobile",
+            "type": "text"
+          },
+          {
+            "name": "req_user_balance",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

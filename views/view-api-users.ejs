@@ -1,0 +1,213 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="viewapiusers" appConnect="local" components="{dmxDataTraversal:{},dmxBootstrap5Modal:{}}" -->
+<meta name="ac:route" content="/view-api-users">
+<dmx-serverconnect id="scPinStateDist" url="api/Users/GetPINStateDist" dmx-param:pincode="modalAddUsers.formAddEditUser.inp_pin.value"></dmx-serverconnect>
+<script is="dmx-flow" id="flowGetPIN" type="text/dmx-flow">{
+    condition: {
+    if: "{{modalAddUsers.formAddEditUser.inp_pin.value.length() == 6}}",
+    then: {
+    steps: {
+    run: {action: "{{scPinStateDist.load({})}}"}
+    }
+    }
+    }
+    }</script>
+<dmx-serverconnect id="scFetchScheme" url="api/Scheme/FetchActiveScheme"></dmx-serverconnect>
+<dmx-serverconnect id="scAPIUsers" url="api/Users/UsersAPI"></dmx-serverconnect>
+<dmx-data-view id="dvUsers" pageSize="100" page="10" dmx-bind:data="scAPIUsers.data.GetAPIUsers.data"></dmx-data-view>
+<dmx-data-detail id="ddUsers" dmx-bind:data="dvUsers.data" key="id"></dmx-data-detail>
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 id="Users" class="text-center align-self-center">SW Infotech API Users <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scCCUsers.state.executing"></span></h1>
+                <!-- <button id="btnAdd" class="btn btn-primary" dmx-on:click="modalAddUsers.show(); ddUsers.select(0); modalAddUsers.formAddEditUser.reset()">Add User</button> -->
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-sm  sw-font-11">
+            <thead>
+                <tr>
+                    <th>Sl No.</th>
+                    <th>Unique Id</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Mobile</th>
+                    <th>Wallet Bal.</th>
+                    <th>Status</th>
+                    <th>Allotted Scheme</th>
+                    <th>Aadhar No.</th>
+                    <th>PAN No.</th>
+                    <th>Password</th>
+                    <th>Address & PIN</th>
+                    <th>State & Dist.</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="scAPIUsers.data.GetAPIUsers.data" id="tableRepeat1">
+                <tr>
+                    <td>{{$index+1}}</td>
+                    <td dmx-text="user_id"></td>
+                    <td dmx-text="user_fname.titlecase()"></td>
+                    <td dmx-text="user_email"></td>
+                    <td dmx-text="user_mobile"></td>
+                    <td dmx-text="balance_amt.toNumber().toFixed(2)"></td>
+
+                    <td dmx-text="u_status != 1 ?'Inactive' : 'Active'" dmx-class:text-primary="u_status == 1" dmx-class:text-warning="u_status != 1"></td>
+                    <td dmx-text="scheme_name"></td>
+                    <td dmx-text="aadhar_no"></td>
+                    <td dmx-text="pan_no"></td>
+                    <td dmx-text="blank1"></td>
+                    <td dmx-text="address+' | '+pin"></td>
+                    <td dmx-text="state+' | '+district"></td>
+                    <td>
+                        <a class="sw-col-ar" href="#" dmx-on:click="ddUsers.select(id)" data-bs-toggle="modal" data-bs-target="#modalAddUsers"><i class="fas fa-edit" title="Edit Users" dmx-on:click="flowGetScheme.run()"></i></a>&emsp;<a class="sw-col-br" href="#" dmx-on:click="ddUsers.select(id)" data-bs-toggle="modal" data-bs-target="#modalPasswordUser"><i class="fas fa-user-lock" title="Password Update"></i></a>&emsp;
+                        &emsp;<a class="sw-col-cr" href="#" dmx-on:click="ddUsers.select(id)" data-bs-toggle="modal" data-bs-target="#"><i class="fas fa-sign-in-alt" title="Login to user panel"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!-- Modal Users Password Update-->
+<div class="modal fade" id="modalPasswordUser" is="dmx-bs5-modal" tabindex="-1" nokeyboard="true" nocloseonclick="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">User Password Update</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h3>Do you want to update this user password?</h3>
+                <form is="dmx-serverconnect-form" id="formPassUser" method="post" action="api/Users/PassUpdtByAdmin" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formPassUser.data ? scNotif.success('User Password and TPIN Updated') : ''; formPassUser.reset(); scCCUsers.load();" dmx-on:error="scNotif.warning('An error occurred');">
+                    <input type="hidden" name="UserId" dmx-bind:value="ddUsers.data.id">
+                    <table class="table table-striped table-bordered table-sm">
+                        <tr>
+                            <td>Image</td>
+                            <td>Name</td>
+                            <td>Email</td>
+                            <td>Phone No.</td>
+                        </tr>
+                        <tr>
+                            <td><img dmx-bind:src="ddUsers.data.user_lname" width="50" height="50"></td>
+                            <td>{{ddUsers.data.user_fname.titlecase()}}</td>
+                            <td>{{ddUsers.data.user_email}}</td>
+                            <td>{{ddUsers.data.user_mobile}}</td>
+                        </tr>
+                    </table>
+                    <div class="mb-3 row">
+                        <label for="inp_password" class="col-sm-2 col-form-label">Password</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" id="inp_password" name="Password" aria-describedby="inp_password_help" placeholder="Enter Password" required="" maxlength="50">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_tpin" class="col-sm-2 col-form-label">TPIN</label>
+                        <div class="col-sm-10">
+                            <input type="number" class="form-control" id="inp_tpin" name="tpin" aria-describedby="inp_tpin_help" placeholder="Enter TPIN" data-rule-integer="" required="" maxlength="6">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">Update<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Custom Navbar Starts -->
+<!-- Modal Add users -->
+<div class="modal fade" id="modalAddUsers" is="dmx-bs5-modal" tabindex="-1" nokeyboard="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ddUsers.data.id ? 'Edit API User Details' : 'Add A New User'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form is="dmx-serverconnect-form" id="formAddEditUser" method="post" action="api/Users/AddEditUsers" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAddEditUser.data.AddEditUsers ? scNotif.success('New User Added') : scNotif.success('User Details Updated');formAddEditUser.reset();scAPIUsers.load();" dmx-on:error="scNotif.warning('An error occurred');">
+                    <input type="hidden" name="UserId" id="UserId" dmx-bind:value="ddUsers.data.id"><input type="hidden" name="user_type" id="user_type" dmx-bind:value="ddUsers.data.user_type">
+                    <div class="mb-3 row">
+                        <div class="col-12 col-sm-6">
+                            <label for="inp_scheme_user" class="col-form-label">Allot Scheme</label>
+                            <div class="col-12 px-0">
+                                <select type="number" class="form-control form-select" id="inp_scheme_type" name="scheme_id" aria-describedby="inp_scheme_type_help" dmx-bind:options="scFetchScheme.data.FetchScheme.data" optiontext="scheme_name" optionvalue="sc_id" dmx-bind:value="ddUsers.data.scheme_id">
+                                    <option value="">Select Option</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label for="inp_name" class="col-form-label">User Name</label>
+                            <div class="col-12 px-0">
+                                <input type="text" class="form-control" id="inp_name" name="name" aria-describedby="inp_name_help" placeholder="Enter Name" maxlength="50" required="" data-msg-required="User Name is required." dmx-bind:value="ddUsers.data.user_fname">
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6"><label for="inp_email" class="col-form-label">Email</label>
+                            <div class="col-12 px-0">
+                                <input type="text" class="form-control" id="inp_email" name="email" aria-describedby="inp_email_help" placeholder="Enter Email" maxlength="100" required="" data-msg-required="Email id is required." data-rule-email="" data-rule-nowhitespace="" dmx-bind:value="ddUsers.data.user_email">
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label for="inp_mobile" class="col-form-label">Mobile</label>
+                            <div class="col-12 px-0">
+                                <input type="number" class="form-control" id="inp_mobile" name="mobile" aria-describedby="inp_mobile_help" placeholder="Enter Mobile" maxlength="10" required="" data-msg-required="Mobile id is required." data-rule-number="" dmx-bind:value="ddUsers.data.user_mobile" dmx-bind:readonly="ddUsers.data.id">
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6"><label for="inp_aadhar" class="col-form-label">Aadhar No</label>
+                            <div class="col-12 px-0">
+                                <input type="number" class="form-control" id="inp_aadhar" name="aadhar" aria-describedby="inp_aadhar_help" placeholder="Enter Aadhar No" maxlength="12" required="" data-msg-required="Aadhar no is required." data-rule-number="" dmx-bind:value="ddUsers.data.aadhar_no">
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label for="inp_pan" class="col-form-label">PAN No.</label>
+                            <div class="col-12 px-0">
+                                <input type="text" class="form-control" id="inp_pan" name="pan" aria-describedby="inp_pan_help" placeholder="Enter PAN No" maxlength="10" required="" data-msg-required="PAN no is required." dmx-bind:value="ddUsers.data.pan_no">
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 row mx-0">
+                            <label for="inp_pin" class="col-form-label">PIN Code</label>
+                            <div class="col-12 px-0">
+                                <input type="number" class="form-control" id="inp_pin" name="pin" aria-describedby="inp_pin_help" placeholder="Enter PIN No." maxlength="100" required="" data-msg-required="PIN is required." dmx-bind:value="ddUsers.data.pin" dmx-on:keyup="flowGetPIN.run()">
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 row mx-0">
+                            <label for="inp_state" class="col-form-label">State</label>
+                            <div class="col-12 px-0">
+                                <input type="text" class="form-control" id="inp_state" name="state" aria-describedby="inp_state_help" placeholder="Enter State" maxlength="100" required="" data-msg-required="State is required." dmx-bind:value="scPinStateDist.data.PinAPI[0].Circle? scPinStateDist.data.PinAPI[0].Circle : ddUsers.data.state">
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 row mx-0">
+                            <label for="inp_district" class="col-form-label">District</label>
+                            <div class="col-12 px-0">
+                                <input type="text" class="form-control" id="inp_district" name="district" aria-describedby="inp_district_help" placeholder="Enter District" maxlength="100" required="" data-msg-required="District is required." dmx-bind:value="scPinStateDist.data.PinAPI[0].District? scPinStateDist.data.PinAPI[0].District : ddUsers.data.district">
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6"><label for="inp_address" class="col-form-label">Address</label>
+                            <div class="col-12 px-0">
+                                <textarea type="text" class="form-control form-select" id="inp_address" name="address" dmx-bind:value="ddUsers.data.address">
+                                </textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-12 text-center">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">{{ddUsers.data.id? 'Update' : 'Save'}}<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>

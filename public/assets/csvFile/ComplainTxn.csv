@@ -1,0 +1,2 @@
+id,user_id,user_number,opening_balance,amount,comm_amt,charge_amt,net_amt,closing_balance,tr_date,status,tr_type,api_logs,operator_name,user_fname,user_mobile,api_ref,ip_address,ticket_id,message,response,complain_status,complain_time,reply_date
+5077,RT3037,9456207493,1201.9175,1199,41.965,0,1157.035,1201.9175,"2022-05-30 13:58:52",FAILED,Cash,SN,"Bsnl Special",ArjunKumar,7906586605," N/A",2409:4053:2d8f:bd0b:dd66:c74:489b:252,57,9456207493,,3,"2022-05-30 14:01:11","2022-05-30 08:58:16"

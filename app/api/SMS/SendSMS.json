@@ -1,0 +1,609 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/send-sms.ejs",
+      "linkedForm": "formPersonalSMS"
+    },
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "user_type",
+        "options": {
+          "rules": {}
+        },
+        "name": "user_type"
+      },
+      {
+        "type": "text",
+        "fieldName": "message",
+        "options": {
+          "rules": {}
+        },
+        "name": "message"
+      },
+      {
+        "type": "number",
+        "fieldName": "sms_mobile",
+        "options": {
+          "rules": {}
+        },
+        "name": "sms_mobile"
+      },
+      {
+        "type": "array",
+        "name": "record",
+        "sub": [
+          {
+            "type": "text",
+            "name": "$_POST"
+          },
+          {
+            "type": "text",
+            "name": "GetUserMobile[$index]"
+          },
+          {
+            "type": "datetime",
+            "name": "NOW"
+          },
+          {
+            "type": "text",
+            "name": "$_SERVER"
+          },
+          {
+            "type": "text",
+            "name": "response"
+          },
+          {
+            "type": "number",
+            "name": "user_id"
+          },
+          {
+            "type": "number",
+            "name": "identity"
+          },
+          {
+            "type": "boolean",
+            "name": "api"
+          },
+          {
+            "type": "text",
+            "name": "api_response"
+          },
+          {
+            "type": "boolean",
+            "name": "api_status"
+          },
+          {
+            "type": "boolean",
+            "name": "api_status == 200 ? 1 : 0"
+          },
+          {
+            "type": "text",
+            "name": "'Admin"
+          }
+        ]
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "REMOTE_ADDR"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "forbiddenUrl": "/403-forbidden",
+          "loginUrl": "login",
+          "permissions": [
+            "write"
+          ]
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.user_type}}",
+          "then": {
+            "steps": [
+              {
+                "name": "GetUserMobile",
+                "module": "dbconnector",
+                "action": "select",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "m_users",
+                        "column": "user_mobile"
+                      }
+                    ],
+                    "table": {
+                      "name": "m_users"
+                    },
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "m_users.user_type",
+                          "field": "m_users.user_type",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.user_type}}",
+                          "data": {
+                            "table": "m_users",
+                            "column": "user_type",
+                            "type": "number"
+                          },
+                          "operation": "="
+                        },
+                        {
+                          "id": "m_users.u_status",
+                          "field": "m_users.u_status",
+                          "type": "string",
+                          "operator": "equal",
+                          "value": "1",
+                          "data": {
+                            "table": "m_users",
+                            "column": "u_status",
+                            "type": "text"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "SELECT user_mobile\nFROM m_users\nWHERE user_type = :P1 /* {{$_POST.user_type}} */ AND u_status = '1'",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.user_type}}"
+                      }
+                    ]
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "text",
+                    "name": "user_mobile"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "repeat",
+                "module": "core",
+                "action": "repeat",
+                "options": {
+                  "repeat": "{{GetUserMobile}}",
+                  "outputFields": [],
+                  "exec": {
+                    "steps": [
+                      {
+                        "name": "api",
+                        "module": "api",
+                        "action": "send",
+                        "options": {
+                          "url": "https://mobicomm.dove-sms.com//submitsms.jsp",
+                          "params": {
+                            "user": "{{'Bucks'}}",
+                            "key": "{{'797b4459a9XX'}}",
+                            "mobile": "{{GetUserMobile[$index].user_mobile}}",
+                            "message": "{{$_POST.message}}",
+                            "senderid": "{{'BUCKSP'}}",
+                            "accusage": "{{1}}"
+                          }
+                        },
+                        "output": false
+                      },
+                      {
+                        "name": "api_status",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{api.status}}"
+                        },
+                        "output": true,
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "api_response",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{api.data}}"
+                        },
+                        "output": true,
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "record_insert",
+                        "module": "dbupdater",
+                        "action": "insert",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "insert",
+                            "values": [
+                              {
+                                "table": "t_sms_log",
+                                "column": "sms_message",
+                                "type": "text",
+                                "value": "{{$_POST.message}}"
+                              },
+                              {
+                                "table": "t_sms_log",
+                                "column": "sender_mobile",
+                                "type": "text",
+                                "value": "{{GetUserMobile[$index].user_mobile}}"
+                              },
+                              {
+                                "table": "t_sms_log",
+                                "column": "created_on",
+                                "type": "datetime",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "table": "t_sms_log",
+                                "column": "sms_type",
+                                "type": "text",
+                                "value": "{{$_POST.user_type}}"
+                              },
+                              {
+                                "table": "t_sms_log",
+                                "column": "ip_address",
+                                "type": "text",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "table": "t_sms_log",
+                                "column": "status",
+                                "type": "boolean",
+                                "value": "{{api_status == 200 ? 1 : 0}}"
+                              },
+                              {
+                                "table": "t_sms_log",
+                                "column": "response",
+                                "type": "text",
+                                "value": "{{api_response}}"
+                              },
+                              {
+                                "table": "t_sms_log",
+                                "column": "user_id",
+                                "type": "number",
+                                "value": "{{identity}}"
+                              },
+                              {
+                                "table": "t_sms_log",
+                                "column": "extra1",
+                                "type": "text",
+                                "value": "{{'Admin Portal'}}"
+                              }
+                            ],
+                            "table": "t_sms_log",
+                            "returning": "id",
+                            "query": "INSERT INTO t_sms_log\n(sms_message, sender_mobile, created_on, sms_type, ip_address, status, response, user_id, extra1) VALUES (:P1 /* {{$_POST.message}} */, :P2 /* {{GetUserMobile[$index].user_mobile}} */, :P3 /* {{NOW}} */, :P4 /* {{$_POST.user_type}} */, :P5 /* {{$_SERVER.REMOTE_ADDR}} */, :P6 /* {{api_status == 200 ? 1 : 0}} */, :P7 /* {{api_response}} */, :P8 /* {{identity}} */, :P9 /* {{'Admin Portal'}} */)",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{$_POST.message}}"
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{GetUserMobile[$index].user_mobile}}"
+                              },
+                              {
+                                "name": ":P3",
+                                "type": "expression",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "name": ":P4",
+                                "type": "expression",
+                                "value": "{{$_POST.user_type}}"
+                              },
+                              {
+                                "name": ":P5",
+                                "type": "expression",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "name": ":P6",
+                                "type": "expression",
+                                "value": "{{api_status == 200 ? 1 : 0}}"
+                              },
+                              {
+                                "name": ":P7",
+                                "type": "expression",
+                                "value": "{{api_response}}"
+                              },
+                              {
+                                "name": ":P8",
+                                "type": "expression",
+                                "value": "{{identity}}"
+                              },
+                              {
+                                "name": ":P9",
+                                "type": "expression",
+                                "value": "{{'Admin Portal'}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "identity",
+                            "type": "text"
+                          },
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ],
+                        "output": false
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "$index",
+                    "type": "number"
+                  },
+                  {
+                    "name": "$number",
+                    "type": "number"
+                  },
+                  {
+                    "name": "$name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "$value",
+                    "type": "object"
+                  },
+                  {
+                    "name": "user_mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_status",
+                    "type": "text",
+                    "sub": []
+                  },
+                  {
+                    "name": "api_response",
+                    "type": "text",
+                    "sub": []
+                  }
+                ],
+                "outputType": "array"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.sms_mobile}}",
+          "then": {
+            "steps": [
+              {
+                "name": "api_individual",
+                "module": "api",
+                "action": "send",
+                "options": {
+                  "url": "https://mobicomm.dove-sms.com//submitsms.jsp",
+                  "params": {
+                    "user": "{{'Bucks'}}",
+                    "key": "{{'797b4459a9XX'}}",
+                    "mobile": "{{$_POST.sms_mobile}}",
+                    "message": "{{$_POST.message}}",
+                    "senderid": "{{'BUCKSP'}}",
+                    "accusage": "{{1}}"
+                  }
+                },
+                "output": false
+              },
+              {
+                "name": "api_status",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{api_individual.status}}"
+                },
+                "output": true,
+                "meta": [],
+                "outputType": "text"
+              },
+              {
+                "name": "api_response",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{api_individual.data}}"
+                },
+                "output": true,
+                "meta": [],
+                "outputType": "text"
+              },
+              {
+                "name": "record_insert",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "t_sms_log",
+                        "column": "sms_message",
+                        "type": "text",
+                        "value": "{{$_POST.message}}"
+                      },
+                      {
+                        "table": "t_sms_log",
+                        "column": "sender_mobile",
+                        "type": "text",
+                        "value": "{{$_POST.sms_mobile}}"
+                      },
+                      {
+                        "table": "t_sms_log",
+                        "column": "created_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "t_sms_log",
+                        "column": "sms_type",
+                        "type": "text",
+                        "value": "{{'Individual'}}"
+                      },
+                      {
+                        "table": "t_sms_log",
+                        "column": "ip_address",
+                        "type": "text",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "table": "t_sms_log",
+                        "column": "status",
+                        "type": "boolean",
+                        "value": "{{api_status == 200 ? 1 : 0}}"
+                      },
+                      {
+                        "table": "t_sms_log",
+                        "column": "response",
+                        "type": "text",
+                        "value": "{{api_response}}"
+                      },
+                      {
+                        "table": "t_sms_log",
+                        "column": "user_id",
+                        "type": "number",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "table": "t_sms_log",
+                        "column": "extra1",
+                        "type": "text",
+                        "value": "{{'Admin Portal'}}"
+                      }
+                    ],
+                    "table": "t_sms_log",
+                    "returning": "id",
+                    "query": "INSERT INTO t_sms_log\n(sms_message, sender_mobile, created_on, sms_type, ip_address, status, response, user_id, extra1) VALUES (:P1 /* {{$_POST.message}} */, :P2 /* {{$_POST.sms_mobile}} */, :P3 /* {{NOW}} */, :P4 /* {{'Individual'}} */, :P5 /* {{$_SERVER.REMOTE_ADDR}} */, :P6 /* {{api_status == 200 ? 1 : 0}} */, :P7 /* {{api_response}} */, :P8 /* {{identity}} */, :P9 /* {{'Admin Portal'}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.message}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_POST.sms_mobile}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{'Individual'}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{api_status == 200 ? 1 : 0}}"
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{api_response}}"
+                      },
+                      {
+                        "name": ":P8",
+                        "type": "expression",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "name": ":P9",
+                        "type": "expression",
+                        "value": "{{'Admin Portal'}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": false
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

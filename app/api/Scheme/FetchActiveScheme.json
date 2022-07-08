@@ -1,0 +1,226 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "FetchScheme",
+        "module": "dbconnector",
+        "action": "paged",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_scheme",
+                "column": "id",
+                "alias": "sc_id"
+              },
+              {
+                "table": "m_scheme",
+                "column": "scheme_name"
+              },
+              {
+                "table": "m_scheme",
+                "column": "scheme_desc"
+              },
+              {
+                "table": "m_scheme",
+                "column": "scheme_type"
+              },
+              {
+                "table": "m_scheme",
+                "column": "scheme_amount"
+              },
+              {
+                "table": "m_scheme",
+                "column": "created_by"
+              },
+              {
+                "table": "m_scheme",
+                "column": "created_on"
+              },
+              {
+                "table": "m_scheme",
+                "column": "updated_by"
+              },
+              {
+                "table": "m_scheme",
+                "column": "updated_on"
+              },
+              {
+                "table": "m_scheme",
+                "column": "status"
+              }
+            ],
+            "table": {
+              "name": "m_scheme"
+            },
+            "joins": [],
+            "orders": [
+              {
+                "table": "m_scheme",
+                "column": "id",
+                "direction": "DESC",
+                "recid": 1
+              }
+            ],
+            "query": "SELECT id AS sc_id, scheme_name, scheme_desc, scheme_type, scheme_amount, created_by, created_on, updated_by, updated_on, status\nFROM m_scheme\nWHERE status = 1\nORDER BY id DESC",
+            "params": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_scheme.status",
+                  "field": "m_scheme.status",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": 1,
+                  "data": {
+                    "table": "m_scheme",
+                    "column": "status",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "primary": "id"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "offset",
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "type": "number"
+          },
+          {
+            "name": "total",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "object",
+            "sub": [
+              {
+                "name": "offset",
+                "type": "object",
+                "sub": [
+                  {
+                    "name": "first",
+                    "type": "number"
+                  },
+                  {
+                    "name": "prev",
+                    "type": "number"
+                  },
+                  {
+                    "name": "next",
+                    "type": "number"
+                  },
+                  {
+                    "name": "last",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "current",
+                "type": "number"
+              },
+              {
+                "name": "total",
+                "type": "number"
+              }
+            ]
+          },
+          {
+            "name": "data",
+            "type": "array",
+            "sub": [
+              {
+                "type": "number",
+                "name": "sc_id"
+              },
+              {
+                "type": "text",
+                "name": "scheme_name"
+              },
+              {
+                "type": "text",
+                "name": "scheme_desc"
+              },
+              {
+                "type": "text",
+                "name": "scheme_type"
+              },
+              {
+                "type": "text",
+                "name": "scheme_amount"
+              },
+              {
+                "type": "number",
+                "name": "created_by"
+              },
+              {
+                "type": "datetime",
+                "name": "created_on"
+              },
+              {
+                "type": "number",
+                "name": "updated_by"
+              },
+              {
+                "type": "datetime",
+                "name": "updated_on"
+              },
+              {
+                "type": "number",
+                "name": "status"
+              }
+            ]
+          }
+        ],
+        "outputType": "object"
+      }
+    ]
+  }
+}

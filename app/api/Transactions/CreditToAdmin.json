@@ -1,0 +1,970 @@
+{
+    "meta": {
+        "options": {
+            "linkedFile": "/views/wallet-credits.ejs",
+            "linkedForm": "formAdminCredit"
+        },
+        "$_POST": [
+            {
+                "type": "number",
+                "fieldName": "admin_credit_amount",
+                "options": {
+                    "rules": {}
+                },
+                "name": "admin_credit_amount"
+            },
+            {
+                "type": "number",
+                "fieldName": "admintpin",
+                "options": {
+                    "rules": {}
+                },
+                "name": "admintpin"
+            },
+            {
+                "type": "text",
+                "name": "netamt"
+            }
+        ],
+        "$_SERVER": [
+            {
+                "type": "text",
+                "name": "REMOTE_ADDR"
+            }
+        ]
+    },
+    "exec": {
+        "steps": [
+            {
+                "name": "",
+                "module": "auth",
+                "action": "restrict",
+                "options": {
+                    "provider": "securityLogin",
+                    "permissions": [
+                        "write"
+                    ],
+                    "loginUrl": "login",
+                    "forbiddenUrl": "403-forbidden"
+                }
+            },
+            {
+                "name": "identity",
+                "module": "auth",
+                "action": "identify",
+                "options": {
+                    "provider": "securityLogin"
+                },
+                "output": true,
+                "meta": []
+            },
+            {
+                "name": "GetAdminDetails",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                    "connection": "postgres_gcpServer",
+                    "sql": {
+                        "type": "SELECT",
+                        "columns": [
+                            {
+                                "table": "m_users",
+                                "column": "user_fname"
+                            },
+                            {
+                                "table": "m_users",
+                                "column": "user_mobile"
+                            },
+                            {
+                                "table": "m_users",
+                                "column": "user_email"
+                            },
+                            {
+                                "table": "m_users",
+                                "column": "user_tpin"
+                            },
+                            {
+                                "table": "m_users",
+                                "column": "balance_amt"
+                            },
+                            {
+                                "table": "m_users",
+                                "column": "balance_outstanding"
+                            }
+                        ],
+                        "table": {
+                            "name": "m_users"
+                        },
+                        "joins": [],
+                        "query": "SELECT user_fname, user_mobile, user_email, user_tpin, balance_amt, balance_outstanding\nFROM m_users\nWHERE id = :P1 /* {{identity}} */",
+                        "params": [
+                            {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{identity}}"
+                            }
+                        ],
+                        "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                                {
+                                    "id": "m_users.id",
+                                    "field": "m_users.id",
+                                    "type": "double",
+                                    "operator": "equal",
+                                    "value": "{{identity}}",
+                                    "data": {
+                                        "table": "m_users",
+                                        "column": "id",
+                                        "type": "number"
+                                    },
+                                    "operation": "="
+                                }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                        }
+                    }
+                },
+                "output": false,
+                "meta": [
+                    {
+                        "type": "text",
+                        "name": "user_fname"
+                    },
+                    {
+                        "type": "text",
+                        "name": "user_mobile"
+                    },
+                    {
+                        "type": "text",
+                        "name": "user_email"
+                    },
+                    {
+                        "type": "text",
+                        "name": "user_tpin"
+                    },
+                    {
+                        "type": "text",
+                        "name": "balance_amt"
+                    },
+                    {
+                        "type": "text",
+                        "name": "balance_outstanding"
+                    }
+                ],
+                "outputType": "object"
+            },
+            {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                    "if": "{{GetAdminDetails.user_tpin == $_POST.admintpin}}",
+                    "then": {
+                        "steps": [
+                            {
+                                "name": "TransId",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                    "value": "{{UUID.md5(123456).substr(1, 15)}}"
+                                },
+                                "output": false,
+                                "meta": [],
+                                "outputType": "text"
+                            },
+                            {
+                                "name": "GetOperatorId",
+                                "module": "dbconnector",
+                                "action": "single",
+                                "options": {
+                                    "connection": "postgres_gcpServer",
+                                    "sql": {
+                                        "type": "SELECT",
+                                        "columns": [
+                                            {
+                                                "table": "m_operator",
+                                                "column": "id",
+                                                "alias": "op_id",
+                                                "aggregate": ""
+                                            },
+                                            {
+                                                "table": "m_operator",
+                                                "column": "service_id"
+                                            }
+                                        ],
+                                        "table": {
+                                            "name": "m_operator"
+                                        },
+                                        "joins": [],
+                                        "query": "SELECT id AS op_id, service_id\nFROM m_operator\nWHERE operator_name = :P1 /* {{'Wallet Credit'}} */ AND status = 1",
+                                        "params": [
+                                            {
+                                                "operator": "equal",
+                                                "type": "expression",
+                                                "name": ":P1",
+                                                "value": "{{'Wallet Credit'}}"
+                                            }
+                                        ],
+                                        "wheres": {
+                                            "condition": "AND",
+                                            "rules": [
+                                                {
+                                                    "id": "m_operator.operator_name",
+                                                    "field": "m_operator.operator_name",
+                                                    "type": "string",
+                                                    "operator": "equal",
+                                                    "value": "{{'Wallet Credit'}}",
+                                                    "data": {
+                                                        "table": "m_operator",
+                                                        "column": "operator_name",
+                                                        "type": "text"
+                                                    },
+                                                    "operation": "="
+                                                },
+                                                {
+                                                    "id": "m_operator.status",
+                                                    "field": "m_operator.status",
+                                                    "type": "double",
+                                                    "operator": "equal",
+                                                    "value": 1,
+                                                    "data": {
+                                                        "table": "m_operator",
+                                                        "column": "status",
+                                                        "type": "number"
+                                                    },
+                                                    "operation": "="
+                                                }
+                                            ],
+                                            "conditional": null,
+                                            "valid": true
+                                        }
+                                    }
+                                },
+                                "output": false,
+                                "meta": [
+                                    {
+                                        "type": "number",
+                                        "name": "op_id"
+                                    },
+                                    {
+                                        "type": "number",
+                                        "name": "service_id"
+                                    }
+                                ],
+                                "outputType": "object"
+                            },
+                            {
+                                "name": "",
+                                "module": "core",
+                                "action": "condition",
+                                "options": {
+                                    "if": "{{GetOperatorId}}",
+                                    "then": {
+                                        "steps": [
+                                            {
+                                                "name": "ClosingBalWallet",
+                                                "module": "core",
+                                                "action": "setvalue",
+                                                "options": {
+                                                    "value": "{{GetAdminDetails.balance_amt.toNumber() +$_POST.admin_credit_amount.toNumber()}}"
+                                                },
+                                                "output": false,
+                                                "meta": [],
+                                                "outputType": "text"
+                                            },
+                                            {
+                                                "name": "WalletCrRechTrans",
+                                                "module": "dbupdater",
+                                                "action": "insert",
+                                                "options": {
+                                                    "connection": "postgres_gcpServer",
+                                                    "sql": {
+                                                        "type": "insert",
+                                                        "values": [
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "op_id",
+                                                                "type": "number",
+                                                                "value": "{{GetOperatorId.op_id}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "service_id",
+                                                                "type": "number",
+                                                                "value": "{{GetOperatorId.service_id}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "api_id",
+                                                                "type": "number",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "user_id",
+                                                                "type": "number",
+                                                                "value": "{{identity}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "user_number",
+                                                                "type": "text",
+                                                                "value": "{{GetAdminDetails.user_mobile}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "details",
+                                                                "type": "text",
+                                                                "value": "{{GetAdminDetails.user_fname}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "opening_balance",
+                                                                "type": "text",
+                                                                "value": "{{GetAdminDetails.balance_amt}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "amount",
+                                                                "type": "text",
+                                                                "value": "{{$_POST.admin_credit_amount}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "comm_per",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "comm_val",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "comm_amt",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "other_charge",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "charge_per",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "charge_amt",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "net_amt",
+                                                                "type": "text",
+                                                                "value": "{{$_POST.admin_credit_amount}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "closing_balance",
+                                                                "type": "text",
+                                                                "value": "{{ClosingBalWallet}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "tr_mode",
+                                                                "type": "text",
+                                                                "value": "{{'Web'}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "tr_type",
+                                                                "type": "text",
+                                                                "value": "{{'Virtual'}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "status",
+                                                                "type": "text",
+                                                                "value": "{{'SUCCESS'}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "tr_id",
+                                                                "type": "text",
+                                                                "value": "{{TransId}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "reason",
+                                                                "type": "text",
+                                                                "value": "{{'Admin Wallet Balance Updated'}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "api_logs",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "is_processed",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "operator_ref",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "api_ref",
+                                                                "type": "text",
+                                                                "value": "{{'N/A'}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "revert_trans",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "ip_address",
+                                                                "type": "text",
+                                                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "api_response_id",
+                                                                "type": "number",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "process_mode",
+                                                                "type": "text",
+                                                                "value": "{{'P2P'}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "live",
+                                                                "type": "text",
+                                                                "value": "{{'Live'}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "tr_date",
+                                                                "type": "datetime",
+                                                                "value": "{{NOW}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "transaction_by",
+                                                                "type": "number",
+                                                                "value": "{{identity}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "dtcommper",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "dtcommval",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "dtcommamt",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "dtchargeper",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "dtchargeval",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "dtchargeamt",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "mdtcommper",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "mdtcommval",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "mdtcommamt",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "mdtchargeper",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "mdtchargeval",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            },
+                                                            {
+                                                                "table": "tt_recharge_trans",
+                                                                "column": "mdtchargeamt",
+                                                                "type": "text",
+                                                                "value": "0"
+                                                            }
+                                                        ],
+                                                        "table": "tt_recharge_trans",
+                                                        "returning": "id",
+                                                        "query": "INSERT INTO tt_recharge_trans\n(op_id, service_id, api_id, user_id, user_number, details, opening_balance, amount, comm_per, comm_val, comm_amt, other_charge, charge_per, charge_amt, net_amt, closing_balance, tr_mode, tr_type, status, tr_id, reason, api_logs, is_processed, operator_ref, api_ref, revert_trans, ip_address, api_response_id, process_mode, live, tr_date, transaction_by, dtcommper, dtcommval, dtcommamt, dtchargeper, dtchargeval, dtchargeamt, mdtcommper, mdtcommval, mdtcommamt, mdtchargeper, mdtchargeval, mdtchargeamt) VALUES (:P1 /* {{GetOperatorId.op_id}} */, :P2 /* {{GetOperatorId.service_id}} */, '0', :P3 /* {{identity}} */, :P4 /* {{GetAdminDetails.user_mobile}} */, :P5 /* {{GetAdminDetails.user_fname}} */, :P6 /* {{GetAdminDetails.balance_amt}} */, :P7 /* {{$_POST.admin_credit_amount}} */, '0', '0', '0', '0', '0', '0', :P8 /* {{$_POST.admin_credit_amount}} */, :P9 /* {{ClosingBalWallet}} */, :P10 /* {{'Web'}} */, :P11 /* {{'Virtual'}} */, :P12 /* {{'SUCCESS'}} */, :P13 /* {{TransId}} */, :P14 /* {{'Admin Wallet Balance Updated'}} */, '0', '0', '0', :P15 /* {{'N/A'}} */, '0', :P16 /* {{$_SERVER.REMOTE_ADDR}} */, '0', :P17 /* {{'P2P'}} */, :P18 /* {{'Live'}} */, :P19 /* {{NOW}} */, :P20 /* {{identity}} */, '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0')",
+                                                        "params": [
+                                                            {
+                                                                "name": ":P1",
+                                                                "type": "expression",
+                                                                "value": "{{GetOperatorId.op_id}}"
+                                                            },
+                                                            {
+                                                                "name": ":P2",
+                                                                "type": "expression",
+                                                                "value": "{{GetOperatorId.service_id}}"
+                                                            },
+                                                            {
+                                                                "name": ":P3",
+                                                                "type": "expression",
+                                                                "value": "{{identity}}"
+                                                            },
+                                                            {
+                                                                "name": ":P4",
+                                                                "type": "expression",
+                                                                "value": "{{GetAdminDetails.user_mobile}}"
+                                                            },
+                                                            {
+                                                                "name": ":P5",
+                                                                "type": "expression",
+                                                                "value": "{{GetAdminDetails.user_fname}}"
+                                                            },
+                                                            {
+                                                                "name": ":P6",
+                                                                "type": "expression",
+                                                                "value": "{{GetAdminDetails.balance_amt}}"
+                                                            },
+                                                            {
+                                                                "name": ":P7",
+                                                                "type": "expression",
+                                                                "value": "{{$_POST.admin_credit_amount}}"
+                                                            },
+                                                            {
+                                                                "name": ":P8",
+                                                                "type": "expression",
+                                                                "value": "{{$_POST.admin_credit_amount}}"
+                                                            },
+                                                            {
+                                                                "name": ":P9",
+                                                                "type": "expression",
+                                                                "value": "{{ClosingBalWallet}}"
+                                                            },
+                                                            {
+                                                                "name": ":P10",
+                                                                "type": "expression",
+                                                                "value": "{{'Web'}}"
+                                                            },
+                                                            {
+                                                                "name": ":P11",
+                                                                "type": "expression",
+                                                                "value": "{{'Virtual'}}"
+                                                            },
+                                                            {
+                                                                "name": ":P12",
+                                                                "type": "expression",
+                                                                "value": "{{'SUCCESS'}}"
+                                                            },
+                                                            {
+                                                                "name": ":P13",
+                                                                "type": "expression",
+                                                                "value": "{{TransId}}"
+                                                            },
+                                                            {
+                                                                "name": ":P14",
+                                                                "type": "expression",
+                                                                "value": "{{'Admin Wallet Balance Updated'}}"
+                                                            },
+                                                            {
+                                                                "name": ":P15",
+                                                                "type": "expression",
+                                                                "value": "{{'N/A'}}"
+                                                            },
+                                                            {
+                                                                "name": ":P16",
+                                                                "type": "expression",
+                                                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                                            },
+                                                            {
+                                                                "name": ":P17",
+                                                                "type": "expression",
+                                                                "value": "{{'P2P'}}"
+                                                            },
+                                                            {
+                                                                "name": ":P18",
+                                                                "type": "expression",
+                                                                "value": "{{'Live'}}"
+                                                            },
+                                                            {
+                                                                "name": ":P19",
+                                                                "type": "expression",
+                                                                "value": "{{NOW}}"
+                                                            },
+                                                            {
+                                                                "name": ":P20",
+                                                                "type": "expression",
+                                                                "value": "{{identity}}"
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "meta": [
+                                                    {
+                                                        "name": "identity",
+                                                        "type": "text"
+                                                    },
+                                                    {
+                                                        "name": "affected",
+                                                        "type": "number"
+                                                    }
+                                                ],
+                                                "output": false
+                                            },
+                                            {
+                                                "name": "UserBalanceAmt",
+                                                "module": "dbupdater",
+                                                "action": "update",
+                                                "options": {
+                                                    "connection": "postgres_gcpServer",
+                                                    "sql": {
+                                                        "type": "update",
+                                                        "values": [
+                                                            {
+                                                                "table": "m_users",
+                                                                "column": "balance_amt",
+                                                                "type": "number",
+                                                                "value": "{{ClosingBalWallet}}"
+                                                            },
+                                                            {
+                                                                "table": "m_users",
+                                                                "column": "updated_by",
+                                                                "type": "text",
+                                                                "value": "{{identity}}"
+                                                            },
+                                                            {
+                                                                "table": "m_users",
+                                                                "column": "updated_on",
+                                                                "type": "datetime",
+                                                                "value": "{{NOW}}"
+                                                            }
+                                                        ],
+                                                        "table": "m_users",
+                                                        "wheres": {
+                                                            "condition": "AND",
+                                                            "rules": [
+                                                                {
+                                                                    "id": "id",
+                                                                    "field": "id",
+                                                                    "type": "double",
+                                                                    "operator": "equal",
+                                                                    "value": "{{identity}}",
+                                                                    "data": {
+                                                                        "column": "id"
+                                                                    },
+                                                                    "operation": "="
+                                                                }
+                                                            ],
+                                                            "conditional": null,
+                                                            "valid": true
+                                                        },
+                                                        "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{ClosingBalWallet}} */, updated_by = :P2 /* {{identity}} */, updated_on = :P3 /* {{NOW}} */\nWHERE id = :P4 /* {{identity}} */",
+                                                        "params": [
+                                                            {
+                                                                "name": ":P1",
+                                                                "type": "expression",
+                                                                "value": "{{ClosingBalWallet}}"
+                                                            },
+                                                            {
+                                                                "name": ":P2",
+                                                                "type": "expression",
+                                                                "value": "{{identity}}"
+                                                            },
+                                                            {
+                                                                "name": ":P3",
+                                                                "type": "expression",
+                                                                "value": "{{NOW}}"
+                                                            },
+                                                            {
+                                                                "operator": "equal",
+                                                                "type": "expression",
+                                                                "name": ":P4",
+                                                                "value": "{{identity}}"
+                                                            }
+                                                        ],
+                                                        "returning": "id"
+                                                    }
+                                                },
+                                                "meta": [
+                                                    {
+                                                        "name": "affected",
+                                                        "type": "number"
+                                                    }
+                                                ],
+                                                "output": false
+                                            },
+                                            {
+                                                "name": "WalletCrBalance",
+                                                "module": "dbupdater",
+                                                "action": "insert",
+                                                "options": {
+                                                    "connection": "postgres_gcpServer",
+                                                    "sql": {
+                                                        "type": "insert",
+                                                        "values": [
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "user_id",
+                                                                "type": "number",
+                                                                "value": "{{identity}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "old_balance",
+                                                                "type": "number",
+                                                                "value": "{{GetAdminDetails.balance_amt}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "amount",
+                                                                "type": "number",
+                                                                "value": "{{$_POST.admin_credit_amount}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "new_balance",
+                                                                "type": "number",
+                                                                "value": "{{ClosingBalWallet}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "transaction_type",
+                                                                "type": "text",
+                                                                "value": "{{'Wallet Credit'}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "tr_date",
+                                                                "type": "text",
+                                                                "value": "{{NOW}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "ip_address",
+                                                                "type": "text",
+                                                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "crdr_type",
+                                                                "type": "text",
+                                                                "value": "{{'Credit'}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "pay_ref_id",
+                                                                "type": "text",
+                                                                "value": "{{WalletCrRechTrans.identity}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "remarks",
+                                                                "type": "text",
+                                                                "value": "{{'Number: '+GetAdminDetails.user_mobile+' | Amount: '+$_POST.admin_credit_amount+' | Wallet Credit | Ref. Id: '+WalletCrRechTrans.identity+' | Comm Per: 00.00 | Comm Val: 00.00 | Charge Per: 00.00 | Charge Val: 00.00 | GST: 00.00 | TDS: 00.00'}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "created_by",
+                                                                "type": "number",
+                                                                "value": "{{identity}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "created_on",
+                                                                "type": "datetime",
+                                                                "value": "{{NOW}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "netamt",
+                                                                "type": "text",
+                                                                "value": "{{$_POST.admin_credit_amount}}"
+                                                            },
+                                                            {
+                                                                "table": "tt_balance",
+                                                                "column": "status",
+                                                                "type": "text",
+                                                                "value": "{{'SUCCESS'}}"
+                                                            }
+                                                        ],
+                                                        "table": "tt_balance",
+                                                        "returning": "id",
+                                                        "query": "INSERT INTO tt_balance\n(user_id, old_balance, amount, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on, netamt, status) VALUES (:P1 /* {{identity}} */, :P2 /* {{GetAdminDetails.balance_amt}} */, :P3 /* {{$_POST.admin_credit_amount}} */, :P4 /* {{ClosingBalWallet}} */, :P5 /* {{'Wallet Credit'}} */, :P6 /* {{NOW}} */, :P7 /* {{$_SERVER.REMOTE_ADDR}} */, :P8 /* {{'Credit'}} */, :P9 /* {{WalletCrRechTrans.identity}} */, :P10 /* {{'Number: '+GetAdminDetails.user_mobile+' | Amount: '+$_POST.admin_credit_amount+' | Wallet Credit | Ref. Id: '+WalletCrRechTrans.identity+' | Comm Per: 00.00 | Comm Val: 00.00 | Charge Per: 00.00 | Charge Val: 00.00 | GST: 00.00 | TDS: 00.00'}} */, :P11 /* {{identity}} */, :P12 /* {{NOW}} */, :P13 /* {{$_POST.admin_credit_amount}} */, :P14 /* {{'SUCCESS'}} */)",
+                                                        "params": [
+                                                            {
+                                                                "name": ":P1",
+                                                                "type": "expression",
+                                                                "value": "{{identity}}"
+                                                            },
+                                                            {
+                                                                "name": ":P2",
+                                                                "type": "expression",
+                                                                "value": "{{GetAdminDetails.balance_amt}}"
+                                                            },
+                                                            {
+                                                                "name": ":P3",
+                                                                "type": "expression",
+                                                                "value": "{{$_POST.admin_credit_amount}}"
+                                                            },
+                                                            {
+                                                                "name": ":P4",
+                                                                "type": "expression",
+                                                                "value": "{{ClosingBalWallet}}"
+                                                            },
+                                                            {
+                                                                "name": ":P5",
+                                                                "type": "expression",
+                                                                "value": "{{'Wallet Credit'}}"
+                                                            },
+                                                            {
+                                                                "name": ":P6",
+                                                                "type": "expression",
+                                                                "value": "{{NOW}}"
+                                                            },
+                                                            {
+                                                                "name": ":P7",
+                                                                "type": "expression",
+                                                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                                            },
+                                                            {
+                                                                "name": ":P8",
+                                                                "type": "expression",
+                                                                "value": "{{'Credit'}}"
+                                                            },
+                                                            {
+                                                                "name": ":P9",
+                                                                "type": "expression",
+                                                                "value": "{{WalletCrRechTrans.identity}}"
+                                                            },
+                                                            {
+                                                                "name": ":P10",
+                                                                "type": "expression",
+                                                                "value": "{{'Number: '+GetAdminDetails.user_mobile+' | Amount: '+$_POST.admin_credit_amount+' | Wallet Credit | Ref. Id: '+WalletCrRechTrans.identity+' | Comm Per: 00.00 | Comm Val: 00.00 | Charge Per: 00.00 | Charge Val: 00.00 | GST: 00.00 | TDS: 00.00'}}"
+                                                            },
+                                                            {
+                                                                "name": ":P11",
+                                                                "type": "expression",
+                                                                "value": "{{identity}}"
+                                                            },
+                                                            {
+                                                                "name": ":P12",
+                                                                "type": "expression",
+                                                                "value": "{{NOW}}"
+                                                            },
+                                                            {
+                                                                "name": ":P13",
+                                                                "type": "expression",
+                                                                "value": "{{$_POST.admin_credit_amount}}"
+                                                            },
+                                                            {
+                                                                "name": ":P14",
+                                                                "type": "expression",
+                                                                "value": "{{'SUCCESS'}}"
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "meta": [
+                                                    {
+                                                        "name": "identity",
+                                                        "type": "text"
+                                                    },
+                                                    {
+                                                        "name": "affected",
+                                                        "type": "number"
+                                                    }
+                                                ],
+                                                "output": false
+                                            }
+                                        ]
+                                    },
+                                    "else": {
+                                        "steps": {
+                                            "name": "GetOpSeIdRes403",
+                                            "module": "core",
+                                            "action": "response",
+                                            "options": {
+                                                "status": 403,
+                                                "data": "Service Id or Operator Id not available"
+                                            }
+                                        }
+                                    }
+                                },
+                                "outputType": "boolean"
+                            }
+                        ]
+                    },
+                    "else": {
+                        "steps": {
+                            "name": "TPinRes403",
+                            "module": "core",
+                            "action": "response",
+                            "options": {
+                                "status": 403,
+                                "data": "403-forbidden"
+                            }
+                        }
+                    }
+                },
+                "outputType": "boolean"
+            }
+        ]
+    }
+}

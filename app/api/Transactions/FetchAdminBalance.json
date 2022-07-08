@@ -1,0 +1,624 @@
+[
+  {
+    "name": "",
+    "module": "auth",
+    "action": "restrict",
+    "options": {
+      "provider": "securityLogin",
+      "permissions": [
+        "write"
+      ],
+      "loginUrl": "login",
+      "forbiddenUrl": "403-forbidden"
+    }
+  },
+  {
+    "name": "identity",
+    "module": "auth",
+    "action": "identify",
+    "options": {
+      "provider": "securityLogin"
+    },
+    "output": false,
+    "meta": []
+  },
+  {
+    "name": "query",
+    "module": "dbconnector",
+    "action": "single",
+    "options": {
+      "connection": "postgres_gcpServer",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "m_users",
+            "column": "balance_amt"
+          },
+          {
+            "table": "m_users",
+            "column": "aeps_balance"
+          },
+          {
+            "table": "m_users",
+            "column": "user_fname"
+          },
+          {
+            "table": "m_users",
+            "column": "user_mobile"
+          },
+          {
+            "table": "m_users",
+            "column": "user_email"
+          },
+          {
+            "table": "m_users",
+            "column": "aadhar_no"
+          },
+          {
+            "table": "m_users",
+            "column": "pan_no"
+          },
+          {
+            "table": "m_users",
+            "column": "address"
+          },
+          {
+            "table": "m_users",
+            "column": "pin"
+          },
+          {
+            "table": "m_users",
+            "column": "state"
+          },
+          {
+            "table": "m_users",
+            "column": "district"
+          },
+          {
+            "table": "m_users",
+            "column": "blank2"
+          },
+          {
+            "table": "m_users",
+            "column": "user_type"
+          }
+        ],
+        "table": {
+          "name": "m_users"
+        },
+        "joins": [],
+        "wheres": {
+          "condition": "AND",
+          "rules": [
+            {
+              "id": "m_users.id",
+              "field": "m_users.id",
+              "type": "double",
+              "operator": "equal",
+              "value": "{{identity}}",
+              "data": {
+                "table": "m_users",
+                "column": "id",
+                "type": "number"
+              },
+              "operation": "="
+            }
+          ],
+          "conditional": null,
+          "valid": true
+        },
+        "query": "SELECT balance_amt, aeps_balance, user_fname, user_mobile, user_email, aadhar_no, pan_no, address, pin, state, district, blank2, user_type\nFROM m_users\nWHERE id = :P1 /* {{identity}} */",
+        "params": [
+          {
+            "operator": "equal",
+            "type": "expression",
+            "name": ":P1",
+            "value": "{{identity}}"
+          }
+        ]
+      }
+    },
+    "output": true,
+    "meta": [
+      {
+        "type": "text",
+        "name": "balance_amt"
+      },
+      {
+        "type": "text",
+        "name": "aeps_balance"
+      },
+      {
+        "type": "text",
+        "name": "user_fname"
+      },
+      {
+        "type": "text",
+        "name": "user_mobile"
+      },
+      {
+        "type": "text",
+        "name": "user_email"
+      },
+      {
+        "type": "text",
+        "name": "aadhar_no"
+      },
+      {
+        "type": "text",
+        "name": "pan_no"
+      },
+      {
+        "type": "text",
+        "name": "address"
+      },
+      {
+        "type": "text",
+        "name": "pin"
+      },
+      {
+        "type": "text",
+        "name": "state"
+      },
+      {
+        "type": "text",
+        "name": "district"
+      },
+      {
+        "type": "text",
+        "name": "blank2"
+      },
+      {
+        "type": "number",
+        "name": "user_type"
+      }
+    ],
+    "outputType": "object"
+  },
+  {
+    "name": "GetAddMoneyReq",
+    "module": "dbconnector",
+    "action": "single",
+    "options": {
+      "connection": "postgres_gcpServer",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "payment_req_self",
+            "column": "id",
+            "alias": "CountAddMoney",
+            "aggregate": "COUNT"
+          }
+        ],
+        "table": {
+          "name": "payment_req_self"
+        },
+        "joins": [],
+        "primary": "id",
+        "groupBy": [],
+        "wheres": {
+          "condition": "AND",
+          "rules": [
+            {
+              "id": "payment_req_self.status",
+              "field": "payment_req_self.status",
+              "type": "double",
+              "operator": "equal",
+              "value": 1,
+              "data": {
+                "table": "payment_req_self",
+                "column": "status",
+                "type": "number",
+                "columnObj": {
+                  "type": "integer",
+                  "primary": false,
+                  "unique": false,
+                  "nullable": false,
+                  "name": "status"
+                }
+              },
+              "operation": "="
+            }
+          ],
+          "conditional": null,
+          "valid": true
+        },
+        "query": "SELECT COUNT(id) AS CountAddMoney\nFROM payment_req_self\nWHERE status = 1",
+        "params": []
+      }
+    },
+    "output": true,
+    "meta": [
+      {
+        "type": "number",
+        "name": "CountAddMoney"
+      }
+    ],
+    "outputType": "object"
+  },
+  {
+    "name": "GetPaymentRequest",
+    "module": "dbconnector",
+    "action": "single",
+    "options": {
+      "connection": "postgres_gcpServer",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "payment_request",
+            "column": "id",
+            "alias": "CountPayment",
+            "aggregate": "COUNT"
+          }
+        ],
+        "table": {
+          "name": "payment_request",
+          "alias": "payment_request"
+        },
+        "joins": [],
+        "groupBy": [],
+        "wheres": {
+          "condition": "AND",
+          "rules": [
+            {
+              "id": "payment_request.pay_user_id",
+              "field": "payment_request.pay_user_id",
+              "type": "double",
+              "operator": "equal",
+              "value": "{{identity}}",
+              "data": {
+                "table": "payment_request",
+                "column": "pay_user_id",
+                "type": "number"
+              },
+              "operation": "="
+            },
+            {
+              "condition": "OR",
+              "rules": [
+                {
+                  "id": "payment_request.status",
+                  "field": "payment_request.status",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": 1,
+                  "data": {
+                    "table": "payment_request",
+                    "column": "status",
+                    "type": "number"
+                  },
+                  "operation": "="
+                },
+                {
+                  "id": "payment_request.status",
+                  "field": "payment_request.status",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": 4,
+                  "data": {
+                    "table": "payment_request",
+                    "column": "status",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null
+            }
+          ],
+          "conditional": null,
+          "valid": true
+        },
+        "query": "SELECT COUNT(id) AS CountPayment\nFROM payment_request AS payment_request\nWHERE pay_user_id = :P1 /* {{identity}} */ AND (status = 1 OR status = 4)",
+        "params": [
+          {
+            "operator": "equal",
+            "type": "expression",
+            "name": ":P1",
+            "value": "{{identity}}"
+          }
+        ],
+        "primary": "id"
+      }
+    },
+    "output": true,
+    "meta": [
+      {
+        "type": "number",
+        "name": "CountPayment"
+      }
+    ],
+    "outputType": "object"
+  },
+  {
+    "name": "GetPendingTrans",
+    "module": "dbconnector",
+    "action": "single",
+    "options": {
+      "connection": "postgres_gcpServer",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "tt_recharge_trans",
+            "column": "id",
+            "alias": "CountTrans",
+            "aggregate": "COUNT"
+          }
+        ],
+        "table": {
+          "name": "tt_recharge_trans",
+          "alias": "tt_recharge_trans"
+        },
+        "joins": [],
+        "groupBy": [],
+        "wheres": {
+          "condition": "AND",
+          "rules": [
+            {
+              "id": "tt_recharge_trans.status",
+              "field": "tt_recharge_trans.status",
+              "type": "string",
+              "operator": "equal",
+              "value": "{{'PENDING'}}",
+              "data": {
+                "table": "tt_recharge_trans",
+                "column": "status",
+                "type": "text",
+                "columnObj": {
+                  "type": "string",
+                  "primary": false,
+                  "nullable": true,
+                  "name": "status"
+                }
+              },
+              "operation": "="
+            }
+          ],
+          "conditional": null,
+          "valid": true
+        },
+        "query": "SELECT COUNT(id) AS CountTrans\nFROM tt_recharge_trans AS tt_recharge_trans\nWHERE status = :P1 /* {{'PENDING'}} */",
+        "params": [
+          {
+            "operator": "equal",
+            "type": "expression",
+            "name": ":P1",
+            "value": "{{'PENDING'}}"
+          }
+        ],
+        "primary": "id"
+      }
+    },
+    "output": true,
+    "meta": [
+      {
+        "type": "number",
+        "name": "CountTrans"
+      }
+    ],
+    "outputType": "object"
+  },
+  {
+    "name": "AEPSPendingTrans",
+    "module": "dbconnector",
+    "action": "single",
+    "options": {
+      "connection": "postgres_gcpServer",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "tt_aeps_trans",
+            "column": "id",
+            "alias": "CountAEPS",
+            "aggregate": "COUNT"
+          }
+        ],
+        "table": {
+          "name": "tt_aeps_trans"
+        },
+        "joins": [],
+        "query": "SELECT COUNT(id) AS CountAEPS\nFROM tt_aeps_trans\nWHERE status = :P1 /* {{'PENDING'}} */",
+        "params": [
+          {
+            "operator": "equal",
+            "type": "expression",
+            "name": ":P1",
+            "value": "{{'PENDING'}}"
+          }
+        ],
+        "primary": "id",
+        "groupBy": [],
+        "wheres": {
+          "condition": "AND",
+          "rules": [
+            {
+              "id": "tt_aeps_trans.status",
+              "field": "tt_aeps_trans.status",
+              "type": "string",
+              "operator": "equal",
+              "value": "{{'PENDING'}}",
+              "data": {
+                "table": "tt_aeps_trans",
+                "column": "status",
+                "type": "text",
+                "columnObj": {
+                  "type": "string",
+                  "maxLength": -5,
+                  "primary": false,
+                  "unique": false,
+                  "nullable": true,
+                  "name": "status"
+                }
+              },
+              "operation": "="
+            }
+          ],
+          "conditional": null,
+          "valid": true
+        }
+      }
+    },
+    "output": true,
+    "meta": [
+      {
+        "type": "number",
+        "name": "CountAEPS"
+      }
+    ],
+    "outputType": "object"
+  },
+  {
+    "name": "BrowsTicketComplain",
+    "module": "dbconnector",
+    "action": "single",
+    "options": {
+      "connection": "postgres_gcpServer",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "tt_recharge_trans",
+            "column": "id",
+            "alias": "CountComplain",
+            "aggregate": "COUNT"
+          }
+        ],
+        "table": {
+          "name": "tt_recharge_trans",
+          "alias": "tt_recharge_trans"
+        },
+        "primary": "id",
+        "joins": [],
+        "groupBy": [],
+        "wheres": {
+          "condition": "AND",
+          "rules": [
+            {
+              "id": "tt_recharge_trans.extra2",
+              "field": "tt_recharge_trans.extra2",
+              "type": "string",
+              "operator": "equal",
+              "value": "{{1}}",
+              "data": {
+                "table": "tt_recharge_trans",
+                "column": "extra2",
+                "type": "text",
+                "columnObj": {
+                  "type": "string",
+                  "primary": false,
+                  "nullable": true,
+                  "name": "extra2"
+                }
+              },
+              "operation": "="
+            }
+          ],
+          "conditional": null,
+          "valid": true
+        },
+        "query": "SELECT COUNT(id) AS CountComplain\nFROM tt_recharge_trans AS tt_recharge_trans\nWHERE extra2 = :P1 /* {{1}} */",
+        "params": [
+          {
+            "operator": "equal",
+            "type": "expression",
+            "name": ":P1",
+            "value": "{{1}}"
+          }
+        ]
+      }
+    },
+    "output": true,
+    "meta": [
+      {
+        "type": "number",
+        "name": "CountComplain"
+      }
+    ],
+    "outputType": "object"
+  },
+  {
+    "name": "GeneralTicket",
+    "module": "dbconnector",
+    "action": "single",
+    "options": {
+      "connection": "postgres_gcpServer",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "t_ticket",
+            "column": "id",
+            "alias": "CountTickets",
+            "aggregate": "COUNT"
+          }
+        ],
+        "table": {
+          "name": "t_ticket"
+        },
+        "primary": "id",
+        "joins": [],
+        "query": "SELECT COUNT(id) AS CountTickets\nFROM t_ticket\nWHERE tran_id IS NULL AND status = '1'",
+        "params": [],
+        "groupBy": [],
+        "wheres": {
+          "condition": "AND",
+          "rules": [
+            {
+              "id": "t_ticket.tran_id",
+              "field": "t_ticket.tran_id",
+              "type": "string",
+              "operator": "is_null",
+              "value": null,
+              "data": {
+                "table": "t_ticket",
+                "column": "tran_id",
+                "type": "text",
+                "columnObj": {
+                  "type": "string",
+                  "primary": false,
+                  "nullable": true,
+                  "name": "tran_id"
+                }
+              },
+              "operation": "IS NULL"
+            },
+            {
+              "id": "t_ticket.status",
+              "field": "t_ticket.status",
+              "type": "string",
+              "operator": "equal",
+              "value": "1",
+              "data": {
+                "table": "t_ticket",
+                "column": "status",
+                "type": "text",
+                "columnObj": {
+                  "type": "string",
+                  "primary": false,
+                  "nullable": false,
+                  "name": "status"
+                }
+              },
+              "operation": "="
+            }
+          ],
+          "conditional": null,
+          "valid": true
+        }
+      }
+    },
+    "output": true,
+    "meta": [
+      {
+        "type": "number",
+        "name": "CountTickets"
+      }
+    ],
+    "outputType": "object"
+  }
+]

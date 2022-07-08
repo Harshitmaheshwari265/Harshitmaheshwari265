@@ -1,0 +1,113 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="apiforward" appConnect="local" components="{dmxBootstrap5TableGenerator:{}}" -->
+<meta name="ac:route" content="/api-forward">
+<dmx-serverconnect id="scServices" url="api/Services/ActiveServices"></dmx-serverconnect>
+<script is="dmx-flow" id="flowFetchOperator" type="text/dmx-flow">{
+condition: {
+if: "{{formAPIForward.ServiceType.value}}",
+then: {
+steps: {
+run: {action: "{{scOperator.load({})}}"}
+}
+}
+}
+}</script>
+<dmx-serverconnect id="scOperator" url="api/operator/ActiveOperator" noload dmx-param:service_type="formAPIForward.ServiceType.value"></dmx-serverconnect>
+<dmx-serverconnect id="scActiveAPI" url="api/APIS/ActiveAPI" dmx-param:api_type="formAPIForward.inp_api_type.value"></dmx-serverconnect>
+<dmx-serverconnect id="scAPIForward" url="api/APIS/APIForwardFetch" dmx-param:service_id="formAPIForward.ServiceType.value"></dmx-serverconnect>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 id="DebitHeading" class="text-center align-self-center">SW Infotech API Forwarding</h1>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container pb-3">
+    <div class="card ">
+        <div class="card-header sw-bg-col-primary">
+            <b>API Forwarding</b>
+        </div>
+
+        <div class="card-body">
+            <form is="dmx-serverconnect-form" id="formAPIForward" method="post" action="api/APIS/APIForwarding" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="scNotif.success('API Forwarded Successfully');scAPIForward.load()" dmx-on:error="scNotif.warning('An error occurred'); " dmx-on:forbidden="scNotif.danger('Unable to Access!')">
+                <div class="row">
+                    <div class="col-12 col-sm-6 col-md-3 my-2">
+                        <label>Service Type</label>
+                        <select id="ServiceType" name="service_id" class="form-control form-select col-12 px-2" dmx-bind:options="scServices.data.GetActiveServices" optiontext="service_name" optionvalue="id" dmx-on:changed="flowFetchOperator.run()" required="">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3 my-2">
+                        <label>Select Operator</label>
+                        <select type="text" class="form-control form-select" id="inp_operator_type" name="operator_id" aria-describedby="inp_operator_type_help" dmx-bind:options="scOperator.data.GetActiveOp" optionvalue="id" required="" optiontext="operator_name">
+                            <option value="">Select</option>
+                            <option value="0">All</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3 my-2">
+                        <label>API Type</label>
+                        <select type="text" class="form-control form-select" id="inp_api_type" aria-describedby="inp_api_type_help" required="">
+                            <option value="Recharge">Recharge</option>
+                            <option value="AEPS">AEPS</option>
+                            <option value="BBPS">BBPS</option>
+                            <option value="DMT">DMT</option>
+                            <option value="SMS">SMS</option>
+                            <option value="Whatsapp">Whatsapp</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3 my-2">
+                        <label>Select API Forward</label>
+                        <select type="text" class="form-control form-select" id="inp_api" name="api_id" aria-describedby="inp_api_help" optionvalue="id" required="" dmx-bind:options="scActiveAPI.data.GetActiveAPI" optiontext="api_name+'('+api_code+')'" dmx-bind:value="scGetFwdSpecific.data.GetDetails[0].api_id">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                    <div class="col p-0 ms-3 my-2">
+                        <button id="btn1" class="btn btn-info mt-md-4" type="submit" dmx-bind:disabled="state.executing">Update API<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+    <div class="card ">
+        <div class="card-header sw-bg-col-primary">
+            <b>API Forward Data</b>
+        </div>
+
+        <div class="card-body">
+            <!-- <div class="row">
+                <div class="col-12 col-lg-6 p-2">
+                    <label>Service Type</label>
+                    <select id="ServiceForward" name="service_id" class="form-control form-select col-12 px-2" dmx-bind:options="scServices.data.GetActiveServices" optiontext="service_name" optionvalue="id" dmx-on:changed="flowFetchForwardService.run()" required="">
+                        <option value="">Select</option>
+                    </select>
+                </div>
+            </div> -->
+            <div class="table-responsive">
+                <table class="table table-hover table-sm  sw-font-11">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Operator</th>
+                            <th>Forward Api</th>
+                            <th>Created on</th>
+                            <th>Updated on</th>
+                        </tr>
+                    </thead>
+                    <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="scAPIForward.data.GetForwardData" id="tableRepeat1">
+                        <tr>
+                            <td dmx-text="service_name"></td>
+                            <td dmx-text="operator_name"></td>
+                            <td dmx-text="api_name+'('+api_code+')'"></td>
+                            <td dmx-text="created_on.formatDate('dd/MM/yyyy hh:mm:ss A')"></td>
+                            <td dmx-text="updated_on.formatDate('dd/MM/yyyy hh:mm:ss A')"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

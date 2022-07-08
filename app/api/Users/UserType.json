@@ -1,0 +1,111 @@
+[
+  {
+    "name": "",
+    "module": "auth",
+    "action": "restrict",
+    "options": {
+      "provider": "securityLogin",
+      "permissions": [
+        "write"
+      ],
+      "loginUrl": "/login",
+      "forbiddenUrl": "/403-forbidden"
+    }
+  },
+  {
+    "name": "identity",
+    "module": "auth",
+    "action": "identify",
+    "options": {
+      "provider": "securityLogin"
+    },
+    "output": true,
+    "meta": [],
+    "disabled": true
+  },
+  {
+    "name": "GetUserType",
+    "module": "dbconnector",
+    "action": "select",
+    "options": {
+      "connection": "postgres_gcpServer",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "m_user_type",
+            "column": "id"
+          },
+          {
+            "table": "m_user_type",
+            "column": "type_name"
+          },
+          {
+            "table": "m_user_type",
+            "column": "user_type"
+          },
+          {
+            "table": "m_user_type",
+            "column": "status"
+          }
+        ],
+        "table": {
+          "name": "m_user_type"
+        },
+        "joins": [],
+        "orders": [
+          {
+            "table": "m_user_type",
+            "column": "id",
+            "direction": "ASC",
+            "recid": 1
+          }
+        ],
+        "wheres": {
+          "condition": "AND",
+          "rules": [
+            {
+              "id": "m_user_type.status",
+              "field": "m_user_type.status",
+              "type": "double",
+              "operator": "equal",
+              "value": 1,
+              "data": {
+                "table": "m_user_type",
+                "column": "status",
+                "type": "number"
+              },
+              "operation": "="
+            }
+          ],
+          "conditional": null,
+          "valid": true
+        },
+        "query": "SELECT id, type_name, user_type, status\nFROM m_user_type\nWHERE status = 1\nORDER BY id ASC",
+        "params": [],
+        "primary": "id"
+      }
+    },
+    "output": true,
+    "type": "dbconnector_select",
+    "meta": [
+      {
+        "type": "number",
+        "name": "id"
+      },
+      {
+        "type": "text",
+        "name": "type_name"
+      },
+      {
+        "type": "text",
+        "name": "user_type"
+      },
+      {
+        "type": "number",
+        "name": "status"
+      }
+    ],
+    "outputType": "array"
+  }
+]

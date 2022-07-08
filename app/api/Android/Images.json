@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "GetImages",
+        "module": "dbconnector",
+        "action": "paged",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "android_sliding_image",
+                "column": "id"
+              },
+              {
+                "table": "android_sliding_image",
+                "column": "user_type"
+              },
+              {
+                "table": "android_sliding_image",
+                "column": "sliding_image"
+              },
+              {
+                "table": "android_sliding_image",
+                "column": "image_type"
+              },
+              {
+                "table": "android_sliding_image",
+                "column": "status"
+              },
+              {
+                "table": "android_sliding_image",
+                "column": "created_by"
+              },
+              {
+                "table": "android_sliding_image",
+                "column": "created_on"
+              }
+            ],
+            "table": {
+              "name": "android_sliding_image"
+            },
+            "joins": [],
+            "primary": "id",
+            "query": "SELECT id, user_type, sliding_image, image_type, status, created_by, created_on\nFROM android_sliding_image\nORDER BY id DESC",
+            "params": [],
+            "orders": [
+              {
+                "table": "android_sliding_image",
+                "column": "id",
+                "direction": "DESC"
+              }
+            ]
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "offset",
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "type": "number"
+          },
+          {
+            "name": "total",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "object",
+            "sub": [
+              {
+                "name": "offset",
+                "type": "object",
+                "sub": [
+                  {
+                    "name": "first",
+                    "type": "number"
+                  },
+                  {
+                    "name": "prev",
+                    "type": "number"
+                  },
+                  {
+                    "name": "next",
+                    "type": "number"
+                  },
+                  {
+                    "name": "last",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "current",
+                "type": "number"
+              },
+              {
+                "name": "total",
+                "type": "number"
+              }
+            ]
+          },
+          {
+            "name": "data",
+            "type": "array",
+            "sub": [
+              {
+                "type": "number",
+                "name": "id"
+              },
+              {
+                "type": "number",
+                "name": "user_type"
+              },
+              {
+                "type": "text",
+                "name": "sliding_image"
+              },
+              {
+                "type": "text",
+                "name": "image_type"
+              },
+              {
+                "type": "number",
+                "name": "status"
+              },
+              {
+                "type": "number",
+                "name": "created_by"
+              },
+              {
+                "type": "datetime",
+                "name": "created_on"
+              }
+            ]
+          }
+        ],
+        "outputType": "object"
+      }
+    ]
+  }
+}

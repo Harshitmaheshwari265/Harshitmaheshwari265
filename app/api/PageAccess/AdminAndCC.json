@@ -1,0 +1,174 @@
+[
+  {
+    "name": "",
+    "module": "auth",
+    "action": "restrict",
+    "options": {
+      "provider": "securityLogin",
+      "permissions": [
+        "write"
+      ],
+      "loginUrl": "/login",
+      "forbiddenUrl": "/403-forbidden"
+    }
+  },
+  {
+    "name": "identity",
+    "module": "auth",
+    "action": "identify",
+    "options": {
+      "provider": "securityLogin"
+    },
+    "output": false,
+    "meta": []
+  },
+  {
+    "name": "",
+    "module": "core",
+    "action": "condition",
+    "options": {
+      "if": "{{identity}}",
+      "then": {
+        "steps": [
+          {
+            "name": "CheckAdminCC",
+            "module": "dbconnector",
+            "action": "single",
+            "options": {
+              "connection": "postgres_gcpServer",
+              "sql": {
+                "type": "SELECT",
+                "columns": [
+                  {
+                    "table": "m_users",
+                    "column": "id",
+                    "alias": "access",
+                    "aggregate": "COUNT"
+                  }
+                ],
+                "table": {
+                  "name": "m_users"
+                },
+                "joins": [],
+                "groupBy": [],
+                "query": "SELECT COUNT(id) AS access\nFROM m_users\nWHERE id = :P1 /* {{identity}} */ AND (user_type = 0 OR user_type = 4) AND u_status = '1'",
+                "params": [
+                  {
+                    "operator": "equal",
+                    "type": "expression",
+                    "name": ":P1",
+                    "value": "{{identity}}"
+                  }
+                ],
+                "wheres": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "id": "m_users.id",
+                      "field": "m_users.id",
+                      "type": "double",
+                      "operator": "equal",
+                      "value": "{{identity}}",
+                      "data": {
+                        "table": "m_users",
+                        "column": "id",
+                        "type": "number"
+                      },
+                      "operation": "="
+                    },
+                    {
+                      "condition": "OR",
+                      "rules": [
+                        {
+                          "id": "m_users.user_type",
+                          "field": "m_users.user_type",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": 0,
+                          "data": {
+                            "table": "m_users",
+                            "column": "user_type",
+                            "type": "number"
+                          },
+                          "operation": "="
+                        },
+                        {
+                          "id": "m_users.user_type",
+                          "field": "m_users.user_type",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": 4,
+                          "data": {
+                            "table": "m_users",
+                            "column": "user_type",
+                            "type": "number"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null
+                    },
+                    {
+                      "id": "m_users.u_status",
+                      "field": "m_users.u_status",
+                      "type": "string",
+                      "operator": "equal",
+                      "value": "1",
+                      "data": {
+                        "table": "m_users",
+                        "column": "u_status",
+                        "type": "text"
+                      },
+                      "operation": "="
+                    }
+                  ],
+                  "conditional": null,
+                  "valid": true
+                },
+                "primary": "id"
+              }
+            },
+            "output": true,
+            "meta": [
+              {
+                "type": "number",
+                "name": "access"
+              }
+            ],
+            "outputType": "object"
+          },
+          {
+            "name": "",
+            "module": "core",
+            "action": "condition",
+            "options": {
+              "if": "{{CheckAdminCC.access == 0}}",
+              "then": {
+                "steps": {
+                  "name": "UnableAccess",
+                  "module": "core",
+                  "action": "redirect",
+                  "options": {
+                    "url": "/403-forbidden"
+                  }
+                }
+              }
+            },
+            "outputType": "boolean"
+          }
+        ]
+      },
+      "else": {
+        "steps": {
+          "name": "Login",
+          "module": "core",
+          "action": "redirect",
+          "options": {
+            "url": "/login"
+          }
+        }
+      }
+    },
+    "outputType": "boolean"
+  }
+]

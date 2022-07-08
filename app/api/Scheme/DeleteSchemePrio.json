@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/scheme-priority.ejs",
+      "linkedForm": "formDelSchPrio"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "schemeprioid",
+        "name": "schemeprioid"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "SchemePriority",
+        "module": "dbupdater",
+        "action": "delete",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "delete",
+            "table": "t_scheme_user",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "id",
+                  "field": "id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.schemeprioid}}",
+                  "data": {
+                    "column": "id"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "DELETE\nFROM t_scheme_user\nWHERE id = :P1 /* {{$_POST.schemeprioid}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.schemeprioid}}"
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  }
+}

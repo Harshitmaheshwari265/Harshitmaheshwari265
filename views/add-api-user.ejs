@@ -1,0 +1,108 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="addapiuser" appConnect="local" -->
+<meta name="ac:route" content="/add-api-user">
+<dmx-serverconnect id="scPinStateDist" url="api/Users/GetPINStateDist" dmx-param:pincode="formAddEditUser.inp_pin.value"></dmx-serverconnect>
+<script is="dmx-flow" id="flowGetPIN" type="text/dmx-flow">{
+    condition: {
+    if: "{{formAddEditUser.inp_pin.value.length() == 6}}",
+    then: {
+    steps: {
+    run: {action: "{{scPinStateDist.load({})}}"}
+    }
+    }
+    }
+    }
+</script>
+<dmx-serverconnect id="scFetchScheme" url="api/Scheme/FetchActiveScheme"></dmx-serverconnect>
+<div class="container pb-3">
+    <header>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h1 id="CCHeading" class="text-center align-self-center">SW Infotech API Users</h1>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="card ">
+        <div class="card-header sw-bg-col-primary">
+            <b>Add API User</b>
+        </div>
+        <div class="card-body">
+            <form is="dmx-serverconnect-form" id="formAddEditUser" method="post" action="api/Users/AddEditUsers" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="scNotif.success('New API User Added'); formAddEditUser.reset();scUsers.load();" dmx-on:error="scNotif.warning('An error occurred'); ">
+                <input type="hidden" id="UserId" name="UserId" dmx-bind:value="ddUsers.data.id">
+                <input type="hidden" name="user_type" id="inp_user_type" value="5">
+
+                <div class="mb-3 row">
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="inp_scheme_user" class="col-form-label">Allot Scheme</label>
+                        <div class="col-12 px-0">
+                            <select type="number" class="form-control form-select" id="inp_scheme_type" name="scheme_id" aria-describedby="inp_scheme_type_help" dmx-bind:options="scFetchScheme.data.FetchScheme.data" optiontext="scheme_name" optionvalue="sc_id" dmx-bind:value="ddUsers.data.scheme_id">
+                                <option value="">Select Option</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="inp_name" class="col-form-label">User Name</label>
+                        <div class="col-12 px-0">
+                            <input type="text" class="form-control" id="inp_name" name="name" aria-describedby="inp_name_help" placeholder="Enter Name" maxlength="50" required="" data-msg-required="User Name is required." dmx-bind:value="ddUsers.data.user_fname">
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3"><label for="inp_email" class="col-form-label">Email</label>
+                        <div class="col-12 px-0">
+                            <input type="text" class="form-control" id="inp_email" name="email" aria-describedby="inp_email_help" placeholder="Enter Email" maxlength="100" required="" data-msg-required="Email id is required." data-rule-email="" data-rule-nowhitespace="" dmx-bind:value="ddUsers.data.user_email">
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="inp_mobile" class="col-form-label">Mobile</label>
+                        <div class="col-12 px-0">
+                            <input type="number" class="form-control" id="inp_mobile" name="mobile" aria-describedby="inp_mobile_help" placeholder="Enter Mobile" maxlength="10" required="" data-msg-required="Mobile id is required." data-rule-number="" dmx-bind:value="ddUsers.data.user_mobile" dmx-bind:readonly="ddUsers.data.id">
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3"><label for="inp_aadhar" class="col-form-label">Aadhar No</label>
+                        <div class="col-12 px-0">
+                            <input type="number" class="form-control" id="inp_aadhar" name="aadhar" aria-describedby="inp_aadhar_help" placeholder="Enter Aadhar No" maxlength="12" required="" data-msg-required="Aadhar no is required." data-rule-number="" dmx-bind:value="ddUsers.data.aadhar_no">
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="inp_pan" class="col-form-label">PAN</label>
+                        <div class="col-12 px-0">
+                            <input type="text" class="form-control" id="inp_pan" name="pan" aria-describedby="inp_pan_help" placeholder="Enter PAN No" maxlength="10" required="" data-msg-required="PAN no is required." dmx-bind:value="ddUsers.data.pan_no">
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="inp_pin" class="col-form-label">PIN</label>
+                        <div class="col-12 px-0">
+                            <input type="number" class="form-control" id="inp_pin" name="pin" aria-describedby="inp_pin_help" placeholder="Enter PIN No." maxlength="100" required="" data-msg-required="PIN is required." dmx-bind:value="ddUsers.data.pin" dmx-on:keyup="flowGetPIN.run()">
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="inp_state" class="col-form-label">State</label>
+                        <div class="col-12 px-0">
+                            <input type="text" class="form-control" id="inp_state" name="state" aria-describedby="inp_state_help" placeholder="Enter State" maxlength="100" required="" data-msg-required="State is required." dmx-bind:value="scPinStateDist.data.PinAPI[0].Circle">
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="inp_district" class="col-form-label">District</label>
+                        <div class="col-12 px-0">
+                            <input type="text" class="form-control" id="inp_district" name="district" aria-describedby="inp_district_help" placeholder="Enter District" maxlength="100" required="" data-msg-required="District is required." dmx-bind:value="scPinStateDist.data.PinAPI[0].District">
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <label for="inp_address" class="col-form-label">Address</label>
+                        <div class="col-12 px-0">
+                            <select type="text" class="form-control form-select" id="inp_address" name="address" dmx-bind:options="scPinStateDist.data.PinAPI" optiontext="Name" optionvalue="Name">
+                                <option value="">Select Address</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">{{ddUsers.data.id? 'Update' : 'Save'}}<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,11 @@
+{
+  "bootstrap5": {
+    "basic": {
+      "headings-font-family": "Arial:400",
+      "font-family-base": "Courier New:400",
+      "font-family-sans-serif": "Abel:400",
+      "border-width": "3px"
+    },
+    "advanced": {}
+  }
+}

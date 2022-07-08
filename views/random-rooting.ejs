@@ -1,0 +1,152 @@
+<!-- Wappler include head-page="layouts/main" is="dmx-app" id="randomrooting" appConnect="local" components="{dmxDataTraversal:{},dmxFormatter:{}}" -->
+<meta name="ac:route" content="/random-rooting">
+<dmx-serverconnect id="scServices" url="api/Services/ActiveServices"></dmx-serverconnect>
+<script is="dmx-flow" id="flowFetchOperator" type="text/dmx-flow">{
+condition: {
+if: "{{formAPIRooting.ServiceType.value}}",
+then: {
+steps: {
+run: {action: "{{scOperator.load({})}}"}
+}
+}
+}
+}</script>
+<dmx-serverconnect id="scOperator" url="api/operator/ActiveOperator" noload dmx-param:service_type="formAPIRooting.ServiceType.value"></dmx-serverconnect>
+<dmx-serverconnect id="scActiveAPI" url="api/APIS/ActiveAPI" dmx-param:api_type="formAPIRooting.inp_api_type.value"></dmx-serverconnect>
+<dmx-serverconnect id="scAPIRouting" url="api/APIS/RandomRoutingFetch" noload dmx-param:service_id="content.formAPIRooting.ServiceType.value" dmx-param:op_id="content.formAPIRooting.inp_operator_type.value"></dmx-serverconnect>
+<dmx-data-detail id="ddAPIRouting" dmx-bind:data="content.scAPIRouting.data.GetRandomAPI" key="id"></dmx-data-detail>
+<script is="dmx-flow" id="flowFetchRouting" type="text/dmx-flow">{
+condition: {
+if: "{{content.formAPIRooting.ServiceType.value && content.formAPIRooting.inp_operator_type.value}}",
+then: {
+steps: {
+run: {action: "{{scAPIRouting.load({})}}"}
+}
+}
+}
+}</script>
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 id="DebitHeading" class="text-center align-self-center">Random Routing</h1>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container pb-3">
+    <div class="card ">
+        <div class="card-header sw-bg-col-primary">
+            <b>Looping</b>
+        </div>
+
+        <div class="card-body">
+            <form is="dmx-serverconnect-form" id="formAPIRooting" method="post" action="api/APIS/RandomAPIAddEdit" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="scNotif.success('API Rooting Added Successfully');scAPIRouting.load()" dmx-on:error="scNotif.warning('An error occurred'); " dmx-on:forbidden="scNotif.danger('Unable to Access!')">
+                <div class="row">
+                    <div class="col-12 col-sm-6 col-md-3 my-2">
+                        <label>Service Type</label>
+                        <select id="ServiceType" name="service_id" class="form-control form-select col-12 px-2" dmx-bind:options="scServices.data.GetActiveServices" optiontext="service_name" optionvalue="id" dmx-on:changed="flowFetchOperator.run();flowFetchRouting.run();" required="">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3 my-2">
+                        <label>Select Operator</label>
+                        <select type="text" class="form-control form-select" id="inp_operator_type" name="operator_id" aria-describedby="inp_operator_type_help" dmx-bind:options="scOperator.data.GetActiveOp" optionvalue="id" required="" optiontext="operator_name" dmx-on:changed="flowFetchRouting.run();">
+                            <option value="">Select</option>
+                            <option value="0">All</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3 my-2">
+                        <label>API Type</label>
+                        <select type="text" class="form-control form-select" id="inp_api_type" aria-describedby="inp_api_type_help" required="" dmx-on:changed="flowFetchRouting.run();">
+                            <option value="Recharge">Recharge</option>
+                            <option value="AEPS">AEPS</option>
+                            <option value="BBPS">BBPS</option>
+                            <option value="DMT">DMT</option>
+                            <option value="SMS">SMS</option>
+                            <option value="Whatsapp">Whatsapp</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3 my-2">
+                        <label>Select Route API</label>
+                        <select type="text" class="form-control form-select" id="inp_api" name="api_id" aria-describedby="inp_api_help" optionvalue="id" required="" dmx-bind:options="scActiveAPI.data.GetActiveAPI" optiontext="api_name+'('+api_code+')'" dmx-bind:value="scGetFwdSpecific.data.GetDetails[0].api_id">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                    <div class="col p-0 ms-3 my-2">
+                        <button id="btn1" class="btn btn-info mt-md-4" type="submit" dmx-bind:disabled="state.executing">Update<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+    <div class="card ">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Action</th>
+                            <th>Service</th>
+                            <th>Operator</th>
+                            <th>Routing Api</th>
+                            <th>Created on</th>
+                            <th>Created By</th>
+                        </tr>
+                    </thead>
+                    <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="scAPIRouting.data.GetRandomAPI" id="tableRepeat1">
+                        <tr>
+                            <td>{{$index+1}}</td>
+                            <td><button class="btn btn-primary btn-sm" dmx-on:click="ddAPIRouting.select(id);modalDelRouting.show()">Delete</button></td>
+                            <td dmx-text="service_name"></td>
+                            <td dmx-text="operator_name"></td>
+                            <td dmx-text="api_name+'('+api_code+')'"></td>
+                            <td dmx-text="created_on.formatDate('dd/MM/yyyy hh:mm:ss A')"></td>
+                            <td dmx-text="user_fname"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Delete Routing API Operator -->
+<div class="modal fade" id="modalDelRouting" is="dmx-bs5-modal" tabindex="-1" nokeyboard="true" nocloseonclick="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Routing</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h3>Do you want to delete this Routing?</h3>
+                <form is="dmx-serverconnect-form" id="formDelRouting" method="post" action="api/APIS/RandomRoutingDel" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="scNotif.success('Routing API Deleted Successfully'); modalDelRouting.hide();modalDelRouting.formDelRouting.reset();scAPIRouting.load({})" dmx-on:error="scNotif.warning('An error occurred'); modalDelRouting.hide();modalDelRouting.formDelRouting.reset()">
+                    <input type="hidden" name="TableId" dmx-bind:value="ddAPIRouting.data.id">
+                    <table class="table table-striped table-bordered table-sm">
+                        <tr>
+                            <td>Service</td>
+                            <td>Operator</td>
+                            <td>API</td>
+                        </tr>
+                        <tr>
+                            <td>{{ddAPIRouting.data.service_name}}</td>
+                            <td>{{ddAPIRouting.data.operator_name.titlecase()}}</td>
+                            <td>{{ddAPIRouting.data.api_name}}({{ddAPIRouting.data.api_code}})</td>
+                        </tr>
+                    </table>
+                    <div class="mb-3 row">
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-danger" dmx-bind:disabled="state.executing">Confirm<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/random-rooting.ejs",
+      "linkedForm": "formDelRouting"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "TableId",
+        "name": "TableId"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "RoutingAPI",
+        "module": "dbupdater",
+        "action": "delete",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "delete",
+            "table": "t_random_root",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "id",
+                  "field": "id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.TableId}}",
+                  "data": {
+                    "column": "id"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "returning": "id",
+            "query": "DELETE\nFROM t_random_root\nWHERE id = :P1 /* {{$_POST.TableId}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.TableId}}"
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  }
+}

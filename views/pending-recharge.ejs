@@ -1,0 +1,141 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="pendingrecharge" appConnect="local" components="{dmxDataTraversal:{},dmxSockets:{},dmxBootstrap5Modal:{}}" -->
+<meta name="ac:route" content="/pending-recharge">
+<dmx-serverconnect id="scPendingRech" url="api/Reports/PendingTransactions"></dmx-serverconnect>
+<dmx-data-view id="dvPendingTrans" dmx-bind:data="scPendingRech.data.GetPending" filter="(user_number.contains(formSearchUser.Search.value) || user_mobile.contains(formSearchUser.Search.value) || user_fname.lowercase().contains(formSearchUser.Search.value) || id.contains(formSearchUser.Search.value) || amount.contains(formSearchUser.Search.value))"></dmx-data-view>
+<dmx-data-detail id="ddPendingTrans" dmx-bind:data="dvPendingTrans.data" key="id"></dmx-data-detail>
+
+<div class="row align-items-center justify-content-between px-4 mb-3 sd-secondary-header mx-0">
+    <div class="col-12 col-md-auto me-auto ps-4">
+        <h1 class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">
+            Pending Recharges
+            <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scPendingRech.state.executing"></span>
+        </h1>
+    </div>
+    <div class="col-auto order-1 order-md-3 d-flex align-items-center justify-content-center">
+        <form id="formSearchUser" class="sd-search-form">
+            <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                <input type="text" class="form-control sd-search-input rounded-pill" id="Search" name="Search" placeholder="Search">
+                <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="container px-4" id="Pendingrecharge">
+    <div class="card">
+        <div class="card-header sw-bg-col-primary">
+            <b>Pending Recharges</b>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover table-sm  sw-font-11">
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Tr. Id</th>
+                            <th>Tr.By</th>
+                            <th>Mobile</th>
+                            <th>Operator</th>
+                            <th>Opening Balance</th>
+                            <th>Amount</th>
+                            <th>Comm. Amt</th>
+                            <th>Charge. Amt.</th>
+                            <th>Net Amt.</th>
+                            <th>Closing Balance</th>
+                            <th>API</th>
+                            <th>Status</th>
+                            <th>Tr. Type</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody is="dmx-repeat" dmx-generator="bs5table" id="tableRepeat1" dmx-bind:repeat="dvPendingTrans.data" key="id">
+                        <tr>
+                            <td>{{$index+1}}</td>
+                            <td dmx-text="id"></td>
+                            <td dmx-text="user_id+' | '+user_fname+' | '+user_mobile"></td>
+                            <td dmx-text="user_number"></td>
+                            <td dmx-text="operator_name"></td>
+                            <td dmx-text="opening_balance.toNumber().toFixed(2)"></td>
+                            <td dmx-text="amount.toNumber().toFixed(2)"></td>
+                            <td dmx-text="comm_amt.toNumber().toFixed(2)"></td>
+                            <td dmx-text="charge_amt.toNumber().toFixed(2)"></td>
+                            <td dmx-text="net_amt.toNumber().toFixed(2)"></td>
+                            <td dmx-text="closing_balance.toNumber().toFixed(2)"></td>
+
+                            <td dmx-text="api_logs"></td>
+                            <td class="fw-bold" dmx-text="status" dmx-class:text-success="status == 'SUCCESS'" dmx-class:text-warning="status == 'PENDING'" dmx-class:text-danger="status == 'FAILURE'" dmx-class:text-primary="status == 'REFUND'"></td>
+                            <td dmx-text="tr_type"></td>
+                            <td dmx-text="tr_date.formatDate('dd-MM-yyyy hh:mm:ss A')"></td>
+                            <td><button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalReply" dmx-on:click="ddPendingTrans.select(id)">Update</button></td>
+                        </tr>
+                    </tbody>
+                    <tbody dmx-show="content.scPendingRech.data.GetPending.length==0">
+                        <tr class="text-center fw-bold text-danger fs-4">
+                            <td colspan="19">No Record Found!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade fixed-left sd-right-sidebar-40" id="modalReply" is="dmx-bs5-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-aside my-0 modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content rounded-0 px-3">
+            <div class="modal-header">
+                <h3 class="modal-title">Reply</h3>
+                <button type="button" class="bg-transparent border-1 ms-auto p-0 px-1" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times" alt="icon"></i>
+                </button>
+            </div>
+            <form is="dmx-serverconnect-form" id="ResponseForm" method="post" action="api/Transactions/PendingTrUp" dmx-on:success="scNotif.success('Action Success'); scPendingRech.load();modalReply.hide();modalReply.ResponseForm.reset()" dmx-on:error="scNotif.warning('An error occurred'); ">
+                <div class="modal-body">
+                    <input type="hidden" name="transid" dmx-bind:value="ddPendingTrans.data.id">
+                    <div class="row align-items-baseline">
+                        <div class="col-12">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">User Details:</label>&emsp;<span>{{ddPendingTrans.data.user_id+' | '+ddPendingTrans.data.user_fname+' | '+ddPendingTrans.data.user_mobile}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Operaotr:</label>&emsp;<span>{{ddPendingTrans.data.operator_name}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Recharge Mobile:</label>&emsp;<span>{{ddPendingTrans.data.user_number}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Amount:</label>&emsp;<span>{{ddPendingTrans.data.amount}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Actual Deduction:</label>&emsp;<span>{{ddPendingTrans.data.net_amt}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Recharge IP:</label>&emsp;<span>{{ddPendingTrans.data.ip_address}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Recharge Date:</label>&emsp;<span>{{ddPendingTrans.data.tr_date.formatDate('dd-MM-yyyy hh:mm:ss A')}}</span>
+                        </div>
+                        <div class="col-12 col-md-6 my-3">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">API Ref. Id./ Operaotr Id :</label>&emsp;
+                            <input type="text" name="api_ref" dmx-bind:value="ddPendingTrans.data.api_ref" class="form-control" required="">
+                        </div>
+                        <div class="col-12 col-md-6 my-3"><label class="form-label text-black fw-bold">Status:</label>
+                            <select type="text" name="tr_status" class="form-control" required="">
+                                <option value="">Select</option>
+                                <option value="SUCCESS">Success</option>
+                                <option value="FAILED">Failed</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-warning">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

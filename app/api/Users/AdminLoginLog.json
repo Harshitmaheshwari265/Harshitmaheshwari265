@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "name": "todate"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "LogAdmin",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "t_login_history",
+                "column": "ip_address"
+              },
+              {
+                "table": "t_login_history",
+                "column": "login_time"
+              },
+              {
+                "table": "t_login_history",
+                "column": "logout_time"
+              }
+            ],
+            "table": {
+              "name": "t_login_history"
+            },
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "t_login_history.login_time",
+                  "field": "t_login_history.login_time",
+                  "type": "datetime",
+                  "operator": "greater_or_equal",
+                  "value": "{{$_GET.fromdate}}",
+                  "data": {
+                    "table": "t_login_history",
+                    "column": "login_time",
+                    "type": "datetime"
+                  },
+                  "operation": ">="
+                },
+                {
+                  "id": "t_login_history.login_time",
+                  "field": "t_login_history.login_time",
+                  "type": "datetime",
+                  "operator": "less_or_equal",
+                  "value": "{{$_GET.todate}}",
+                  "data": {
+                    "table": "t_login_history",
+                    "column": "login_time",
+                    "type": "datetime"
+                  },
+                  "operation": "<="
+                },
+                {
+                  "id": "t_login_history.user_id",
+                  "field": "t_login_history.user_id",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "{{identity}}",
+                  "data": {
+                    "table": "t_login_history",
+                    "column": "user_id",
+                    "type": "text"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT ip_address, login_time, logout_time\nFROM t_login_history\nWHERE login_time >= :P1 /* {{$_GET.fromdate}} */ AND login_time <= :P2 /* {{$_GET.todate}} */ AND user_id = :P3 /* {{identity}} */\nORDER BY id DESC",
+            "params": [
+              {
+                "operator": "greater_or_equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.fromdate}}"
+              },
+              {
+                "operator": "less_or_equal",
+                "type": "expression",
+                "name": ":P2",
+                "value": "{{$_GET.todate}}"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P3",
+                "value": "{{identity}}"
+              }
+            ],
+            "orders": [
+              {
+                "table": "t_login_history",
+                "column": "id",
+                "direction": "DESC",
+                "recid": 1
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "ip_address",
+            "type": "text"
+          },
+          {
+            "name": "login_time",
+            "type": "datetime"
+          },
+          {
+            "name": "logout_time",
+            "type": "datetime"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

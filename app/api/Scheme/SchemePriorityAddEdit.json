@@ -1,0 +1,433 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/scheme-priority.ejs",
+      "linkedForm": "formAddEditSchPriority"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "SchemeId",
+        "name": "SchemeId"
+      },
+      {
+        "type": "text",
+        "fieldName": "user_type",
+        "name": "user_type"
+      },
+      {
+        "type": "text",
+        "fieldName": "target_user_id",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "target_user_id"
+      },
+      {
+        "type": "text",
+        "fieldName": "for_user_type",
+        "name": "for_user_type"
+      },
+      {
+        "type": "text",
+        "fieldName": "target_scheme1",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "target_scheme1"
+      },
+      {
+        "type": "text",
+        "fieldName": "target_scheme2",
+        "name": "target_scheme2"
+      },
+      {
+        "type": "text",
+        "fieldName": "target_scheme3",
+        "name": "target_scheme3"
+      },
+      {
+        "type": "text",
+        "fieldName": "target_scheme4",
+        "name": "target_scheme4"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "GetExistingScheme",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "t_scheme_user",
+                "column": "id",
+                "alias": "count_user",
+                "aggregate": "COUNT"
+              }
+            ],
+            "groupBy": [],
+            "table": {
+              "name": "t_scheme_user"
+            },
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "t_scheme_user.user_id",
+                  "field": "t_scheme_user.user_id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.target_user_id}}",
+                  "data": {
+                    "table": "t_scheme_user",
+                    "column": "user_id",
+                    "type": "number"
+                  },
+                  "operation": "="
+                },
+                {
+                  "id": "t_scheme_user.for_user_type",
+                  "field": "t_scheme_user.for_user_type",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.for_user_type}}",
+                  "data": {
+                    "table": "t_scheme_user",
+                    "column": "for_user_type",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT COUNT(id) AS count_user\nFROM t_scheme_user\nWHERE user_id = :P1 /* {{$_POST.target_user_id}} */ AND for_user_type = :P2 /* {{$_POST.for_user_type}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.target_user_id}}"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P2",
+                "value": "{{$_POST.for_user_type}}"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "count_user",
+            "type": "text"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{GetExistingScheme.count_user < 1}}",
+          "then": {
+            "steps": {
+              "name": "SchemePriorityAdd",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "t_scheme_user",
+                      "column": "user_id",
+                      "type": "number",
+                      "value": "{{$_POST.target_user_id}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "scheme1",
+                      "type": "number",
+                      "value": "{{$_POST.target_scheme1}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "scheme2",
+                      "type": "number",
+                      "value": "{{$_POST.target_scheme2}}",
+                      "condition": "{{$_POST.target_scheme2}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "scheme3",
+                      "type": "number",
+                      "value": "{{$_POST.target_scheme3}}",
+                      "condition": "{{$_POST.target_scheme3}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "scheme4",
+                      "type": "number",
+                      "value": "{{$_POST.target_scheme4}}",
+                      "condition": "{{$_POST.target_scheme4}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "created_by",
+                      "type": "text",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "for_user_type",
+                      "type": "number",
+                      "value": "{{$_POST.for_user_type}}"
+                    }
+                  ],
+                  "table": "t_scheme_user",
+                  "returning": "id",
+                  "query": "INSERT INTO t_scheme_user\n(user_id, scheme1, scheme2, scheme3, scheme4, created_by, created_on, for_user_type) VALUES (:P1 /* {{$_POST.target_user_id}} */, :P2 /* {{$_POST.target_scheme1}} */, :P3 /* {{$_POST.target_scheme2}} */, :P4 /* {{$_POST.target_scheme3}} */, :P5 /* {{$_POST.target_scheme4}} */, :P6 /* {{identity}} */, :P7 /* {{NOW}} */, :P8 /* {{$_POST.for_user_type}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.target_user_id}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.target_scheme1}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.target_scheme2}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.target_scheme3}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.target_scheme4}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{$_POST.for_user_type}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "SchemePriorityEdit",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "t_scheme_user",
+                      "column": "scheme1",
+                      "type": "number",
+                      "value": "{{$_POST.target_scheme1}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "scheme2",
+                      "type": "number",
+                      "value": "{{$_POST.target_scheme2}}",
+                      "condition": "{{$_POST.target_scheme2}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "scheme3",
+                      "type": "number",
+                      "value": "{{$_POST.target_scheme3}}",
+                      "condition": "{{$_POST.target_scheme3}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "scheme4",
+                      "type": "number",
+                      "value": "{{$_POST.target_scheme4}}",
+                      "condition": "{{$_POST.target_scheme4}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "updated_by",
+                      "type": "text",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "t_scheme_user",
+                      "column": "updated_on",
+                      "type": "datetime",
+                      "value": "now()"
+                    }
+                  ],
+                  "table": "t_scheme_user",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "user_id",
+                        "field": "user_id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.target_user_id}}",
+                        "data": {
+                          "column": "user_id"
+                        },
+                        "operation": "="
+                      },
+                      {
+                        "id": "for_user_type",
+                        "field": "for_user_type",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.for_user_type}}",
+                        "data": {
+                          "column": "for_user_type"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE t_scheme_user\nSET scheme1 = :P1 /* {{$_POST.target_scheme1}} */, scheme2 = :P2 /* {{$_POST.target_scheme2}} */, scheme3 = :P3 /* {{$_POST.target_scheme3}} */, scheme4 = :P4 /* {{$_POST.target_scheme4}} */, updated_by = :P5 /* {{identity}} */, updated_on = 'now()'\nWHERE user_id = :P6 /* {{$_POST.target_user_id}} */ AND for_user_type = :P7 /* {{$_POST.for_user_type}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.target_scheme1}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.target_scheme2}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.target_scheme3}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.target_scheme4}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P6",
+                      "value": "{{$_POST.target_user_id}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P7",
+                      "value": "{{$_POST.for_user_type}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

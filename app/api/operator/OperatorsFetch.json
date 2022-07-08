@@ -1,0 +1,515 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "service_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.service_id==0}}",
+          "then": {
+            "steps": {
+              "name": "OperatorFetch",
+              "module": "dbconnector",
+              "action": "paged",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "SELECT",
+                  "columns": [
+                    {
+                      "table": "m_operator",
+                      "column": "id",
+                      "alias": "op_id"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "operator_name"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "service_id"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "status"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "min_amount"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "max_amount"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "created_on"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "created_by"
+                    },
+                    {
+                      "table": "op_service",
+                      "column": "service_name"
+                    },
+                    {
+                      "table": "op_service",
+                      "column": "service_type"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "is_gst"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "is_tds"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "image"
+                    }
+                  ],
+                  "table": {
+                    "name": "m_operator"
+                  },
+                  "joins": [
+                    {
+                      "table": "m_service",
+                      "column": "*",
+                      "alias": "op_service",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "op_service",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "m_operator",
+                              "column": "service_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "orders": [
+                    {
+                      "table": "op_service",
+                      "column": "service_name",
+                      "direction": "ASC"
+                    }
+                  ],
+                  "query": "SELECT m_operator.id AS op_id, m_operator.operator_name, m_operator.service_id, m_operator.status, m_operator.min_amount, m_operator.max_amount, m_operator.created_on, m_operator.created_by, op_service.service_name, op_service.service_type, m_operator.is_gst, m_operator.is_tds, m_operator.image\nFROM m_operator\nINNER JOIN m_service AS op_service ON (op_service.id = m_operator.service_id)\nORDER BY op_service.service_name ASC",
+                  "params": []
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "offset",
+                  "type": "number"
+                },
+                {
+                  "name": "limit",
+                  "type": "number"
+                },
+                {
+                  "name": "total",
+                  "type": "number"
+                },
+                {
+                  "name": "page",
+                  "type": "object",
+                  "sub": [
+                    {
+                      "name": "offset",
+                      "type": "object",
+                      "sub": [
+                        {
+                          "name": "first",
+                          "type": "number"
+                        },
+                        {
+                          "name": "prev",
+                          "type": "number"
+                        },
+                        {
+                          "name": "next",
+                          "type": "number"
+                        },
+                        {
+                          "name": "last",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "current",
+                      "type": "number"
+                    },
+                    {
+                      "name": "total",
+                      "type": "number"
+                    }
+                  ]
+                },
+                {
+                  "name": "data",
+                  "type": "array",
+                  "sub": [
+                    {
+                      "type": "number",
+                      "name": "op_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "operator_name"
+                    },
+                    {
+                      "type": "number",
+                      "name": "service_id"
+                    },
+                    {
+                      "type": "number",
+                      "name": "status"
+                    },
+                    {
+                      "type": "number",
+                      "name": "min_amount"
+                    },
+                    {
+                      "type": "text",
+                      "name": "max_amount"
+                    },
+                    {
+                      "type": "datetime",
+                      "name": "created_on"
+                    },
+                    {
+                      "type": "number",
+                      "name": "created_by"
+                    },
+                    {
+                      "type": "text",
+                      "name": "service_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "service_type"
+                    },
+                    {
+                      "type": "number",
+                      "name": "is_gst"
+                    },
+                    {
+                      "type": "number",
+                      "name": "is_tds"
+                    },
+                    {
+                      "type": "text",
+                      "name": "image"
+                    }
+                  ]
+                }
+              ],
+              "outputType": "object"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "OperatorFetch",
+              "module": "dbconnector",
+              "action": "paged",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "SELECT",
+                  "columns": [
+                    {
+                      "table": "m_operator",
+                      "column": "id",
+                      "alias": "op_id"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "operator_name"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "service_id"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "status"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "min_amount"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "max_amount"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "created_on"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "created_by"
+                    },
+                    {
+                      "table": "op_service",
+                      "column": "service_name"
+                    },
+                    {
+                      "table": "op_service",
+                      "column": "service_type"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "is_gst"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "is_tds"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "image"
+                    }
+                  ],
+                  "table": {
+                    "name": "m_operator"
+                  },
+                  "joins": [
+                    {
+                      "table": "m_service",
+                      "column": "*",
+                      "alias": "op_service",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "op_service",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "m_operator",
+                              "column": "service_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    }
+                  ],
+                  "orders": [
+                    {
+                      "table": "op_service",
+                      "column": "service_name",
+                      "direction": "ASC",
+                      "recid": 1
+                    }
+                  ],
+                  "query": "SELECT m_operator.id AS op_id, m_operator.operator_name, m_operator.service_id, m_operator.status, m_operator.min_amount, m_operator.max_amount, m_operator.created_on, m_operator.created_by, op_service.service_name, op_service.service_type, m_operator.is_gst, m_operator.is_tds, m_operator.image\nFROM m_operator\nINNER JOIN m_service AS op_service ON (op_service.id = m_operator.service_id)\nWHERE m_operator.service_id = :P1 /* {{$_GET.service_id}} */\nORDER BY op_service.service_name ASC",
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_GET.service_id}}"
+                    }
+                  ],
+                  "primary": "id",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "m_operator.service_id",
+                        "field": "m_operator.service_id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_GET.service_id}}",
+                        "data": {
+                          "table": "m_operator",
+                          "column": "service_id",
+                          "type": "number",
+                          "columnObj": {
+                            "type": "integer",
+                            "primary": false,
+                            "nullable": true,
+                            "unique": false,
+                            "name": "service_id"
+                          }
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  }
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "offset",
+                  "type": "number"
+                },
+                {
+                  "name": "limit",
+                  "type": "number"
+                },
+                {
+                  "name": "total",
+                  "type": "number"
+                },
+                {
+                  "name": "page",
+                  "type": "object",
+                  "sub": [
+                    {
+                      "name": "offset",
+                      "type": "object",
+                      "sub": [
+                        {
+                          "name": "first",
+                          "type": "number"
+                        },
+                        {
+                          "name": "prev",
+                          "type": "number"
+                        },
+                        {
+                          "name": "next",
+                          "type": "number"
+                        },
+                        {
+                          "name": "last",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "current",
+                      "type": "number"
+                    },
+                    {
+                      "name": "total",
+                      "type": "number"
+                    }
+                  ]
+                },
+                {
+                  "name": "data",
+                  "type": "array",
+                  "sub": [
+                    {
+                      "type": "number",
+                      "name": "op_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "operator_name"
+                    },
+                    {
+                      "type": "number",
+                      "name": "service_id"
+                    },
+                    {
+                      "type": "number",
+                      "name": "status"
+                    },
+                    {
+                      "type": "number",
+                      "name": "min_amount"
+                    },
+                    {
+                      "type": "text",
+                      "name": "max_amount"
+                    },
+                    {
+                      "type": "datetime",
+                      "name": "created_on"
+                    },
+                    {
+                      "type": "number",
+                      "name": "created_by"
+                    },
+                    {
+                      "type": "text",
+                      "name": "service_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "service_type"
+                    },
+                    {
+                      "type": "number",
+                      "name": "is_gst"
+                    },
+                    {
+                      "type": "number",
+                      "name": "is_tds"
+                    },
+                    {
+                      "type": "text",
+                      "name": "image"
+                    }
+                  ]
+                }
+              ],
+              "outputType": "object"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

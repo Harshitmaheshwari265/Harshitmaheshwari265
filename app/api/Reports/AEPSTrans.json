@@ -1,0 +1,1477 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "name": "todate"
+      },
+      {
+        "type": "text",
+        "name": "selectstatus"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.selectstatus == 0}}",
+          "then": {
+            "steps": {
+              "name": "AEPSTxn",
+              "module": "dbconnector",
+              "action": "paged",
+              "options": {
+                "sql": {
+                  "type": "SELECT",
+                  "columns": [
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "id",
+                      "alias": "table_id"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "pay_ref_id"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "user_id",
+                      "alias": "ac_holder_user_id"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "old_bal"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "amount"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "net_amt"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "new_bal"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "tr_type"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "tr_date"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "remarks",
+                      "aggregate": ""
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "status"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "created_by",
+                      "alias": "transaction_by"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "crdr_type"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "user_rt_id"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "merchant_id"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "comm_per"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "comm_val"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "comm_amt"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "charge_per"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "charge_val"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "charge_amt"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "tr_mode"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "tr_type"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "tr_id"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "reason"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "api_logs",
+                      "alias": "api_name"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "is_processed"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "operator_ref"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "api_ref"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "ip_address"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "api_response_time"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "process_mode"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "live"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "trans_by"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "updated_on"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_comm_per"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_comm_val"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_comm_amt"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_charge_per"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_charge_val"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_charge_amount"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "mdt_comm_amt"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "mdt_charge_amt"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "bank_name"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "bank_acno"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "benef_name"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "benef_id"
+                    },
+                    {
+                      "table": "m_op",
+                      "column": "operator_name"
+                    },
+                    {
+                      "table": "ms",
+                      "column": "service_name"
+                    },
+                    {
+                      "table": "mu",
+                      "column": "user_fname"
+                    },
+                    {
+                      "table": "mu",
+                      "column": "user_mobile"
+                    },
+                    {
+                      "table": "mu",
+                      "column": "aeps_merchant_id"
+                    },
+                    {
+                      "table": "mu",
+                      "column": "created_by",
+                      "alias": "parent_id"
+                    },
+                    {
+                      "table": "mu_parent",
+                      "column": "user_fname",
+                      "alias": "parent_fname"
+                    },
+                    {
+                      "table": "mu_parent",
+                      "column": "user_mobile",
+                      "alias": "parent_mobile"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "aeps_number"
+                    }
+                  ],
+                  "table": {
+                    "name": "tt_aeps_balance",
+                    "alias": "tt_aeps_tab"
+                  },
+                  "primary": "id",
+                  "joins": [
+                    {
+                      "table": "tt_aeps_trans",
+                      "column": "*",
+                      "alias": "tart",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "tart",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "tt_aeps_tab",
+                              "column": "pay_ref_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "*",
+                      "alias": "m_op",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "m_op",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "tart",
+                              "column": "op_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "*",
+                      "alias": "ms",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "ms",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "tart",
+                              "column": "service_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "*",
+                      "alias": "mu",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "mu",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "tt_aeps_tab",
+                              "column": "user_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "*",
+                      "alias": "mu_parent",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "mu_parent",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "mu",
+                              "column": "created_by"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    }
+                  ],
+                  "query": "SELECT tt_aeps_tab.id AS table_id, tt_aeps_tab.pay_ref_id, tt_aeps_tab.user_id AS ac_holder_user_id, tt_aeps_tab.old_bal, tt_aeps_tab.amount, tt_aeps_tab.net_amt, tt_aeps_tab.new_bal, tt_aeps_tab.tr_type, tt_aeps_tab.tr_date, tt_aeps_tab.remarks, tt_aeps_tab.status, tt_aeps_tab.created_by AS transaction_by, tt_aeps_tab.crdr_type, tart.user_rt_id, tart.merchant_id, tart.comm_per, tart.comm_val, tart.comm_amt, tart.charge_per, tart.charge_val, tart.charge_amt, tart.tr_mode, tart.tr_type, tart.tr_id, tart.reason, tart.api_logs AS api_name, tart.is_processed, tart.operator_ref, tart.api_ref, tart.ip_address, tart.api_response_time, tart.process_mode, tart.live, tart.trans_by, tart.updated_on, tart.dt_comm_per, tart.dt_comm_val, tart.dt_comm_amt, tart.dt_charge_per, tart.dt_charge_val, tart.dt_charge_amount, tart.mdt_comm_amt, tart.mdt_charge_amt, tart.bank_name, tart.bank_acno, tart.benef_name, tart.benef_id, m_op.operator_name, ms.service_name, mu.user_fname, mu.user_mobile, mu.aeps_merchant_id, mu.created_by AS parent_id, mu_parent.user_fname AS parent_fname, mu_parent.user_mobile AS parent_mobile, tart.aeps_number\nFROM tt_aeps_balance AS tt_aeps_tab\nINNER JOIN tt_aeps_trans AS tart ON (tart.id = tt_aeps_tab.pay_ref_id) INNER JOIN m_operator AS m_op ON (m_op.id = tart.op_id) INNER JOIN m_service AS ms ON (ms.id = tart.service_id) INNER JOIN m_users AS mu ON (mu.id = tt_aeps_tab.user_id) INNER JOIN m_users AS mu_parent ON (mu_parent.id = mu.created_by)\nWHERE tart.tr_date BETWEEN :P1 /* {{$_GET.fromdate}} */ AND :P2 /* {{$_GET.todate}} */\nORDER BY tt_aeps_tab.id DESC",
+                  "params": [
+                    {
+                      "operator": "between",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_GET.fromdate}}"
+                    },
+                    {
+                      "operator": "between",
+                      "type": "expression",
+                      "name": ":P2",
+                      "value": "{{$_GET.todate}}"
+                    }
+                  ],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "tart.tr_date",
+                        "field": "tart.tr_date",
+                        "type": "datetime",
+                        "operator": "between",
+                        "value": [
+                          "{{$_GET.fromdate}}",
+                          "{{$_GET.todate}}"
+                        ],
+                        "data": {
+                          "table": "tart",
+                          "column": "tr_date",
+                          "type": "datetime",
+                          "columnObj": {
+                            "type": "timestamp",
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "tr_date"
+                          }
+                        },
+                        "operation": "BETWEEN"
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "orders": [
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "id",
+                      "direction": "DESC",
+                      "recid": 1
+                    }
+                  ]
+                },
+                "connection": "postgres_gcpServer"
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "offset",
+                  "type": "number"
+                },
+                {
+                  "name": "limit",
+                  "type": "number"
+                },
+                {
+                  "name": "total",
+                  "type": "number"
+                },
+                {
+                  "name": "page",
+                  "type": "object",
+                  "sub": [
+                    {
+                      "name": "offset",
+                      "type": "object",
+                      "sub": [
+                        {
+                          "name": "first",
+                          "type": "number"
+                        },
+                        {
+                          "name": "prev",
+                          "type": "number"
+                        },
+                        {
+                          "name": "next",
+                          "type": "number"
+                        },
+                        {
+                          "name": "last",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "current",
+                      "type": "number"
+                    },
+                    {
+                      "name": "total",
+                      "type": "number"
+                    }
+                  ]
+                },
+                {
+                  "name": "data",
+                  "type": "array",
+                  "sub": [
+                    {
+                      "type": "number",
+                      "name": "table_id"
+                    },
+                    {
+                      "type": "number",
+                      "name": "pay_ref_id"
+                    },
+                    {
+                      "type": "number",
+                      "name": "ac_holder_user_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "old_bal"
+                    },
+                    {
+                      "type": "text",
+                      "name": "amount"
+                    },
+                    {
+                      "type": "text",
+                      "name": "net_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "new_bal"
+                    },
+                    {
+                      "type": "text",
+                      "name": "tr_type"
+                    },
+                    {
+                      "type": "datetime",
+                      "name": "tr_date"
+                    },
+                    {
+                      "type": "text",
+                      "name": "remarks"
+                    },
+                    {
+                      "type": "text",
+                      "name": "status"
+                    },
+                    {
+                      "type": "number",
+                      "name": "transaction_by"
+                    },
+                    {
+                      "type": "text",
+                      "name": "crdr_type"
+                    },
+                    {
+                      "type": "text",
+                      "name": "user_rt_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "merchant_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "comm_per"
+                    },
+                    {
+                      "type": "text",
+                      "name": "comm_val"
+                    },
+                    {
+                      "type": "text",
+                      "name": "comm_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "charge_per"
+                    },
+                    {
+                      "type": "text",
+                      "name": "charge_val"
+                    },
+                    {
+                      "type": "text",
+                      "name": "charge_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "tr_mode"
+                    },
+                    {
+                      "type": "text",
+                      "name": "tr_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "reason"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "is_processed"
+                    },
+                    {
+                      "type": "text",
+                      "name": "operator_ref"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_ref"
+                    },
+                    {
+                      "type": "text",
+                      "name": "ip_address"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_response_time"
+                    },
+                    {
+                      "type": "text",
+                      "name": "process_mode"
+                    },
+                    {
+                      "type": "text",
+                      "name": "live"
+                    },
+                    {
+                      "type": "text",
+                      "name": "trans_by"
+                    },
+                    {
+                      "type": "datetime",
+                      "name": "updated_on"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_comm_per"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_comm_val"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_comm_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_charge_per"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_charge_val"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_charge_amount"
+                    },
+                    {
+                      "type": "text",
+                      "name": "mdt_comm_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "mdt_charge_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "bank_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "bank_acno"
+                    },
+                    {
+                      "type": "text",
+                      "name": "benef_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "benef_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "operator_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "service_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "user_fname"
+                    },
+                    {
+                      "type": "text",
+                      "name": "user_mobile"
+                    },
+                    {
+                      "type": "text",
+                      "name": "aeps_merchant_id"
+                    },
+                    {
+                      "type": "number",
+                      "name": "parent_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "parent_fname"
+                    },
+                    {
+                      "type": "text",
+                      "name": "parent_mobile"
+                    },
+                    {
+                      "type": "text",
+                      "name": "aeps_number"
+                    }
+                  ]
+                }
+              ],
+              "outputType": "object"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "AEPSTxn",
+              "module": "dbconnector",
+              "action": "paged",
+              "options": {
+                "sql": {
+                  "type": "SELECT",
+                  "columns": [
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "id",
+                      "alias": "table_id"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "pay_ref_id"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "user_id",
+                      "alias": "ac_holder_user_id"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "old_bal"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "amount"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "net_amt"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "new_bal"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "tr_type"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "tr_date"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "remarks",
+                      "aggregate": ""
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "status"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "created_by",
+                      "alias": "transaction_by"
+                    },
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "crdr_type"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "user_rt_id"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "merchant_id"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "comm_per"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "comm_val"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "comm_amt"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "charge_per"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "charge_val"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "charge_amt"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "tr_mode"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "tr_type"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "tr_id"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "reason"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "api_logs",
+                      "alias": "api_name"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "is_processed"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "operator_ref"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "api_ref"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "ip_address"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "api_response_time"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "process_mode"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "live"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "trans_by"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "updated_on"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_comm_per"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_comm_val"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_comm_amt"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_charge_per"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_charge_val"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "dt_charge_amount"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "mdt_comm_amt"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "mdt_charge_amt"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "bank_name"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "bank_acno"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "benef_name"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "benef_id"
+                    },
+                    {
+                      "table": "m_op",
+                      "column": "operator_name"
+                    },
+                    {
+                      "table": "ms",
+                      "column": "service_name"
+                    },
+                    {
+                      "table": "mu",
+                      "column": "user_fname"
+                    },
+                    {
+                      "table": "mu",
+                      "column": "user_mobile"
+                    },
+                    {
+                      "table": "mu",
+                      "column": "aeps_merchant_id"
+                    },
+                    {
+                      "table": "mu",
+                      "column": "created_by",
+                      "alias": "parent_id"
+                    },
+                    {
+                      "table": "mu_parent",
+                      "column": "user_fname",
+                      "alias": "parent_fname"
+                    },
+                    {
+                      "table": "mu_parent",
+                      "column": "user_mobile",
+                      "alias": "parent_mobile"
+                    },
+                    {
+                      "table": "tart",
+                      "column": "aeps_number"
+                    }
+                  ],
+                  "table": {
+                    "name": "tt_aeps_balance",
+                    "alias": "tt_aeps_tab"
+                  },
+                  "primary": "id",
+                  "joins": [
+                    {
+                      "table": "tt_aeps_trans",
+                      "column": "*",
+                      "alias": "tart",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "tart",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "tt_aeps_tab",
+                              "column": "pay_ref_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "*",
+                      "alias": "m_op",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "m_op",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "tart",
+                              "column": "op_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "*",
+                      "alias": "ms",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "ms",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "tart",
+                              "column": "service_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "*",
+                      "alias": "mu",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "mu",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "tt_aeps_tab",
+                              "column": "user_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "*",
+                      "alias": "mu_parent",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "mu_parent",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "mu",
+                              "column": "created_by"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    }
+                  ],
+                  "query": "SELECT tt_aeps_tab.id AS table_id, tt_aeps_tab.pay_ref_id, tt_aeps_tab.user_id AS ac_holder_user_id, tt_aeps_tab.old_bal, tt_aeps_tab.amount, tt_aeps_tab.net_amt, tt_aeps_tab.new_bal, tt_aeps_tab.tr_type, tt_aeps_tab.tr_date, tt_aeps_tab.remarks, tt_aeps_tab.status, tt_aeps_tab.created_by AS transaction_by, tt_aeps_tab.crdr_type, tart.user_rt_id, tart.merchant_id, tart.comm_per, tart.comm_val, tart.comm_amt, tart.charge_per, tart.charge_val, tart.charge_amt, tart.tr_mode, tart.tr_type, tart.tr_id, tart.reason, tart.api_logs AS api_name, tart.is_processed, tart.operator_ref, tart.api_ref, tart.ip_address, tart.api_response_time, tart.process_mode, tart.live, tart.trans_by, tart.updated_on, tart.dt_comm_per, tart.dt_comm_val, tart.dt_comm_amt, tart.dt_charge_per, tart.dt_charge_val, tart.dt_charge_amount, tart.mdt_comm_amt, tart.mdt_charge_amt, tart.bank_name, tart.bank_acno, tart.benef_name, tart.benef_id, m_op.operator_name, ms.service_name, mu.user_fname, mu.user_mobile, mu.aeps_merchant_id, mu.created_by AS parent_id, mu_parent.user_fname AS parent_fname, mu_parent.user_mobile AS parent_mobile, tart.aeps_number\nFROM tt_aeps_balance AS tt_aeps_tab\nINNER JOIN tt_aeps_trans AS tart ON (tart.id = tt_aeps_tab.pay_ref_id) INNER JOIN m_operator AS m_op ON (m_op.id = tart.op_id) INNER JOIN m_service AS ms ON (ms.id = tart.service_id) INNER JOIN m_users AS mu ON (mu.id = tt_aeps_tab.user_id) INNER JOIN m_users AS mu_parent ON (mu_parent.id = mu.created_by)\nWHERE tart.tr_date BETWEEN :P1 /* {{$_GET.fromdate}} */ AND :P2 /* {{$_GET.todate}} */ AND tt_aeps_tab.status = :P3 /* {{$_GET.selectstatus}} */\nORDER BY tt_aeps_tab.id DESC",
+                  "params": [
+                    {
+                      "operator": "between",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_GET.fromdate}}"
+                    },
+                    {
+                      "operator": "between",
+                      "type": "expression",
+                      "name": ":P2",
+                      "value": "{{$_GET.todate}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P3",
+                      "value": "{{$_GET.selectstatus}}"
+                    }
+                  ],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "tart.tr_date",
+                        "field": "tart.tr_date",
+                        "type": "datetime",
+                        "operator": "between",
+                        "value": [
+                          "{{$_GET.fromdate}}",
+                          "{{$_GET.todate}}"
+                        ],
+                        "data": {
+                          "table": "tart",
+                          "column": "tr_date",
+                          "type": "datetime",
+                          "columnObj": {
+                            "type": "timestamp",
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "tr_date"
+                          }
+                        },
+                        "operation": "BETWEEN"
+                      },
+                      {
+                        "id": "tt_aeps_tab.status",
+                        "field": "tt_aeps_tab.status",
+                        "type": "string",
+                        "operator": "equal",
+                        "value": "{{$_GET.selectstatus}}",
+                        "data": {
+                          "table": "tt_aeps_tab",
+                          "column": "status",
+                          "type": "text",
+                          "columnObj": {
+                            "type": "string",
+                            "maxLength": -5,
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "status"
+                          }
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "orders": [
+                    {
+                      "table": "tt_aeps_tab",
+                      "column": "id",
+                      "direction": "DESC",
+                      "recid": 1
+                    }
+                  ]
+                },
+                "connection": "postgres_gcpServer"
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "offset",
+                  "type": "number"
+                },
+                {
+                  "name": "limit",
+                  "type": "number"
+                },
+                {
+                  "name": "total",
+                  "type": "number"
+                },
+                {
+                  "name": "page",
+                  "type": "object",
+                  "sub": [
+                    {
+                      "name": "offset",
+                      "type": "object",
+                      "sub": [
+                        {
+                          "name": "first",
+                          "type": "number"
+                        },
+                        {
+                          "name": "prev",
+                          "type": "number"
+                        },
+                        {
+                          "name": "next",
+                          "type": "number"
+                        },
+                        {
+                          "name": "last",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "current",
+                      "type": "number"
+                    },
+                    {
+                      "name": "total",
+                      "type": "number"
+                    }
+                  ]
+                },
+                {
+                  "name": "data",
+                  "type": "array",
+                  "sub": [
+                    {
+                      "type": "number",
+                      "name": "table_id"
+                    },
+                    {
+                      "type": "number",
+                      "name": "pay_ref_id"
+                    },
+                    {
+                      "type": "number",
+                      "name": "ac_holder_user_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "old_bal"
+                    },
+                    {
+                      "type": "text",
+                      "name": "amount"
+                    },
+                    {
+                      "type": "text",
+                      "name": "net_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "new_bal"
+                    },
+                    {
+                      "type": "text",
+                      "name": "tr_type"
+                    },
+                    {
+                      "type": "datetime",
+                      "name": "tr_date"
+                    },
+                    {
+                      "type": "text",
+                      "name": "remarks"
+                    },
+                    {
+                      "type": "text",
+                      "name": "status"
+                    },
+                    {
+                      "type": "number",
+                      "name": "transaction_by"
+                    },
+                    {
+                      "type": "text",
+                      "name": "crdr_type"
+                    },
+                    {
+                      "type": "text",
+                      "name": "user_rt_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "merchant_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "comm_per"
+                    },
+                    {
+                      "type": "text",
+                      "name": "comm_val"
+                    },
+                    {
+                      "type": "text",
+                      "name": "comm_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "charge_per"
+                    },
+                    {
+                      "type": "text",
+                      "name": "charge_val"
+                    },
+                    {
+                      "type": "text",
+                      "name": "charge_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "tr_mode"
+                    },
+                    {
+                      "type": "text",
+                      "name": "tr_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "reason"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "is_processed"
+                    },
+                    {
+                      "type": "text",
+                      "name": "operator_ref"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_ref"
+                    },
+                    {
+                      "type": "text",
+                      "name": "ip_address"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_response_time"
+                    },
+                    {
+                      "type": "text",
+                      "name": "process_mode"
+                    },
+                    {
+                      "type": "text",
+                      "name": "live"
+                    },
+                    {
+                      "type": "text",
+                      "name": "trans_by"
+                    },
+                    {
+                      "type": "datetime",
+                      "name": "updated_on"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_comm_per"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_comm_val"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_comm_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_charge_per"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_charge_val"
+                    },
+                    {
+                      "type": "text",
+                      "name": "dt_charge_amount"
+                    },
+                    {
+                      "type": "text",
+                      "name": "mdt_comm_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "mdt_charge_amt"
+                    },
+                    {
+                      "type": "text",
+                      "name": "bank_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "bank_acno"
+                    },
+                    {
+                      "type": "text",
+                      "name": "benef_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "benef_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "operator_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "service_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "user_fname"
+                    },
+                    {
+                      "type": "text",
+                      "name": "user_mobile"
+                    },
+                    {
+                      "type": "text",
+                      "name": "aeps_merchant_id"
+                    },
+                    {
+                      "type": "number",
+                      "name": "parent_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "parent_fname"
+                    },
+                    {
+                      "type": "text",
+                      "name": "parent_mobile"
+                    },
+                    {
+                      "type": "text",
+                      "name": "aeps_number"
+                    }
+                  ]
+                }
+              ],
+              "outputType": "object"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

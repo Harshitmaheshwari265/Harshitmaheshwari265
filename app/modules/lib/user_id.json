@@ -1,0 +1,10 @@
+{
+  "name": "identity",
+  "module": "auth",
+  "action": "identify",
+  "options": {
+    "provider": "securityLogin"
+  },
+  "output": true,
+  "meta": []
+}

@@ -1,0 +1,22 @@
+{
+  "name": "postgres_gcpServer",
+  "module": "dbconnector",
+  "action": "connect",
+  "options": {
+    "client": "postgres",
+    "connection": {
+      "host": "db-postgresql-blr1-40136-do-user-10118978-0.b.db.ondigitalocean.com",
+      "port": 25060,
+      "user": "doadmin",
+      "password": "9hi1N6DClf1GAWlo",
+      "database": "defaultdb",
+      "ssl": {
+        "rejectUnauthorized": false
+      }
+    },
+    "meta": {}
+  },
+  "fileName": "postgres_gcpServer.json",
+  "actionFilePath": "file:///F:/swi/SwpayMaster/app/modules/connections/postgres_gcpServer.json",
+  "serverType": "node"
+}

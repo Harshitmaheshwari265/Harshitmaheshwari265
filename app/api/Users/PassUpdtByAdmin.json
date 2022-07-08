@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/users.ejs",
+      "linkedForm": "formPassUser"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "UserId",
+        "name": "UserId"
+      },
+      {
+        "type": "text",
+        "fieldName": "Password",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "50"
+            }
+          }
+        },
+        "name": "Password"
+      },
+      {
+        "type": "number",
+        "fieldName": "tpin",
+        "options": {
+          "rules": {
+            "core:number": {},
+            "core:maxlength": {
+              "param": "6"
+            }
+          }
+        },
+        "name": "tpin"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.UserId}}",
+          "then": {
+            "steps": {
+              "name": "PassUpdate",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "m_users",
+                      "column": "password",
+                      "type": "text",
+                      "value": "{{$_POST.Password.sha256(NOW)}}"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "salt",
+                      "type": "text",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "updated_by",
+                      "type": "text",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "updated_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "user_tpin",
+                      "type": "text",
+                      "value": "{{$_POST.tpin}}"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "blank1",
+                      "type": "text",
+                      "value": "{{$_POST.Password}}"
+                    }
+                  ],
+                  "table": "m_users",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.UserId}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE m_users\nSET password = :P1 /* {{$_POST.Password.sha256(NOW)}} */, salt = :P2 /* {{NOW}} */, updated_by = :P3 /* {{identity}} */, updated_on = :P4 /* {{NOW}} */, user_tpin = :P5 /* {{$_POST.tpin}} */, blank1 = :P6 /* {{$_POST.Password}} */\nWHERE id = :P7 /* {{$_POST.UserId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.Password.sha256(NOW)}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.tpin}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{$_POST.Password}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P7",
+                      "value": "{{$_POST.UserId}}"
+                    }
+                  ],
+                  "returning": "id"
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

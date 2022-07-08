@@ -1,0 +1,399 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/layouts/main.ejs",
+      "linkedForm": "formMobRech"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "opname"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "SubmitTime",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{NOW}}"
+        },
+        "output": true
+      },
+      {
+        "name": "diff",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{NOW.dateDiff('seconds', SubmitTime)}}"
+        },
+        "output": true
+      },
+      {
+        "name": "api",
+        "module": "api",
+        "action": "send",
+        "options": {
+          "url": "http://rathodtelecom.in/API/TransactionAPI",
+          "schema": [],
+          "params": {
+            "UserID": "609",
+            "Token": "{{'c239ebcd32921fe5c9c7d2756344f1a5'}}",
+            "Account": "{{$_POST.MobRech}}",
+            "Amount": "{{$_POST.MobRechAmount}}",
+            "SPKey": "{{$_POST.opname}}",
+            "APIRequestID": "{{NOW.md5(1234).substr(1, 6)}}"
+          },
+          "data": {
+            "UserID": "609",
+            "Token": "{{'c239ebcd32921fe5c9c7d2756344f1a5'}}",
+            "Account": "{{$_POST.MobRech}}",
+            "Amount": "{{$_POST.MobRechAmount}}",
+            "SPKey": "{{$_POST.opname}}",
+            "APIRequestID": "{{NOW.md5(1234).substr(1, 6)}}"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "object",
+            "name": "data",
+            "sub": [
+              {
+                "type": "text",
+                "name": "account"
+              },
+              {
+                "type": "number",
+                "name": "amount"
+              },
+              {
+                "type": "text",
+                "name": "rpid"
+              },
+              {
+                "type": "text",
+                "name": "agentid"
+              },
+              {
+                "type": "text",
+                "name": "opid"
+              },
+              {
+                "type": "boolean",
+                "name": "isRefundStatusShow"
+              },
+              {
+                "type": "number",
+                "name": "status"
+              },
+              {
+                "type": "text",
+                "name": "msg"
+              },
+              {
+                "type": "number",
+                "name": "bal"
+              },
+              {
+                "type": "text",
+                "name": "errorcode"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "name": "headers",
+            "sub": [
+              {
+                "type": "text",
+                "name": "content-type"
+              },
+              {
+                "type": "text",
+                "name": "date"
+              },
+              {
+                "type": "text",
+                "name": "server"
+              },
+              {
+                "type": "text",
+                "name": "transfer-encoding"
+              }
+            ]
+          }
+        ],
+        "outputType": "object",
+        "disabled": true
+      },
+      {
+        "name": "api_copy",
+        "module": "api",
+        "action": "send",
+        "options": {
+          "url": "http://rathodtelecom.in/API/TransactionAPI?UserID=@user&Token=@token&Account=@account&Amount=@amount&SPKey=@spkey&APIRequestID=@reqid&Optional1=&Optional2=&Optional3=&Optional4=&Format=1",
+          "schema": [],
+          "params": {
+            "@userid": "609",
+            "@token": "{{'c239ebcd32921fe5c9c7d2756344f1a5'}}",
+            "@account": "{{$_POST.MobRech}}",
+            "@amount": "{{$_POST.MobRechAmount}}",
+            "@spkey": "{{$_POST.opname}}",
+            "@reqid": "{{TIMESTAMP.md5(123).substr(0, 6)}}"
+          },
+          "data": {
+            "@user": "609",
+            "@token": "{{'c239ebcd32921fe5c9c7d2756344f1a5'}}",
+            "@account": "{{$_POST.MobRech}}",
+            "@amount": "{{$_POST.MobRechAmount}}",
+            "@spkey": "{{$_POST.opname}}",
+            "@reqid": "{{TIMESTAMP.md5(123).substr(0, 6)}}"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "object",
+            "name": "data",
+            "sub": [
+              {
+                "type": "text",
+                "name": "account"
+              },
+              {
+                "type": "number",
+                "name": "amount"
+              },
+              {
+                "type": "text",
+                "name": "rpid"
+              },
+              {
+                "type": "text",
+                "name": "agentid"
+              },
+              {
+                "type": "text",
+                "name": "opid"
+              },
+              {
+                "type": "boolean",
+                "name": "isRefundStatusShow"
+              },
+              {
+                "type": "number",
+                "name": "status"
+              },
+              {
+                "type": "text",
+                "name": "msg"
+              },
+              {
+                "type": "number",
+                "name": "bal"
+              },
+              {
+                "type": "text",
+                "name": "errorcode"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "name": "headers",
+            "sub": [
+              {
+                "type": "text",
+                "name": "content-type"
+              },
+              {
+                "type": "text",
+                "name": "date"
+              },
+              {
+                "type": "text",
+                "name": "server"
+              },
+              {
+                "type": "text",
+                "name": "transfer-encoding"
+              }
+            ]
+          }
+        ],
+        "outputType": "object",
+        "disabled": true
+      },
+      {
+        "name": "insert",
+        "module": "dbupdater",
+        "action": "insert",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "insert",
+            "values": [
+              {
+                "table": "api_response",
+                "column": "user_id",
+                "type": "text",
+                "value": "1"
+              },
+              {
+                "table": "api_response",
+                "column": "recharge_mobile",
+                "type": "text",
+                "value": "{{api.data.account}}"
+              },
+              {
+                "table": "api_response",
+                "column": "operator",
+                "type": "text",
+                "value": "{{$_POST.opname}}"
+              },
+              {
+                "table": "api_response",
+                "column": "amount",
+                "type": "text",
+                "value": "{{api.data.amount}}"
+              },
+              {
+                "table": "api_response",
+                "column": "status",
+                "type": "text",
+                "value": "{{api.data.status}}"
+              },
+              {
+                "table": "api_response",
+                "column": "order_id",
+                "type": "text",
+                "value": "{{api.data.rpid}}"
+              },
+              {
+                "table": "api_response",
+                "column": "balance",
+                "type": "text",
+                "value": "{{api.data.bal}}"
+              },
+              {
+                "table": "api_response",
+                "column": "ec",
+                "type": "text",
+                "value": "{{api.data.errorcode}}"
+              },
+              {
+                "table": "api_response",
+                "column": "apirefid",
+                "type": "text",
+                "value": "{{api.data.opid}}"
+              },
+              {
+                "table": "api_response",
+                "column": "remarks",
+                "type": "text",
+                "value": "{{api.data.msg}}"
+              },
+              {
+                "table": "api_response",
+                "column": "time",
+                "type": "datetime",
+                "value": "{{NOW}}"
+              },
+              {
+                "table": "api_response",
+                "column": "live_id",
+                "type": "text",
+                "value": "{{api.data.agentid}}"
+              },
+              {
+                "table": "api_response",
+                "column": "blank1",
+                "type": "text",
+                "value": "{{NOW.dateDiff('seconds', SubmitTime)}}"
+              }
+            ],
+            "table": "api_response",
+            "query": "INSERT INTO api_response\n(user_id, recharge_mobile, operator, amount, status, order_id, balance, ec, apirefid, remarks, time, live_id, blank1) VALUES ('1', :P1 /* {{api.data.account}} */, :P2 /* {{$_POST.opname}} */, :P3 /* {{api.data.amount}} */, :P4 /* {{api.data.status}} */, :P5 /* {{api.data.rpid}} */, :P6 /* {{api.data.bal}} */, :P7 /* {{api.data.errorcode}} */, :P8 /* {{api.data.opid}} */, :P9 /* {{api.data.msg}} */, :P10 /* {{NOW}} */, :P11 /* {{api.data.agentid}} */, :P12 /* {{NOW.dateDiff('seconds', SubmitTime)}} */)",
+            "params": [
+              {
+                "name": ":P1",
+                "type": "expression",
+                "value": "{{api.data.account}}"
+              },
+              {
+                "name": ":P2",
+                "type": "expression",
+                "value": "{{$_POST.opname}}"
+              },
+              {
+                "name": ":P3",
+                "type": "expression",
+                "value": "{{api.data.amount}}"
+              },
+              {
+                "name": ":P4",
+                "type": "expression",
+                "value": "{{api.data.status}}"
+              },
+              {
+                "name": ":P5",
+                "type": "expression",
+                "value": "{{api.data.rpid}}"
+              },
+              {
+                "name": ":P6",
+                "type": "expression",
+                "value": "{{api.data.bal}}"
+              },
+              {
+                "name": ":P7",
+                "type": "expression",
+                "value": "{{api.data.errorcode}}"
+              },
+              {
+                "name": ":P8",
+                "type": "expression",
+                "value": "{{api.data.opid}}"
+              },
+              {
+                "name": ":P9",
+                "type": "expression",
+                "value": "{{api.data.msg}}"
+              },
+              {
+                "name": ":P10",
+                "type": "expression",
+                "value": "{{NOW}}"
+              },
+              {
+                "name": ":P11",
+                "type": "expression",
+                "value": "{{api.data.agentid}}"
+              },
+              {
+                "name": ":P12",
+                "type": "expression",
+                "value": "{{NOW.dateDiff('seconds', SubmitTime)}}"
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "identity",
+            "type": "text"
+          },
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ],
+        "output": true,
+        "disabled": true
+      }
+    ]
+  }
+}

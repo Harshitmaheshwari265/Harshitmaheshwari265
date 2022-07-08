@@ -1,0 +1,331 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "user_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "GetChildren",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_users",
+                "column": "id"
+              },
+              {
+                "table": "m_users",
+                "column": "user_id"
+              },
+              {
+                "table": "m_users",
+                "column": "user_fname"
+              },
+              {
+                "table": "m_users",
+                "column": "user_lname"
+              },
+              {
+                "table": "m_users",
+                "column": "user_mobile"
+              },
+              {
+                "table": "m_users",
+                "column": "user_email"
+              },
+              {
+                "table": "m_users",
+                "column": "user_type"
+              },
+              {
+                "table": "m_users",
+                "column": "md_id"
+              },
+              {
+                "table": "m_users",
+                "column": "ds_id"
+              },
+              {
+                "table": "m_users",
+                "column": "u_status"
+              },
+              {
+                "table": "m_users",
+                "column": "user_tpin"
+              },
+              {
+                "table": "m_users",
+                "column": "scheme_id"
+              },
+              {
+                "table": "m_users",
+                "column": "kyc_status"
+              },
+              {
+                "table": "m_users",
+                "column": "balance_amt"
+              },
+              {
+                "table": "m_users",
+                "column": "aeps_balance"
+              },
+              {
+                "table": "m_users",
+                "column": "created_by"
+              },
+              {
+                "table": "m_users",
+                "column": "created_on"
+              },
+              {
+                "table": "m_users",
+                "column": "updated_on"
+              },
+              {
+                "table": "m_users",
+                "column": "aadhar_no"
+              },
+              {
+                "table": "m_users",
+                "column": "pan_no"
+              },
+              {
+                "table": "m_users",
+                "column": "address"
+              },
+              {
+                "table": "m_users",
+                "column": "pin"
+              },
+              {
+                "table": "m_users",
+                "column": "state"
+              },
+              {
+                "table": "m_users",
+                "column": "district"
+              },
+              {
+                "table": "m_users",
+                "column": "blank1"
+              },
+              {
+                "table": "m_users",
+                "column": "blank2"
+              },
+              {
+                "table": "m_users",
+                "column": "blank3"
+              },
+              {
+                "table": "m_users",
+                "column": "aeps_merchant_id"
+              }
+            ],
+            "table": {
+              "name": "m_users"
+            },
+            "primary": "id",
+            "joins": [],
+            "query": "SELECT id, user_id, user_fname, user_lname, user_mobile, user_email, user_type, md_id, ds_id, u_status, user_tpin, scheme_id, kyc_status, balance_amt, aeps_balance, created_by, created_on, updated_on, aadhar_no, pan_no, address, pin, state, district, blank1, blank2, blank3, aeps_merchant_id\nFROM m_users\nWHERE created_by = :P1 /* {{$_GET.user_id}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.user_id}}"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_users.created_by",
+                  "field": "m_users.created_by",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_GET.user_id}}",
+                  "data": {
+                    "table": "m_users",
+                    "column": "created_by",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "integer",
+                      "primary": false,
+                      "nullable": true,
+                      "unique": false,
+                      "name": "created_by"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            }
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "user_id"
+          },
+          {
+            "type": "text",
+            "name": "user_fname"
+          },
+          {
+            "type": "text",
+            "name": "user_lname"
+          },
+          {
+            "type": "text",
+            "name": "user_mobile"
+          },
+          {
+            "type": "text",
+            "name": "user_email"
+          },
+          {
+            "type": "number",
+            "name": "user_type"
+          },
+          {
+            "type": "text",
+            "name": "md_id"
+          },
+          {
+            "type": "text",
+            "name": "ds_id"
+          },
+          {
+            "type": "text",
+            "name": "u_status"
+          },
+          {
+            "type": "text",
+            "name": "user_tpin"
+          },
+          {
+            "type": "number",
+            "name": "scheme_id"
+          },
+          {
+            "type": "text",
+            "name": "kyc_status"
+          },
+          {
+            "type": "text",
+            "name": "balance_amt"
+          },
+          {
+            "type": "text",
+            "name": "aeps_balance"
+          },
+          {
+            "type": "number",
+            "name": "created_by"
+          },
+          {
+            "type": "datetime",
+            "name": "created_on"
+          },
+          {
+            "type": "datetime",
+            "name": "updated_on"
+          },
+          {
+            "type": "text",
+            "name": "aadhar_no"
+          },
+          {
+            "type": "text",
+            "name": "pan_no"
+          },
+          {
+            "type": "text",
+            "name": "address"
+          },
+          {
+            "type": "text",
+            "name": "pin"
+          },
+          {
+            "type": "text",
+            "name": "state"
+          },
+          {
+            "type": "text",
+            "name": "district"
+          },
+          {
+            "type": "text",
+            "name": "blank1"
+          },
+          {
+            "type": "text",
+            "name": "blank2"
+          },
+          {
+            "type": "text",
+            "name": "blank3"
+          },
+          {
+            "type": "text",
+            "name": "aeps_merchant_id"
+          }
+        ],
+        "outputType": "array",
+        "type": "dbconnector_select"
+      },
+      {
+        "name": "csvExport",
+        "module": "export",
+        "action": "csv",
+        "options": {
+          "path": "/public/assets/csvFile/ChildrenList.csv",
+          "data": "{{GetChildren}}",
+          "header": true,
+          "overwrite": true
+        },
+        "outputType": "text",
+        "output": true
+      }
+    ]
+  }
+}

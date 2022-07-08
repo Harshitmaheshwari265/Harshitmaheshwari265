@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "FetchServices",
+        "module": "dbconnector",
+        "action": "paged",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_service",
+                "column": "id"
+              },
+              {
+                "table": "m_service",
+                "column": "service_name"
+              },
+              {
+                "table": "m_service",
+                "column": "service_desc"
+              },
+              {
+                "table": "m_service",
+                "column": "service_type"
+              },
+              {
+                "table": "m_service",
+                "column": "is_active"
+              },
+              {
+                "table": "m_service",
+                "column": "created_on"
+              },
+              {
+                "table": "m_service",
+                "column": "is_bbps"
+              }
+            ],
+            "table": {
+              "name": "m_service"
+            },
+            "joins": [],
+            "query": "SELECT id, service_name, service_desc, service_type, is_active, created_on, is_bbps\nFROM m_service\nORDER BY service_name ASC",
+            "params": [],
+            "orders": [
+              {
+                "table": "m_service",
+                "column": "service_name",
+                "direction": "ASC",
+                "recid": 1
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "offset",
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "type": "number"
+          },
+          {
+            "name": "total",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "object",
+            "sub": [
+              {
+                "name": "offset",
+                "type": "object",
+                "sub": [
+                  {
+                    "name": "first",
+                    "type": "number"
+                  },
+                  {
+                    "name": "prev",
+                    "type": "number"
+                  },
+                  {
+                    "name": "next",
+                    "type": "number"
+                  },
+                  {
+                    "name": "last",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "current",
+                "type": "number"
+              },
+              {
+                "name": "total",
+                "type": "number"
+              }
+            ]
+          },
+          {
+            "name": "data",
+            "type": "array",
+            "sub": [
+              {
+                "type": "number",
+                "name": "id"
+              },
+              {
+                "type": "text",
+                "name": "service_name"
+              },
+              {
+                "type": "text",
+                "name": "service_desc"
+              },
+              {
+                "type": "text",
+                "name": "service_type"
+              },
+              {
+                "type": "number",
+                "name": "is_active"
+              },
+              {
+                "type": "datetime",
+                "name": "created_on"
+              },
+              {
+                "type": "number",
+                "name": "is_bbps"
+              }
+            ]
+          }
+        ],
+        "outputType": "object"
+      }
+    ]
+  }
+}

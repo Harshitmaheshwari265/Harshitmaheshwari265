@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/users.ejs",
+      "linkedForm": "formKycUser"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "UserId",
+        "name": "UserId"
+      },
+      {
+        "type": "text",
+        "fieldName": "kyc_status",
+        "name": "kyc_status"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "KycUp",
+        "module": "dbupdater",
+        "action": "update",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "update",
+            "values": [
+              {
+                "table": "m_users",
+                "column": "kyc_status",
+                "type": "text",
+                "value": "{{$_POST.kyc_status}}"
+              }
+            ],
+            "table": "m_users",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "id",
+                  "field": "id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.UserId}}",
+                  "data": {
+                    "column": "id"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "returning": "id",
+            "query": "UPDATE m_users\nSET kyc_status = :P1 /* {{$_POST.kyc_status}} */\nWHERE id = :P2 /* {{$_POST.UserId}} */",
+            "params": [
+              {
+                "name": ":P1",
+                "type": "expression",
+                "value": "{{$_POST.kyc_status}}"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P2",
+                "value": "{{$_POST.UserId}}"
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  }
+}

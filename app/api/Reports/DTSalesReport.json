@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "name": "todate"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "DtSales",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "select mu.id as did, mu.user_id as dt_userid, mu.user_fname as dt_name, mu.user_mobile as dt_mobile, \n\t(\n\t\tselect sum(trt.amount::float) as success_amt from tt_recharge_trans trt \n\t\tleft join m_users murt on (murt.id = trt.user_id) \n\t\tleft join m_service ms on (ms.id = trt.service_id) \n\t\twhere trt.status ='SUCCESS' and trt.tr_date between @fromdate and @todate and murt.created_by = mu.id and ms.service_name !='Wallet' and ms.service_name !='AEPS' \n\t), \n\t(\n\t\tselect sum(trt.amount::float) as failed_amt from tt_recharge_trans trt \n\t\tleft join m_users murt on (murt.id = trt.user_id) \n\t\tleft join m_service ms on (ms.id = trt.service_id) \n\t\twhere trt.status ='FAILED' and trt.tr_date between @fromdate and @todate and murt.created_by = mu.id and ms.service_name !='Wallet' and ms.service_name !='AEPS' \n\t)\n\tfrom m_users mu \nwhere mu.user_type =2;",
+            "params": [
+              {
+                "name": "@fromdate",
+                "value": "{{$_GET.fromdate}}",
+                "test": "2022-05-01 00:00:00"
+              },
+              {
+                "name": "@todate",
+                "value": "{{$_GET.todate}}",
+                "test": "2022-05-25 23:59:59"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "did",
+            "type": "number"
+          },
+          {
+            "name": "dt_userid",
+            "type": "text"
+          },
+          {
+            "name": "dt_name",
+            "type": "text"
+          },
+          {
+            "name": "dt_mobile",
+            "type": "text"
+          },
+          {
+            "name": "success_amt",
+            "type": "number"
+          },
+          {
+            "name": "failed_amt",
+            "type": "number"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

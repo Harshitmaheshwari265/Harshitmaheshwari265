@@ -1,0 +1,453 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/users.ejs",
+      "linkedForm": "formChangeParent"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "ChildUserId",
+        "name": "ChildUserId"
+      },
+      {
+        "type": "number",
+        "fieldName": "Admin_tpin",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            },
+            "core:number": {},
+            "core:maxlength": {
+              "param": "6"
+            },
+            "core:integer": {
+              "param": ""
+            }
+          }
+        },
+        "name": "Admin_tpin"
+      },
+      {
+        "type": "text",
+        "fieldName": "parent_user_type",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "parent_user_type"
+      },
+      {
+        "type": "text",
+        "fieldName": "parent_user_id",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "parent_user_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "validate",
+        "module": "validator",
+        "action": "validate",
+        "options": {
+          "data": [
+            {
+              "name": "validate_1",
+              "value": "{{$_POST.Admin_tpin}}",
+              "rules": {
+                "db:exists": {
+                  "param": {
+                    "connection": "postgres_gcpServer",
+                    "table": "m_users",
+                    "column": "user_tpin"
+                  },
+                  "message": "Validation Failed, T-PIN Mismatched"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.parent_user_type==0}}",
+          "then": {
+            "steps": {
+              "name": "ParentUp",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "m_users",
+                      "column": "md_id",
+                      "type": "text",
+                      "value": "{{0}}"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "ds_id",
+                      "type": "text",
+                      "value": "{{0}}"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{$_POST.parent_user_id}}"
+                    }
+                  ],
+                  "table": "m_users",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.ChildUserId}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "returning": "id",
+                  "query": "UPDATE m_users\nSET md_id = :P1 /* {{0}} */, ds_id = :P2 /* {{0}} */, created_by = :P3 /* {{$_POST.parent_user_id}} */\nWHERE id = :P4 /* {{$_POST.ChildUserId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{0}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{0}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.parent_user_id}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P4",
+                      "value": "{{$_POST.ChildUserId}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.parent_user_type==1}}",
+          "then": {
+            "steps": {
+              "name": "ParentUp",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "m_users",
+                      "column": "md_id",
+                      "type": "text",
+                      "value": "{{$_POST.parent_user_id}}"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "ds_id",
+                      "type": "text",
+                      "value": "{{0}}"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{$_POST.parent_user_id}}"
+                    }
+                  ],
+                  "table": "m_users",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.ChildUserId}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "returning": "id",
+                  "query": "UPDATE m_users\nSET md_id = :P1 /* {{$_POST.parent_user_id}} */, ds_id = :P2 /* {{0}} */, created_by = :P3 /* {{$_POST.parent_user_id}} */\nWHERE id = :P4 /* {{$_POST.ChildUserId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.parent_user_id}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{0}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.parent_user_id}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P4",
+                      "value": "{{$_POST.ChildUserId}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.parent_user_type==2}}",
+          "then": {
+            "steps": [
+              {
+                "name": "GetParentCreator",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "m_users",
+                        "column": "md_id"
+                      }
+                    ],
+                    "table": {
+                      "name": "m_users"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "m_users.id",
+                          "field": "m_users.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.parent_user_id}}",
+                          "data": {
+                            "table": "m_users",
+                            "column": "id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "increments",
+                              "default": "",
+                              "primary": true,
+                              "nullable": false,
+                              "unique": true,
+                              "name": "id"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "SELECT md_id\nFROM m_users\nWHERE id = :P1 /* {{$_POST.parent_user_id}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.parent_user_id}}"
+                      }
+                    ]
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "text",
+                    "name": "md_id"
+                  }
+                ],
+                "outputType": "object"
+              },
+              {
+                "name": "ParentUp",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "m_users",
+                        "column": "md_id",
+                        "type": "text",
+                        "value": "{{GetParentCreator.md_id}}"
+                      },
+                      {
+                        "table": "m_users",
+                        "column": "ds_id",
+                        "type": "text",
+                        "value": "{{$_POST.parent_user_id}}"
+                      },
+                      {
+                        "table": "m_users",
+                        "column": "created_by",
+                        "type": "number",
+                        "value": "{{$_POST.parent_user_id}}"
+                      }
+                    ],
+                    "table": "m_users",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.ChildUserId}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "UPDATE m_users\nSET md_id = :P1 /* {{GetParentCreator.md_id}} */, ds_id = :P2 /* {{$_POST.parent_user_id}} */, created_by = :P3 /* {{$_POST.parent_user_id}} */\nWHERE id = :P4 /* {{$_POST.ChildUserId}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{GetParentCreator.md_id}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_POST.parent_user_id}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{$_POST.parent_user_id}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P4",
+                        "value": "{{$_POST.ChildUserId}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,607 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/android-image.ejs",
+      "linkedForm": "formAddEditImage"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "AndroidTableId",
+        "name": "AndroidTableId"
+      },
+      {
+        "type": "text",
+        "fieldName": "SwitchCheckStatus",
+        "name": "SwitchCheckStatus"
+      },
+      {
+        "type": "text",
+        "fieldName": "status",
+        "name": "status"
+      },
+      {
+        "type": "file",
+        "fieldName": "filelogo",
+        "name": "filelogo",
+        "sub": [
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "text",
+            "name": "type"
+          },
+          {
+            "type": "number",
+            "name": "size"
+          },
+          {
+            "type": "text",
+            "name": "error"
+          }
+        ],
+        "outputType": "file"
+      },
+      {
+        "type": "text",
+        "fieldName": "user_type",
+        "name": "user_type"
+      },
+      {
+        "type": "text",
+        "fieldName": "image_type",
+        "name": "image_type"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        },
+        "output": false
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.AndroidTableId!=0}}",
+          "then": {
+            "steps": [
+              {
+                "name": "GetImageName",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "android_sliding_image",
+                        "column": "sliding_image"
+                      }
+                    ],
+                    "table": {
+                      "name": "android_sliding_image"
+                    },
+                    "joins": [],
+                    "query": "SELECT sliding_image\nFROM android_sliding_image\nWHERE id = :P1 /* {{$_POST.AndroidTableId}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.AndroidTableId}}"
+                      }
+                    ],
+                    "primary": "id",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "android_sliding_image.id",
+                          "field": "android_sliding_image.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.AndroidTableId}}",
+                          "data": {
+                            "table": "android_sliding_image",
+                            "column": "id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "increments",
+                              "default": "",
+                              "primary": true,
+                              "unique": true,
+                              "nullable": false,
+                              "name": "id"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    }
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "text",
+                    "name": "sliding_image"
+                  }
+                ],
+                "outputType": "object"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.filelogo != 'null' && $_POST.filelogo}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "upload_edit",
+                        "module": "upload",
+                        "action": "upload",
+                        "options": {
+                          "fields": "{{$_POST.filelogo}}",
+                          "path": "/public/assets/images/android",
+                          "template": "{guid}{ext}",
+                          "replaceSpace": true,
+                          "replaceDiacritics": true,
+                          "asciiOnly": true,
+                          "throwErrors": true,
+                          "overwrite": true
+                        },
+                        "meta": [
+                          {
+                            "name": "name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "path",
+                            "type": "text"
+                          },
+                          {
+                            "name": "url",
+                            "type": "text"
+                          },
+                          {
+                            "name": "type",
+                            "type": "text"
+                          },
+                          {
+                            "name": "size",
+                            "type": "text"
+                          },
+                          {
+                            "name": "error",
+                            "type": "number"
+                          }
+                        ],
+                        "outputType": "file",
+                        "output": false
+                      },
+                      {
+                        "name": "fileExists",
+                        "module": "fs",
+                        "action": "exists",
+                        "options": {
+                          "path": "{{'/public'+GetImageName.sliding_image}}",
+                          "then": {
+                            "steps": {
+                              "name": "fileRemove",
+                              "module": "fs",
+                              "action": "remove",
+                              "options": {
+                                "path": "{{'/public'+GetImageName.sliding_image}}"
+                              },
+                              "outputType": "boolean"
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "putFile_edit",
+                        "module": "s3",
+                        "action": "putFile",
+                        "options": {
+                          "provider": "do_s3_fra",
+                          "bucket": "images",
+                          "path": "{{upload.path}}",
+                          "key": "Operators/{{identity}}/{{upload.name}}",
+                          "acl": "public-read"
+                        },
+                        "outputType": "boolean",
+                        "output": true,
+                        "disabled": true
+                      },
+                      {
+                        "name": "LocPic_copy",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "android_sliding_image",
+                                "column": "sliding_image",
+                                "type": "text",
+                                "value": "{{upload_edit.name}}"
+                              }
+                            ],
+                            "table": "android_sliding_image",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "field": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.AndroidTableId}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "UPDATE android_sliding_image\nSET sliding_image = :P1 /* {{upload_edit.name}} */\nWHERE id = :P2 /* {{$_POST.AndroidTableId}} */",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{upload_edit.name}}"
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{$_POST.AndroidTableId}}"
+                              }
+                            ],
+                            "returning": "id"
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ],
+                        "output": true,
+                        "disabled": true
+                      },
+                      {
+                        "name": "removeLocPic_edit",
+                        "module": "fs",
+                        "action": "remove",
+                        "options": {
+                          "path": "{{GetImageName.image}}"
+                        },
+                        "outputType": "boolean",
+                        "output": true,
+                        "disabled": true
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean",
+                "output": false
+              },
+              {
+                "name": "ImageInfoEdit",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "android_sliding_image",
+                        "column": "user_type",
+                        "type": "number",
+                        "value": "{{$_POST.user_type}}"
+                      },
+                      {
+                        "table": "android_sliding_image",
+                        "column": "sliding_image",
+                        "type": "text",
+                        "value": "{{upload_edit.name?+'/assets/images/android/'+upload_edit.name:GetImageName.sliding_image}}"
+                      },
+                      {
+                        "table": "android_sliding_image",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{$_POST.status == 'true' ? 1 : 0}}"
+                      },
+                      {
+                        "table": "android_sliding_image",
+                        "column": "image_type",
+                        "type": "text",
+                        "value": "{{$_POST.image_type}}"
+                      }
+                    ],
+                    "table": "android_sliding_image",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.AndroidTableId}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "UPDATE android_sliding_image\nSET user_type = :P1 /* {{$_POST.user_type}} */, sliding_image = :P2 /* {{upload_edit.name?+'/assets/images/android/'+upload_edit.name:GetImageName.sliding_image}} */, status = :P3 /* {{$_POST.status == 'true' ? 1 : 0}} */, image_type = :P4 /* {{$_POST.image_type}} */\nWHERE id = :P5 /* {{$_POST.AndroidTableId}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.user_type}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{upload_edit.name?+'/assets/images/android/'+upload_edit.name:GetImageName.sliding_image}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{$_POST.status == 'true' ? 1 : 0}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{$_POST.image_type}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P5",
+                        "value": "{{$_POST.AndroidTableId}}"
+                      }
+                    ],
+                    "returning": "id"
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              }
+            ]
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.filelogo != 'null' && $_POST.filelogo}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "upload",
+                        "module": "upload",
+                        "action": "upload",
+                        "options": {
+                          "fields": "{{$_POST.filelogo}}",
+                          "path": "/public/assets/images/android",
+                          "template": "{guid}{ext}",
+                          "replaceSpace": true,
+                          "replaceDiacritics": true,
+                          "asciiOnly": true,
+                          "throwErrors": true,
+                          "overwrite": true
+                        },
+                        "meta": [
+                          {
+                            "name": "name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "path",
+                            "type": "text"
+                          },
+                          {
+                            "name": "url",
+                            "type": "text"
+                          },
+                          {
+                            "name": "type",
+                            "type": "text"
+                          },
+                          {
+                            "name": "size",
+                            "type": "text"
+                          },
+                          {
+                            "name": "error",
+                            "type": "number"
+                          }
+                        ],
+                        "outputType": "file",
+                        "output": true
+                      },
+                      {
+                        "name": "putFile",
+                        "module": "s3",
+                        "action": "putFile",
+                        "options": {
+                          "provider": "do_s3_fra",
+                          "bucket": "images",
+                          "path": "{{upload.path}}",
+                          "key": "Operators/{{identity}}/{{upload.name}}",
+                          "acl": "public-read"
+                        },
+                        "outputType": "boolean",
+                        "output": true,
+                        "disabled": true
+                      },
+                      {
+                        "name": "removeLocPic",
+                        "module": "fs",
+                        "action": "remove",
+                        "options": {
+                          "path": "{{upload.path}}"
+                        },
+                        "outputType": "boolean",
+                        "output": true,
+                        "disabled": true
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean",
+                "output": false
+              },
+              {
+                "name": "ImageInfoAdd",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "android_sliding_image",
+                        "column": "user_type",
+                        "type": "number",
+                        "value": "{{$_POST.user_type}}"
+                      },
+                      {
+                        "table": "android_sliding_image",
+                        "column": "sliding_image",
+                        "type": "text",
+                        "value": "{{'/assets/images/android/'+upload.name}}"
+                      },
+                      {
+                        "table": "android_sliding_image",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{$_POST.status == 'true' ? 1 : 0}}"
+                      },
+                      {
+                        "table": "android_sliding_image",
+                        "column": "created_by",
+                        "type": "number",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "table": "android_sliding_image",
+                        "column": "created_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "android_sliding_image",
+                        "column": "image_type",
+                        "type": "text",
+                        "value": "{{$_POST.image_type}}"
+                      }
+                    ],
+                    "table": "android_sliding_image",
+                    "returning": "id",
+                    "query": "INSERT INTO android_sliding_image\n(user_type, sliding_image, status, created_by, created_on, image_type) VALUES (:P1 /* {{$_POST.user_type}} */, :P2 /* {{'/assets/images/android/'+upload.name}} */, :P3 /* {{$_POST.status == 'true' ? 1 : 0}} */, :P4 /* {{identity}} */, :P5 /* {{NOW}} */, :P6 /* {{$_POST.image_type}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.user_type}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{'/assets/images/android/'+upload.name}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{$_POST.status == 'true' ? 1 : 0}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{$_POST.image_type}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean",
+        "output": false
+      }
+    ]
+  }
+}

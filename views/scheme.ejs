@@ -1,0 +1,104 @@
+<!-- Wappler include head-page="layouts/main" is="dmx-app" id="scheme" appConnect="local" components="{dmxFormatter:{},dmxDataTraversal:{}}" -->
+<meta name="ac:route" content="/scheme">
+<dmx-serverconnect id="scSchemes" url="api/Scheme/FetchScheme"></dmx-serverconnect>
+<dmx-data-view id="dvSchemes" dmx-bind:data="scSchemes.data.FetchScheme.data" pageSize="100" page="10"></dmx-data-view>
+<dmx-data-detail id="ddSchemes" dmx-bind:data="dvSchemes.data" key="sc_id"></dmx-data-detail>
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 id="Schemes" class="text-center align-self-center">SW Infotech Schemes<span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scSchemes.state.executing"></span></h1>
+                <button id="btnAdd" class="btn btn-primary" dmx-on:click="modalAddScheme.show(); ddSchemes.select(0);">Add Scheme</button>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-sm  sw-font-11">
+            <thead>
+                <tr>
+                    <th>Sl. No.</th>
+                    <th>Scheme Name</th>
+                    <th>Scheme Desc.</th>
+                    <th>Scheme Type</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="dvSchemes.data" id="tableRepeat1">
+                <tr>
+                    <td>{{$index+1}}</td>
+                    <td dmx-text="scheme_name.titlecase()"></td>
+                    <td dmx-text="scheme_desc"></td>
+                    <td dmx-text="scheme_type == 1 ? 'MDT' : scheme_type == 2 ? 'DT' : scheme_type == 3 ? 'RT' : scheme_type == 7 ? 'WL' : 'None'" dmx-class:table-primary="scheme_type == 1" dmx-class:table-success="scheme_type == 2" dmx-class:table-warning="scheme_type == 3" dmx-class:table-danger="scheme_type == 4"></td>
+                    <td dmx-text="status != 1 ?'Inactive' : 'Active'" dmx-class:table-primary="status == 1" dmx-class:table-warning="status != 1"></td>
+                    <td>
+                        <a class="dropdown-item" href="#" dmx-on:click="ddSchemes.select(sc_id)" data-bs-toggle="modal" data-bs-target="#modalAddScheme"><i class="fas fa-edit sw-col-ar" title="Edit Schemes"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!-- Modal Add Scheme -->
+<div class="modal fade" id="modalAddScheme" is="dmx-bs5-modal" tabindex="-1" nocloseonclick="true" nokeyboard="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ddSchemes.data.sc_id ? 'Edit Scheme' : 'Add Scheme'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form is="dmx-serverconnect-form" id="formAddEditScheme" method="post" action="api/Scheme/SchemeAddEdit" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAddEditScheme.data.AddEditSchemes ? scNotif.success('New Scheme Added') : scNotif.success('Scheme Details Updated');scSchemes.load()" dmx-on:error="scNotif.warning('An error occurred'); modalAddSchemes.hide();formAddEditScheme.reset();browserMain.goto('schemes')">
+                    <!--  -->
+                    <input type="hidden" name="SchemeId" dmx-bind:value="ddSchemes.data.sc_id">
+                    <div class="mb-3 row">
+                        <label for="inp_name" class="col-sm-2 col-form-label">Scheme Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_name" name="name" aria-describedby="inp_name_help" placeholder="Sonakshi Distributor" maxlength="100" required="" data-msg-required="Scheme Name is required." dmx-bind:value="ddSchemes.data.scheme_name.titlecase()">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_desc" class="col-sm-2 col-form-label">Scheme Desc.</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_scheme_desc" name="scheme_desc" aria-describedby="inp_scheme_desc_help" placeholder="Enter Scheme" maxlength="100" required="" data-msg-required="Desc. id is required." dmx-bind:value="ddSchemes.data.scheme_desc">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_super_Scheme" class="col-sm-2 col-form-label">Scheme Type</label>
+                        <div class="col-sm-10">
+                            <select type="number" class="form-control form-select" id="inp_Scheme_type" name="scheme_type" aria-describedby="inp_Scheme_type_help" placeholder="Enter Scheme type" dmx-bind:value="ddSchemes.data.scheme_type">
+                                <option value="">Select Option</option>
+                                <option value="1">MDT</option>
+                                <option value="2">DT</option>
+                                <option value="3">RT</option>
+                                <option value="7">WL</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_status" class="col-sm-2 col-form-label">Status</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_status" name="status" aria-describedby="inp_status_help" placeholder="Enter Status" dmx-bind:value="ddSchemes.data.status">
+                                <option value="1">Active</option>
+                                <option value="0">InActive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-2">&nbsp;</div>
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">Save<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

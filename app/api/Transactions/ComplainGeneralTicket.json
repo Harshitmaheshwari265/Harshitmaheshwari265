@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/complain-other-tickets.ejs",
+      "linkedForm": "ResponseForm"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "response",
+        "name": "response"
+      },
+      {
+        "type": "text",
+        "fieldName": "ComplainId",
+        "name": "ComplainId"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "ComplainUp",
+        "module": "dbupdater",
+        "action": "update",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "update",
+            "values": [
+              {
+                "table": "t_ticket",
+                "column": "status",
+                "type": "text",
+                "value": "2"
+              },
+              {
+                "table": "t_ticket",
+                "column": "response",
+                "type": "text",
+                "value": "{{$_POST.response}}"
+              },
+              {
+                "table": "t_ticket",
+                "column": "reply_date",
+                "type": "datetime",
+                "value": "{{NOW}}"
+              }
+            ],
+            "table": "t_ticket",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "id",
+                  "field": "id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.ComplainId}}",
+                  "data": {
+                    "column": "id"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "returning": "id",
+            "query": "UPDATE t_ticket\nSET status = '2', response = :P1 /* {{$_POST.response}} */, reply_date = :P2 /* {{NOW}} */\nWHERE id = :P3 /* {{$_POST.ComplainId}} */",
+            "params": [
+              {
+                "name": ":P1",
+                "type": "expression",
+                "value": "{{$_POST.response}}"
+              },
+              {
+                "name": ":P2",
+                "type": "expression",
+                "value": "{{NOW}}"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P3",
+                "value": "{{$_POST.ComplainId}}"
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,387 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/bank-admin.ejs",
+      "linkedForm": "formAddEditBank"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "BankId",
+        "name": "BankId"
+      },
+      {
+        "type": "text",
+        "fieldName": "bank_name",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Bank Name is required."
+            },
+            "core:maxlength": {
+              "param": "100"
+            }
+          }
+        },
+        "name": "bank_name"
+      },
+      {
+        "type": "text",
+        "fieldName": "bank_ifsc",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Bank IFSC is required."
+            },
+            "core:maxlength": {
+              "param": 15
+            }
+          }
+        },
+        "name": "bank_ifsc"
+      },
+      {
+        "type": "text",
+        "fieldName": "ac_no",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Bank A/C Number is required."
+            },
+            "core:maxlength": {
+              "param": "20"
+            }
+          }
+        },
+        "name": "ac_no"
+      },
+      {
+        "type": "text",
+        "fieldName": "ac_holder_name",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Bank A/C Holder Name is required."
+            },
+            "core:maxlength": {
+              "param": "100"
+            }
+          }
+        },
+        "name": "ac_holder_name"
+      },
+      {
+        "type": "text",
+        "fieldName": "status",
+        "name": "status"
+      },
+      {
+        "type": "text",
+        "fieldName": "branch_name",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "100"
+            }
+          }
+        },
+        "name": "branch_name"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.BankId != ''}}",
+          "then": {
+            "steps": {
+              "name": "AdminBankEdit",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "m_bank",
+                      "column": "bank_name",
+                      "type": "text",
+                      "value": "{{$_POST.bank_name}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "ac_holder_name",
+                      "type": "text",
+                      "value": "{{$_POST.ac_holder_name}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "ac_no",
+                      "type": "text",
+                      "value": "{{$_POST.ac_no}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "ifsc_code",
+                      "type": "text",
+                      "value": "{{$_POST.bank_ifsc}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "branch_name",
+                      "type": "text",
+                      "value": "{{$_POST.bank_name}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "updated_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "updated_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "status",
+                      "type": "number",
+                      "value": "{{$_POST.status}}"
+                    }
+                  ],
+                  "table": "m_bank",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.BankId}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE m_bank\nSET bank_name = :P1 /* {{$_POST.bank_name}} */, ac_holder_name = :P2 /* {{$_POST.ac_holder_name}} */, ac_no = :P3 /* {{$_POST.ac_no}} */, ifsc_code = :P4 /* {{$_POST.bank_ifsc}} */, branch_name = :P5 /* {{$_POST.bank_name}} */, updated_by = :P6 /* {{identity}} */, updated_on = :P7 /* {{NOW}} */, status = :P8 /* {{$_POST.status}} */\nWHERE id = :P9 /* {{$_POST.BankId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.bank_name}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.ac_holder_name}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.ac_no}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.bank_ifsc}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.bank_name}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P9",
+                      "value": "{{$_POST.BankId}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "AdminBankAdd",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "m_bank",
+                      "column": "bank_name",
+                      "type": "text",
+                      "value": "{{$_POST.bank_name}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "ac_holder_name",
+                      "type": "text",
+                      "value": "{{$_POST.ac_holder_name}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "ac_no",
+                      "type": "text",
+                      "value": "{{$_POST.ac_no}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "ifsc_code",
+                      "type": "text",
+                      "value": "{{$_POST.bank_ifsc}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "branch_name",
+                      "type": "text",
+                      "value": "{{$_POST.branch_name}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "m_bank",
+                      "column": "status",
+                      "type": "number",
+                      "value": "{{$_POST.status}}"
+                    }
+                  ],
+                  "table": "m_bank",
+                  "returning": "id",
+                  "query": "INSERT INTO m_bank\n(bank_name, ac_holder_name, ac_no, ifsc_code, branch_name, created_by, created_on, status) VALUES (:P1 /* {{$_POST.bank_name}} */, :P2 /* {{$_POST.ac_holder_name}} */, :P3 /* {{$_POST.ac_no}} */, :P4 /* {{$_POST.bank_ifsc}} */, :P5 /* {{$_POST.branch_name}} */, :P6 /* {{identity}} */, :P7 /* {{NOW}} */, :P8 /* {{$_POST.status}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.bank_name}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.ac_holder_name}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.ac_no}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.bank_ifsc}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.branch_name}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{$_POST.status}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

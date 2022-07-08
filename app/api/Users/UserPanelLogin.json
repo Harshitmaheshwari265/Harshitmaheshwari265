@@ -1,0 +1,223 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/users.ejs",
+      "linkedForm": "formUserLogin"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "UserId",
+        "name": "UserId"
+      },
+      {
+        "type": "number",
+        "fieldName": "tpin",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            },
+            "core:number": {},
+            "core:maxlength": {
+              "param": "6"
+            },
+            "core:integer": {
+              "param": ""
+            }
+          }
+        },
+        "name": "tpin"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "GetAdminInfo",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_users",
+                "column": "user_tpin"
+              }
+            ],
+            "table": {
+              "name": "m_users"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_users.id",
+                  "field": "m_users.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": 12,
+                  "data": {
+                    "table": "m_users",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "nullable": false,
+                      "unique": true,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT user_tpin\nFROM m_users\nWHERE id = 12",
+            "params": []
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "text",
+            "name": "user_tpin"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{GetAdminInfo.user_tpin==$_POST.tpin}}",
+          "then": {
+            "steps": [
+              {
+                "name": "GetUserInfo",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "m_users",
+                        "column": "user_mobile",
+                        "alias": "Mobile"
+                      },
+                      {
+                        "table": "m_users",
+                        "column": "blank1",
+                        "alias": "Password"
+                      }
+                    ],
+                    "table": {
+                      "name": "m_users"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "m_users.id",
+                          "field": "m_users.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.UserId}}",
+                          "data": {
+                            "table": "m_users",
+                            "column": "id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "increments",
+                              "default": "",
+                              "primary": true,
+                              "nullable": false,
+                              "unique": true,
+                              "name": "id"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "SELECT user_mobile AS Mobile, blank1 AS Password\nFROM m_users\nWHERE id = :P1 /* {{$_POST.UserId}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.UserId}}"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "text",
+                    "name": "Mobile"
+                  },
+                  {
+                    "type": "text",
+                    "name": "Password"
+                  }
+                ],
+                "outputType": "object"
+              },
+              {
+                "name": "api",
+                "module": "api",
+                "action": "send",
+                "options": {
+                  "method": "POST",
+                  "url": "https://swpay.in/api/Users/AdminLogin"
+                },
+                "output": true
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "Resp",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 403,
+                "data": "T-Pin Mismatched"
+              },
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

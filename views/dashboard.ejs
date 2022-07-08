@@ -1,0 +1,104 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="dashboard" appConnect="local" components="{dmxCharts:{},dmxDatePicker:{},dmxFormatter:{}}" jquery_slim_35="cdn" moment_2="cdn" -->
+<meta name="ac:route" content="/dashboard">
+<dmx-serverconnect id="scRechargePerformance" url="api/Dashboard/RechargePerformance" dmx-param:startdate="formDashboard.daterange.start" dmx-param:enddate="formDashboard.daterange.end"></dmx-serverconnect>
+<div class="align-items-center d-flex justify-content-between px-4 mb-3 sd-secondary-header w-100">
+    <div class="row col-12">
+        <div class="col-12 col-md-4">
+            <h1 class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">
+                Dashboard
+                <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scRechargePerformance.state.executing"></span>
+            </h1>
+        </div>
+        <div class="col-12 col-md-6 offset-0 offset-lg-2 text-end">
+            <form id="formDashboard"><label class="sd-datepicker">
+                    <span class="btn bg-light"><img src="assets/images/icons/calendar.svg" class="img-fluid" width="20px"></span>
+                    <input type="text" is="dmx-date-range-picker" format="DD MMM YY" class="" placeholder="Nov 2021 - Dec 2021" id="daterange" dmx-bind:startdate="dateNow.datetime.addDays(0)" dmx-bind:enddate="dateNow.datetime.formatDate('yyyy-MM-dd 23:59:59')" autoapply="true">
+                </label>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title m-1">Overall Performance (No. of Trans.)</h4>
+                </div>
+                <div class="card-body">
+                    <dmx-chart id="chartRechPer" legend="right" responsive="true" dmx-bind:data="scRechargePerformance.data.Overall" labels="countrecharges" dataset-2:label="Success" dataset-2:value="countsuccess" dataset-1:label="Failure" dataset-1:value="countfailure" dataset-3:label="Reversal" dataset-3:value="countreversal" point-size="" cutout="" height="100" width="100" colors="colors9" thickness="1" dataset-1:tooltip="" type="bar" points="true"></dmx-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title m-1">Recharge Performance (No. of Trans.)</h4>
+                </div>
+                <div class="card-body">
+                    <dmx-chart id="" legend="right" responsive="true" dmx-bind:data="scRechargePerformance.data.RechargeOnly" labels="countrecharges" dataset-1:label="Success" dataset-1:value="countsuccess" dataset-2:label="Failure" dataset-2:value="countfailure" dataset-3:label="Reversal" dataset-3:value="countreversal" type="bar" points="true" point-size="" cutout="" height="100" width="100" colors="colors1" thickness="1" dataset-1:tooltip=""></dmx-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="card-title m-1">Overall Transaction (in Rs.)</h4>
+                </div>
+                <div class="card-body">
+                    <dmx-chart id="OverallTrans" legend="right" responsive="true" dmx-bind:data="scRechargePerformance.data.OverallTransDatewise" dataset-1:label="Success" dataset-1:value="totalsuccessamount" dataset-2:label="Failure" dataset-2:value="totalfailedamount" type="horizontalBar" points="true" point-size="" cutout="" height="100" width="100" colors="colors8" thickness="1" labels="to_char"></dmx-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="card-title m-1">Recharge Transaction (in Rs.)</h4>
+                </div>
+                <div class="card-body">
+                    <dmx-chart id="RechargeTrans" legend="right" responsive="true" dmx-bind:data="scRechargePerformance.data.DateWiseAmt" dataset-1:label="Success" dataset-1:value="totalsuccessamount" dataset-2:label="Failure" dataset-2:value="totalfailedamount" type="bar" points="true" point-size="" cutout="" height="100" width="100" colors="colors1" thickness="1" labels="to_char"></dmx-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h4 class="card-title m-1">Service Performance (Sale Rs.)</h4>
+                </div>
+                <div class="card-body">
+                    <dmx-chart id="ServiceSaleRs" legend="right" responsive="true" dmx-bind:data="scRechargePerformance.data.ServiceWiseSaleRs" dataset-1:label="Success" dataset-1:value="successamount" dataset-2:label="Failure" dataset-2:value="failedamount" type="bar" points="true" point-size="" cutout="" height="100" width="100" colors="colors1" thickness="1" labels="service_name"></dmx-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h4 class="card-title m-1">Service Performance (Trans. No.)</h4>
+                </div>
+                <div class="card-body">
+                    <dmx-chart id="ServiceTransNo" legend="right" responsive="true" dmx-bind:data="scRechargePerformance.data.ServiceWiseCountTrans" dataset-1:label="Success" dataset-1:value="successidcount" dataset-2:label="Failure" dataset-2:value="failedidcount" type="bar" points="true" point-size="" cutout="" height="100" width="100" colors="colors8" thickness="1" labels="service_name"></dmx-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="card-title m-1">Operator Performance (Sale Rs.)</h4>
+                </div>
+                <div class="card-body">
+                    <dmx-chart id="OperatorSaleRs" legend="right" responsive="true" dmx-bind:data="scRechargePerformance.data.OpWiseSaleTransAmt" dataset-1:label="Success" dataset-1:value="successamount" dataset-2:label="Failure" dataset-2:value="failedamount" type="bar" points="true" point-size="" cutout="" height="100" width="100" colors="colors8" thickness="1" labels="operator_name"></dmx-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="card-title m-1">Operator Performance (Trans. No.)</h4>
+                </div>
+                <div class="card-body">
+                    <dmx-chart id="OperatorTransNo" legend="right" responsive="true" dmx-bind:data="scRechargePerformance.data.OpWiseSaleTransNo" dataset-1:label="Success" dataset-1:value="successidcount" dataset-2:label="Failure" dataset-2:value="failedidcount" type="bar" points="true" point-size="" cutout="" height="100" width="100" colors="colors8" thickness="1" labels="operator_name"></dmx-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

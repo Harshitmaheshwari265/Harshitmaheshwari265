@@ -1,0 +1,268 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "user_type"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "UserDetails",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_users",
+                "column": "id"
+              },
+              {
+                "table": "m_users",
+                "column": "user_fname"
+              },
+              {
+                "table": "m_users",
+                "column": "user_mobile"
+              },
+              {
+                "table": "user_type_name",
+                "column": "user_type"
+              },
+              {
+                "table": "m_users",
+                "column": "user_type",
+                "alias": "user_type_id"
+              },
+              {
+                "table": "m_users",
+                "column": "user_id"
+              },
+              {
+                "table": "m_users",
+                "column": "balance_amt"
+              }
+            ],
+            "table": {
+              "name": "m_users"
+            },
+            "joins": [
+              {
+                "table": "m_user_type",
+                "column": "*",
+                "alias": "user_type_name",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "user_type_name",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "m_users",
+                        "column": "user_type"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                }
+              }
+            ],
+            "orders": [
+              {
+                "table": "m_users",
+                "column": "user_fname",
+                "direction": "ASC",
+                "recid": 1
+              }
+            ],
+            "query": "SELECT m_users.id, m_users.user_fname, m_users.user_mobile, user_type_name.user_type, m_users.user_type AS user_type_id, m_users.user_id, m_users.balance_amt\nFROM m_users\nINNER JOIN m_user_type AS user_type_name ON (user_type_name.id = m_users.user_type)\nWHERE m_users.user_type = :P1 /* {{$_GET.user_type}} */\nORDER BY m_users.user_fname ASC",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.user_type}}"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_users.user_type",
+                  "field": "m_users.user_type",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "{{$_GET.user_type}}",
+                  "data": {
+                    "table": "m_users",
+                    "column": "user_type",
+                    "type": "text"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            }
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "user_fname"
+          },
+          {
+            "type": "text",
+            "name": "user_mobile"
+          },
+          {
+            "type": "text",
+            "name": "user_type"
+          },
+          {
+            "type": "number",
+            "name": "user_type_id"
+          },
+          {
+            "type": "text",
+            "name": "user_id"
+          },
+          {
+            "type": "text",
+            "name": "balance_amt"
+          }
+        ],
+        "outputType": "array",
+        "type": "dbconnector_select"
+      },
+      {
+        "name": "GetUserType",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "t_user_type_scheme",
+                "column": "for_user_type_id"
+              },
+              {
+                "table": "UserTypeName",
+                "column": "user_type",
+                "alias": "for_user_type_name"
+              }
+            ],
+            "table": {
+              "name": "t_user_type_scheme"
+            },
+            "joins": [
+              {
+                "table": "m_user_type",
+                "column": "*",
+                "alias": "UserTypeName",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "UserTypeName",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "t_user_type_scheme",
+                        "column": "for_user_type_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                }
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "t_user_type_scheme.user_type_id",
+                  "field": "t_user_type_scheme.user_type_id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_GET.user_type}}",
+                  "data": {
+                    "table": "t_user_type_scheme",
+                    "column": "user_type_id",
+                    "type": "number"
+                  },
+                  "operation": "="
+                },
+                {
+                  "id": "t_user_type_scheme.status",
+                  "field": "t_user_type_scheme.status",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": 1,
+                  "data": {
+                    "table": "t_user_type_scheme",
+                    "column": "status",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT t_user_type_scheme.for_user_type_id, UserTypeName.user_type AS for_user_type_name\nFROM t_user_type_scheme\nLEFT JOIN m_user_type AS UserTypeName ON (UserTypeName.id = t_user_type_scheme.for_user_type_id)\nWHERE t_user_type_scheme.user_type_id = :P1 /* {{$_GET.user_type}} */ AND t_user_type_scheme.status = 1",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.user_type}}"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "type": "dbconnector_select",
+        "meta": [
+          {
+            "type": "number",
+            "name": "for_user_type_id"
+          },
+          {
+            "type": "text",
+            "name": "for_user_type_name"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

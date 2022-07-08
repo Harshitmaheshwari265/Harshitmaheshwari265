@@ -1,0 +1,300 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/login.ejs",
+      "linkedForm": "formLogin"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "Mobile",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "Mobile"
+      },
+      {
+        "type": "text",
+        "fieldName": "Password",
+        "options": {
+          "rules": {
+            "core:required": {
+              "message": "Please enter your password"
+            }
+          }
+        },
+        "name": "Password"
+      },
+      {
+        "type": "text",
+        "fieldName": "remember",
+        "name": "remember"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "REMOTE_ADDR"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "getSalt",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_users",
+                "column": "salt",
+                "alias": "saltvalue"
+              },
+              {
+                "table": "m_users",
+                "column": "id"
+              }
+            ],
+            "table": {
+              "name": "m_users"
+            },
+            "joins": [],
+            "query": "SELECT salt AS saltvalue, id\nFROM m_users\nWHERE blank2 = :P1 /* {{$_POST.Mobile}} */ AND (user_type = 0 OR user_type = 4) AND u_status = '1'",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.Mobile}}"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_users.blank2",
+                  "field": "m_users.blank2",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "{{$_POST.Mobile}}",
+                  "data": {
+                    "table": "m_users",
+                    "column": "blank2",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "string",
+                      "primary": false,
+                      "nullable": true,
+                      "maxLength": -5,
+                      "unique": false,
+                      "name": "blank2"
+                    }
+                  },
+                  "operation": "="
+                },
+                {
+                  "condition": "OR",
+                  "rules": [
+                    {
+                      "id": "m_users.user_type",
+                      "field": "m_users.user_type",
+                      "type": "double",
+                      "operator": "equal",
+                      "value": 0,
+                      "data": {
+                        "table": "m_users",
+                        "column": "user_type",
+                        "type": "number",
+                        "columnObj": {
+                          "type": "integer",
+                          "primary": false,
+                          "nullable": false,
+                          "unique": false,
+                          "name": "user_type"
+                        }
+                      },
+                      "operation": "="
+                    },
+                    {
+                      "id": "m_users.user_type",
+                      "field": "m_users.user_type",
+                      "type": "double",
+                      "operator": "equal",
+                      "value": 4,
+                      "data": {
+                        "table": "m_users",
+                        "column": "user_type",
+                        "type": "number",
+                        "columnObj": {
+                          "type": "integer",
+                          "primary": false,
+                          "nullable": false,
+                          "unique": false,
+                          "name": "user_type"
+                        }
+                      },
+                      "operation": "="
+                    }
+                  ],
+                  "conditional": null
+                },
+                {
+                  "id": "m_users.u_status",
+                  "field": "m_users.u_status",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "1",
+                  "data": {
+                    "table": "m_users",
+                    "column": "u_status",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "string",
+                      "primary": false,
+                      "nullable": true,
+                      "maxLength": -5,
+                      "unique": false,
+                      "name": "u_status"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "primary": "id"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "text",
+            "name": "saltvalue"
+          },
+          {
+            "type": "number",
+            "name": "id"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{getSalt}}",
+          "then": {
+            "steps": [
+              {
+                "name": "identity",
+                "module": "auth",
+                "action": "login",
+                "options": {
+                  "provider": "securityLogin",
+                  "password": "{{$_POST.Password.sha256(getSalt.saltvalue)}}",
+                  "username": "{{$_POST.Mobile}}"
+                },
+                "output": true,
+                "meta": []
+              },
+              {
+                "name": "LoginLog",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "t_login_history",
+                        "column": "user_id",
+                        "type": "text",
+                        "value": "{{getSalt.id}}"
+                      },
+                      {
+                        "table": "t_login_history",
+                        "column": "ip_address",
+                        "type": "text",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "table": "t_login_history",
+                        "column": "login_time",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      }
+                    ],
+                    "table": "t_login_history",
+                    "returning": "id",
+                    "query": "INSERT INTO t_login_history\n(user_id, ip_address, login_time) VALUES (:P1 /* {{getSalt.id}} */, :P2 /* {{$_SERVER.REMOTE_ADDR}} */, :P3 /* {{NOW}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{getSalt.id}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              }
+            ]
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "LoginRes403",
+                "module": "core",
+                "action": "response",
+                "options": {
+                  "status": 403,
+                  "data": "User does not exists"
+                }
+              },
+              {
+                "name": "Login",
+                "module": "core",
+                "action": "redirect",
+                "options": {
+                  "url": "/login"
+                },
+                "disabled": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean",
+        "output": true
+      }
+    ]
+  }
+}

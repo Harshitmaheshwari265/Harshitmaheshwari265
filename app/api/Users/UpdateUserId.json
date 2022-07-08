@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/my-profile.ejs",
+      "linkedForm": "formUpdateUser"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "userid",
+        "name": "userid"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "./login",
+          "forbiddenUrl": "./403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "UserLoginId",
+        "module": "dbupdater",
+        "action": "update",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "update",
+            "values": [
+              {
+                "table": "m_users",
+                "column": "blank2",
+                "type": "text",
+                "value": "{{$_POST.userid}}"
+              }
+            ],
+            "table": "m_users",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "id",
+                  "field": "id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{identity}}",
+                  "data": {
+                    "column": "id"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "UPDATE m_users\nSET blank2 = :P1 /* {{$_POST.userid}} */\nWHERE id = :P2 /* {{identity}} */",
+            "params": [
+              {
+                "name": ":P1",
+                "type": "expression",
+                "value": "{{$_POST.userid}}"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P2",
+                "value": "{{identity}}"
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ],
+        "output": true
+      }
+    ]
+  }
+}

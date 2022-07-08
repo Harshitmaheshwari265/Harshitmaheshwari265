@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "user_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "GetBal",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_users",
+                "column": "balance_amt"
+              },
+              {
+                "table": "m_users",
+                "column": "aeps_balance"
+              }
+            ],
+            "table": {
+              "name": "m_users"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_users.id",
+                  "field": "m_users.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_GET.user_id}}",
+                  "data": {
+                    "table": "m_users",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "nullable": false,
+                      "unique": true,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT balance_amt, aeps_balance\nFROM m_users\nWHERE id = :P1 /* {{$_GET.user_id}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.user_id}}"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "text",
+            "name": "balance_amt"
+          },
+          {
+            "type": "text",
+            "name": "aeps_balance"
+          }
+        ],
+        "outputType": "object"
+      }
+    ]
+  }
+}

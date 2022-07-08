@@ -1,0 +1,114 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="manageservices" appConnect="local" components="{dmxDataTraversal:{},dmxBootstrap5Modal:{}}" -->
+<meta name="ac:route" content="/manage-services">
+<script is="dmx-flow" id="flowCommision" type="text/dmx-flow">{
+  condition: {
+    if: "{{scheme_type.value}}",
+    then: {
+      steps: {
+        run: {action: "{{scCommision.load({})}}"}
+      }
+    }
+  }
+}</script>
+<dmx-serverconnect id="scSchemes" url="api/Scheme/FetchActiveScheme"></dmx-serverconnect>
+<dmx-serverconnect id="scCommision" url="api/Services/ManageService" noload dmx-param:scheme_id="scheme_type.value" dmx-param:service_id="formUpdateAllCommision.inp_Fetch_service.value"></dmx-serverconnect>
+<dmx-data-view id="dvCommision" dmx-bind:data="scCommision.data.AllCommisionScheme" filter="(service_name.lowercase().contains(formSearchUser.Search.value.lowercase()))"></dmx-data-view>
+<dmx-data-detail id="ddCommision" dmx-bind:data="dvCommision.data" key="id"></dmx-data-detail>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 id="Commision">SW Infotech Control Services<span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scCommision.state.executing"></span></h1>
+            </div>
+            <div class="col-auto order-1 order-md-3 d-flex align-items-center justify-content-center">
+                <form id="formSearchUser" class="sd-search-form">
+                    <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                        <input type="text" class="form-control sd-search-input rounded-pill" id="Search" name="Search" placeholder="Search">
+                        <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <div class="card">
+        <div class="card-header sw-bg-col-primary">
+            <b>Services Setting Based On Scheme</b>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-lg-3 p-1">
+                    <label>Select Scheme</label>
+                    <select id="scheme_type" name="scheme_select" class="form-control col-12 px-1 form-select" dmx-bind:options="scSchemes.data.FetchScheme.data" optiontext="scheme_name" optionvalue="sc_id" dmx-on:changed="flowCommision.run()">
+                        <option value="">Select</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-sm  sw-font-11">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody is="dmx-repeat" dmx-generator="bs5table" id="tableRepeat1" dmx-bind:repeat="dvCommision.data">
+                <tr>
+                    <td dmx-text="id"></td>
+                    <td dmx-text="service_name"></td>
+                    <td dmx-text="status == 1 ? 'Active' : 'Inactive'" dmx-class:table-primary="status == 1" dmx-class:table-danger="status == 0"></td>
+                    <td>
+                        <a class="dropdown-item" href="#" dmx-on:click="ddCommision.select(id)" data-bs-toggle="modal" data-bs-target="#modalAddCommision"><i class="fas fa-edit" title="Edit Service"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!-- Modal Add Commision -->
+<div class="modal fade" id="modalAddCommision" is="dmx-bs5-modal" tabindex="-1" nokeyboard="true" nocloseonclick="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ddCommision.data.id ? 'Edit Services' : 'Add Services'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form is="dmx-serverconnect-form" id="formAddEditCommision" method="post" action="api/Services/ServicesSchemeAddEdit" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAddEditCommision.data.SchemeCommisionAddEdit ? scNotif.success('Successfully Added') : scNotif.success('Service Updated'); scCommision.load({})" dmx-on:error="scNotif.warning('An error occurred'); ">
+                    <!-- formAddEditCommision.reset(); -->
+                    <input type="hidden" name="tableid" dmx-bind:value="ddCommision.data.id"><input type="hidden" name="service_id" dmx-bind:value="ddCommision.data.service_id">
+                    <input type="hidden" name="scheme_id" dmx-bind:value="scheme_type.value">
+                    <div class="mb-3 row">
+                        <label for="inp_status" class="col-sm-2 col-form-label">Status</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_Commision_status" name="status" aria-describedby="inp_status_help" placeholder="Enter Status" dmx-bind:value="ddCommision.data.status">
+                                <option value="1">Active</option>
+                                <option value="0">InActive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-2">&nbsp;</div>
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">Save<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

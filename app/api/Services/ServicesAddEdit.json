@@ -1,0 +1,303 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/services.ejs",
+      "linkedForm": "formAddEditService"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "ServiceId",
+        "name": "ServiceId"
+      },
+      {
+        "type": "text",
+        "fieldName": "name",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Service Name is required."
+            },
+            "core:maxlength": {
+              "param": "50"
+            }
+          }
+        },
+        "name": "name"
+      },
+      {
+        "type": "text",
+        "fieldName": "status",
+        "name": "status"
+      },
+      {
+        "type": "text",
+        "fieldName": "bbps",
+        "name": "bbps"
+      },
+      {
+        "type": "text",
+        "fieldName": "service_desc",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "100"
+            }
+          }
+        },
+        "name": "service_desc"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.ServiceId != ''}}",
+          "then": {
+            "steps": {
+              "name": "ServiceEdit",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "m_service",
+                      "column": "service_desc",
+                      "type": "text",
+                      "value": "{{$_POST.service_desc}}"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "is_active",
+                      "type": "number",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "updated_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "updated_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "is_bbps",
+                      "type": "number",
+                      "value": "{{$_POST.bbps}}"
+                    }
+                  ],
+                  "table": "m_service",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.ServiceId}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE m_service\nSET service_desc = :P1 /* {{$_POST.service_desc}} */, is_active = :P2 /* {{$_POST.status}} */, updated_by = :P3 /* {{identity}} */, updated_on = :P4 /* {{NOW}} */, is_bbps = :P5 /* {{$_POST.bbps}} */\nWHERE id = :P6 /* {{$_POST.ServiceId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.service_desc}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.bbps}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P6",
+                      "value": "{{$_POST.ServiceId}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": false
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "ServiceAdd",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "m_service",
+                      "column": "service_name",
+                      "type": "text",
+                      "value": "{{$_POST.name}}"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "service_desc",
+                      "type": "text",
+                      "value": "{{$_POST.service_desc}}"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "service_type",
+                      "type": "text",
+                      "value": "{{$_POST.service_type}}"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "is_active",
+                      "type": "number",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "is_bbps",
+                      "type": "number",
+                      "value": "0"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "is_auth",
+                      "type": "number",
+                      "value": "1"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "m_service",
+                  "returning": "id",
+                  "query": "INSERT INTO m_service\n(service_name, service_desc, service_type, is_active, is_bbps, is_auth, created_by, created_on) VALUES (:P1 /* {{$_POST.name}} */, :P2 /* {{$_POST.service_desc}} */, :P3 /* {{$_POST.service_type}} */, :P4 /* {{$_POST.status}} */, '0', '1', :P5 /* {{identity}} */, :P6 /* {{NOW}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.name}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.service_desc}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.service_type}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": false
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

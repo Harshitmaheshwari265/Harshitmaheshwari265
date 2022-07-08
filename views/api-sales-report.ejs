@@ -1,0 +1,71 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="apisalesreport" appConnect="local" components="{dmxFormatter:{}}" -->
+<meta name="ac:route" content="/api-sales-report">
+<script is="dmx-flow" id="flowAPISales" type="text/dmx-flow">{
+  condition: {
+    if: "{{inpFromDate.value && inpToDate.value && selectServices.value}}",
+    then: {
+      steps: {
+        run: {action: "{{scApiSales.load({})}}"}
+      }
+    }
+  }
+}</script>
+<dmx-value id="varFilter" dmx-bind:value="0"></dmx-value>
+<dmx-serverconnect id="scServices" url="api/Services/Services"></dmx-serverconnect>
+
+<dmx-serverconnect id="scApiSales" url="api/Reports/ApiSales" dmx-param:service_id="selectServices.value" noload dmx-param:fromdate="inpFromDate.value+' 00:00:00'" dmx-param:todate="inpToDate.value+' 23:59:59.999'"></dmx-serverconnect>
+
+
+<div class="row align-items-center justify-content-between px-4 mb-3 sd-secondary-header mx-0">
+    <div class="col-12 col-md-auto me-auto ps-4">
+        <h1 class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">
+            API Sales Report
+            <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scPatients.state.executing"></span>
+        </h1>
+    </div>
+    <div class="col-auto order-2 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+        <label>From Date:</label><input type="date" name="fromdate" id="inpFromDate" class="w-25" required="">
+        &emsp;<label>To Date:</label><input type="date" name="todate" id="inpToDate" class="w-25" required="">
+        &emsp;<label>Type:</label><select id="selectServices" name="service_id" dmx-bind:options="scServices.data.FetchServices.data" optiontext="service_name" optionvalue="id">
+            <option value="0">All</option>
+        </select>
+        &emsp;<button id="btnFilter" class="btn btn-primary btn-sm" dmx-on:click="flowAPISales.run(); varFilter.setValue(1)">Filter</button>
+        <button id="btnExport" class="btn btn-dark btn-sm">Export</button>
+    </div>
+    <!--div class="col-auto order-1 order-md-3 d-flex align-items-center justify-content-center">
+        <form id="formSearchUser" class="sd-search-form">
+            <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                <input type="text" class="form-control sd-search-input rounded-pill" id="Search" name="Search" placeholder="Search">
+                <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+            </div>
+        </form>
+    </div-->
+</div>
+<div class="container px-4" id="AccontSummery" dmx-show="varFilter.value == 1">
+    <div class="card">
+        <div class="card-header sw-bg-col-primary">
+            <b>API Sales Report</b>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover table-sm  sw-font-11">
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>API Code</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody is="dmx-repeat" dmx-generator="bs5table" id="tableRepeat1" dmx-bind:repeat="scApiSales.data.ApiSalesReport">
+                        <tr>
+                            <td>{{$index+1}}</td>
+                            <td dmx-text="api_logs"></td>
+                            <td dmx-text="total" class="total_amt"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

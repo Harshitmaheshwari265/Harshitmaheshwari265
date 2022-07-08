@@ -1,0 +1,109 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="services" appConnect="local" components="{dmxFormatter:{},dmxDataTraversal:{},dmxBootstrap5Modal:{}}" -->
+<meta name="ac:route" content="/services">
+<dmx-serverconnect id="scServices" url="api/Services/Services"></dmx-serverconnect>
+<dmx-data-view id="dvServices" dmx-bind:data="scServices.data.FetchServices.data" pageSize="100" page="10"></dmx-data-view>
+<dmx-data-detail id="ddServices" dmx-bind:data="dvServices.data" key="id"></dmx-data-detail>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 id="Services" class="text-center align-self-center">SW Infotech Services<span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scServices.state.executing"></span></h1>
+                <!-- <button id="btnAdd" class="btn btn-primary" dmx-on:click="modalAddServices.show(); ddServices.select(0);">Add Service</button> -->
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-sm  sw-font-11">
+            <thead>
+                <tr>
+                    <th>Sl. No.</th>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <!-- <th>Service Desc.</th> -->
+                    <th>Is Active</th>
+                    <th>Is BBPS</th>
+                    <th>Created On</th>
+                    <!-- <th>Updated By/ On</th> -->
+                    <!-- <th>Action</th> -->
+                </tr>
+            </thead>
+            <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="scServices.data.FetchServices.data" id="tableRepeat1">
+                <tr>
+                    <td>{{$index+1}}</td>
+                    <td><img dmx-bind:src="service_type" width="50" height="50" class="sw-img-render"></td>
+                    <td dmx-text="service_name.titlecase()"></td>
+                    <!-- <td assets/css/icons/dmx-text="service_type"></td> -->
+                    <!-- <td dmx-text="service_desc"></td> -->
+                    <td dmx-text="is_active == 1 ? 'Active' : 'Inactive'" dmx-class:text-primary="is_active == 1" dmx-class:text-danger="is_active == 0"></td>
+
+                    <td dmx-text="is_bbps != 1 ?'False' : 'True'" dmx-class:text-primary="is_bbps == 1" dmx-class:text-danger="is_bbps != 1"></td>
+                    <td dmx-text="created_on.formatDate('dd-MM-yyyy HH:mm:ss A')"></td>
+                    <!-- <td dmx-text="updated_by+' ('+updated_on+')'"></td> -->
+                    <td>
+                        <a class="dropdown-item" href="#" dmx-on:click="ddServices.select(id)" data-bs-toggle="modal" data-bs-target="#modalAddServices"><i class="fas fa-edit sw-col-ar" title="Edit Services"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!-- Modal Add Services -->
+<div class="modal fade" id="modalAddServices" is="dmx-bs5-modal" tabindex="-1" nokeyboard="true" nocloseonclick="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ddServices.data.id ? 'Edit Services' : 'Add Services'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form is="dmx-serverconnect-form" id="formAddEditService" method="post" action="api/Services/ServicesAddEdit" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAddEditService.data.AddEditServices ? scNotif.success('New Service Added') : scNotif.success('Service updated'); scServices.load({})" dmx-on:error="scNotif.warning('An error occurred'); modalAddServices.hide();formAddEditService.reset()">
+                    <input type="hidden" name="ServiceId" dmx-bind:value="ddServices.data.id">
+                    <div class="mb-3 row">
+                        <label for="inp_name" class="col-sm-2 col-form-label">Service Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_service_name" name="name" aria-describedby="inp_name_help" placeholder="E.g: Mobile/ DTH" maxlength="50" required="" data-msg-required="Service Name is required." dmx-bind:value="ddServices.data.service_name" readonly="true">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_service_desc" class="col-sm-2 col-form-label">Service Desc</label>
+                        <div class="col-sm-10">
+                            <textarea type="text" class="form-control" id="inp_services_desc" name="service_desc" aria-describedby="inp_service_desc_help" placeholder="Enter Service Desc." maxlength="100" dmx-bind:value="ddServices.data.service_desc"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_status" class="col-sm-2 col-form-label">Status</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_service_status" name="status" aria-describedby="inp_status_help" placeholder="Enter Status" dmx-bind:value="ddServices.data.status">
+                                <option value="1">Active</option>
+                                <option value="0">InActive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_bbps" class="col-sm-2 col-form-label">BBPS</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_service_bbps" name="bbps" aria-describedby="inp_bbps_help" dmx-bind:value="ddServices.data.is_bbps">
+                                <option value="1">True</option>
+                                <option value="0">False</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-2">&nbsp;</div>
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">Save<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

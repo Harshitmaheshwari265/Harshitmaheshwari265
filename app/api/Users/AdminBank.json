@@ -1,0 +1,197 @@
+[
+  {
+    "name": "",
+    "module": "auth",
+    "action": "restrict",
+    "options": {
+      "provider": "securityLogin",
+      "permissions": [
+        "write"
+      ],
+      "loginUrl": "/login",
+      "forbiddenUrl": "/403-forbidden"
+    }
+  },
+  {
+    "name": "GetBanks",
+    "module": "dbconnector",
+    "action": "paged",
+    "options": {
+      "connection": "postgres_gcpServer",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "m_bank",
+            "column": "id"
+          },
+          {
+            "table": "m_bank",
+            "column": "bank_name"
+          },
+          {
+            "table": "m_bank",
+            "column": "ac_holder_name"
+          },
+          {
+            "table": "m_bank",
+            "column": "ac_no"
+          },
+          {
+            "table": "m_bank",
+            "column": "ifsc_code"
+          },
+          {
+            "table": "m_bank",
+            "column": "branch_name"
+          },
+          {
+            "table": "m_bank",
+            "column": "image_url"
+          },
+          {
+            "table": "m_bank",
+            "column": "created_by"
+          },
+          {
+            "table": "m_bank",
+            "column": "created_on"
+          },
+          {
+            "table": "m_bank",
+            "column": "updated_by"
+          },
+          {
+            "table": "m_bank",
+            "column": "updated_on"
+          },
+          {
+            "table": "m_bank",
+            "column": "status"
+          }
+        ],
+        "table": {
+          "name": "m_bank"
+        },
+        "joins": [],
+        "orders": [
+          {
+            "table": "m_bank",
+            "column": "id",
+            "direction": "DESC",
+            "recid": 1
+          }
+        ],
+        "query": "SELECT id, bank_name, ac_holder_name, ac_no, ifsc_code, branch_name, image_url, created_by, created_on, updated_by, updated_on, status\nFROM m_bank\nORDER BY id DESC",
+        "params": []
+      }
+    },
+    "output": true,
+    "meta": [
+      {
+        "name": "offset",
+        "type": "number"
+      },
+      {
+        "name": "limit",
+        "type": "number"
+      },
+      {
+        "name": "total",
+        "type": "number"
+      },
+      {
+        "name": "page",
+        "type": "object",
+        "sub": [
+          {
+            "name": "offset",
+            "type": "object",
+            "sub": [
+              {
+                "name": "first",
+                "type": "number"
+              },
+              {
+                "name": "prev",
+                "type": "number"
+              },
+              {
+                "name": "next",
+                "type": "number"
+              },
+              {
+                "name": "last",
+                "type": "number"
+              }
+            ]
+          },
+          {
+            "name": "current",
+            "type": "number"
+          },
+          {
+            "name": "total",
+            "type": "number"
+          }
+        ]
+      },
+      {
+        "name": "data",
+        "type": "array",
+        "sub": [
+          {
+            "name": "id",
+            "type": "text"
+          },
+          {
+            "name": "bank_name",
+            "type": "text"
+          },
+          {
+            "name": "ac_holder_name",
+            "type": "text"
+          },
+          {
+            "name": "ac_no",
+            "type": "text"
+          },
+          {
+            "name": "ifsc_code",
+            "type": "text"
+          },
+          {
+            "name": "branch_name",
+            "type": "text"
+          },
+          {
+            "name": "image_url",
+            "type": "text"
+          },
+          {
+            "name": "created_by",
+            "type": "number"
+          },
+          {
+            "name": "created_on",
+            "type": "datetime"
+          },
+          {
+            "name": "updated_by",
+            "type": "number"
+          },
+          {
+            "name": "updated_on",
+            "type": "datetime"
+          },
+          {
+            "name": "status",
+            "type": "number"
+          }
+        ]
+      }
+    ],
+    "outputType": "object",
+    "type": "dbconnector_paged_select"
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "api",
+    "module": "api",
+    "action": "send",
+    "options": {
+      "params": {
+        "apiToken": "{{'a88ccb6aa2a14eaf8eaa1f112c3ff690'}}"
+      },
+      "url": "http://sonakshiworld.com/apiservice.asmx/GetBalanceNew"
+    },
+    "output": true
+  },
+  {
+    "name": "GetAPIBalance",
+    "module": "core",
+    "action": "setvalue",
+    "options": {
+      "value": "{{api.data.xmlToJSON()}}"
+    },
+    "output": true
+  }
+]

@@ -1,0 +1,295 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "name": "todate"
+      },
+      {
+        "type": "text",
+        "name": "get_type"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.get_type==0}}",
+          "then": {
+            "steps": {
+              "name": "GetPendingComplaint",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "query": "SELECT t_ticket.id, t_ticket.support_type, t_ticket.message, t_ticket.status, t_ticket.adddate::text, t_ticket.response, t_ticket.reply_date::text, mu.user_fname, mu.user_mobile, mu.user_id\nFROM t_ticket\nLEFT JOIN m_users AS mu ON (mu.id = t_ticket.user_id)\nWHERE t_ticket.tran_id IS NULL AND t_ticket.created_on BETWEEN @fromdate AND @todate ORDER BY t_ticket.id DESC",
+                  "params": [
+                    {
+                      "name": "@fromdate",
+                      "value": "{{$_GET.fromdate}}",
+                      "test": "2022-05-27 00:00:00"
+                    },
+                    {
+                      "name": "@todate",
+                      "value": "{{$_GET.todate}}",
+                      "test": "2022-05-28 23:59:59"
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "id",
+                  "type": "number"
+                },
+                {
+                  "name": "support_type",
+                  "type": "text"
+                },
+                {
+                  "name": "message",
+                  "type": "text"
+                },
+                {
+                  "name": "status",
+                  "type": "text"
+                },
+                {
+                  "name": "adddate",
+                  "type": "text"
+                },
+                {
+                  "name": "response",
+                  "type": "text"
+                },
+                {
+                  "name": "reply_date",
+                  "type": "text"
+                },
+                {
+                  "name": "user_fname",
+                  "type": "text"
+                },
+                {
+                  "name": "user_mobile",
+                  "type": "text"
+                },
+                {
+                  "name": "user_id",
+                  "type": "text"
+                }
+              ],
+              "outputType": "array"
+            }
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{!$_GET.get_type||$_GET.get_type==1}}",
+          "then": {
+            "steps": {
+              "name": "GetPendingComplaint",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "query": "SELECT t_ticket.id, t_ticket.support_type, t_ticket.message, t_ticket.status, t_ticket.adddate::text, t_ticket.response, t_ticket.reply_date::text, mu.user_fname, mu.user_mobile, mu.user_id\nFROM t_ticket\nLEFT JOIN m_users AS mu ON (mu.id = t_ticket.user_id)\nWHERE t_ticket.tran_id IS NULL AND t_ticket.created_on BETWEEN @fromdate AND @todate AND t_ticket.status='1' ORDER BY t_ticket.id DESC",
+                  "params": [
+                    {
+                      "name": "@fromdate",
+                      "value": "{{$_GET.fromdate}}",
+                      "test": "2022-05-27 00:00:00"
+                    },
+                    {
+                      "name": "@todate",
+                      "value": "{{$_GET.todate}}",
+                      "test": "2022-05-28 23:59:59"
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "id",
+                  "type": "number"
+                },
+                {
+                  "name": "support_type",
+                  "type": "text"
+                },
+                {
+                  "name": "message",
+                  "type": "text"
+                },
+                {
+                  "name": "status",
+                  "type": "text"
+                },
+                {
+                  "name": "adddate",
+                  "type": "text"
+                },
+                {
+                  "name": "response",
+                  "type": "text"
+                },
+                {
+                  "name": "reply_date",
+                  "type": "text"
+                },
+                {
+                  "name": "user_fname",
+                  "type": "text"
+                },
+                {
+                  "name": "user_mobile",
+                  "type": "text"
+                },
+                {
+                  "name": "user_id",
+                  "type": "text"
+                }
+              ],
+              "outputType": "array"
+            }
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.get_type==2}}",
+          "then": {
+            "steps": {
+              "name": "GetPendingComplaint",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "query": "SELECT t_ticket.id, t_ticket.support_type, t_ticket.message, t_ticket.status, t_ticket.adddate::text, t_ticket.response, t_ticket.reply_date::text, mu.user_fname, mu.user_mobile, mu.user_id\nFROM t_ticket\nLEFT JOIN m_users AS mu ON (mu.id = t_ticket.user_id)\nWHERE t_ticket.tran_id IS NULL AND t_ticket.created_on BETWEEN @fromdate AND @todate AND t_ticket.status='2' ORDER BY t_ticket.id DESC",
+                  "params": [
+                    {
+                      "name": "@fromdate",
+                      "value": "{{$_GET.fromdate}}",
+                      "test": "2022-05-27 00:00:00"
+                    },
+                    {
+                      "name": "@todate",
+                      "value": "{{$_GET.todate}}",
+                      "test": "2022-05-28 23:59:59"
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "id",
+                  "type": "number"
+                },
+                {
+                  "name": "support_type",
+                  "type": "text"
+                },
+                {
+                  "name": "message",
+                  "type": "text"
+                },
+                {
+                  "name": "status",
+                  "type": "text"
+                },
+                {
+                  "name": "adddate",
+                  "type": "text"
+                },
+                {
+                  "name": "response",
+                  "type": "text"
+                },
+                {
+                  "name": "reply_date",
+                  "type": "text"
+                },
+                {
+                  "name": "user_fname",
+                  "type": "text"
+                },
+                {
+                  "name": "user_mobile",
+                  "type": "text"
+                },
+                {
+                  "name": "user_id",
+                  "type": "text"
+                }
+              ],
+              "outputType": "array"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

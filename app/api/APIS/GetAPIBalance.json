@@ -1,0 +1,40 @@
+[
+  {
+    "name": "apiTestUsers",
+    "module": "api",
+    "action": "send",
+    "options": {
+      "url": "https://sonakshiworld.com/apiservice.asmx/RegisterComplaint",
+      "params": {
+        "apiToken": "{{'f5e11be7da444cd49409dad7508b5111'}}",
+        "reqid": "{{'WWSD43587'}}"
+      }
+    },
+    "output": true,
+    "disabled": true
+  },
+  {
+    "name": "api",
+    "module": "api",
+    "action": "send",
+    "options": {
+      "url": "https://www.sonakshiworld.com/apiservice.asmx/GetBalanceNew",
+      "params": {
+        "apiToken": "{{'069f5596739a4ee79b557107e3fb4280'}}"
+      },
+      "passErrors": false
+    },
+    "output": true
+  },
+  {
+    "name": "GetAPIBalance",
+    "module": "core",
+    "action": "setvalue",
+    "options": {
+      "value": "{{api.data.xmlToJSON()}}"
+    },
+    "output": true,
+    "meta": [],
+    "outputType": "text"
+  }
+]

@@ -1,0 +1,894 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/operators.ejs",
+      "linkedForm": "formAddEditOperator"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "OperatorId",
+        "name": "OperatorId"
+      },
+      {
+        "type": "text",
+        "fieldName": "name",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Operator Name is required."
+            },
+            "core:maxlength": {
+              "param": 100
+            }
+          }
+        },
+        "name": "name"
+      },
+      {
+        "type": "text",
+        "fieldName": "min_amt",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Minimum Limit is required."
+            },
+            "core:maxlength": {
+              "param": "10"
+            }
+          }
+        },
+        "name": "min_amt"
+      },
+      {
+        "type": "text",
+        "fieldName": "max_amount",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "10"
+            }
+          }
+        },
+        "name": "max_amount"
+      },
+      {
+        "type": "text",
+        "fieldName": "inp_is_gst",
+        "multiple": true,
+        "name": "inp_is_gst"
+      },
+      {
+        "type": "text",
+        "fieldName": "is_gst",
+        "name": "is_gst"
+      },
+      {
+        "type": "text",
+        "fieldName": "is_tds",
+        "name": "is_tds"
+      },
+      {
+        "type": "text",
+        "fieldName": "op_status",
+        "name": "op_status"
+      },
+      {
+        "type": "file",
+        "fieldName": "filelogo",
+        "name": "filelogo",
+        "sub": [
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "text",
+            "name": "type"
+          },
+          {
+            "type": "number",
+            "name": "size"
+          },
+          {
+            "type": "text",
+            "name": "error"
+          }
+        ],
+        "outputType": "file"
+      },
+      {
+        "type": "text",
+        "fieldName": "service",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "service"
+      },
+      {
+        "type": "text",
+        "name": "image"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        },
+        "output": false
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.OperatorId != ''}}",
+          "then": {
+            "steps": [
+              {
+                "name": "GetImageName",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "m_operator",
+                        "column": "image"
+                      }
+                    ],
+                    "table": {
+                      "name": "m_operator"
+                    },
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "m_operator.id",
+                          "field": "m_operator.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.OperatorId}}",
+                          "data": {
+                            "table": "m_operator",
+                            "column": "id",
+                            "type": "number"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "SELECT image\nFROM m_operator\nWHERE id = :P1 /* {{$_POST.OperatorId}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.OperatorId}}"
+                      }
+                    ]
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "text",
+                    "name": "image"
+                  }
+                ],
+                "outputType": "object"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.filelogo != 'null' && $_POST.filelogo}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "upload_edit",
+                        "module": "upload",
+                        "action": "upload",
+                        "options": {
+                          "fields": "{{$_POST.filelogo}}",
+                          "path": "/public/assets/images/operators",
+                          "template": "{guid}{ext}",
+                          "replaceSpace": true,
+                          "replaceDiacritics": true,
+                          "asciiOnly": true,
+                          "throwErrors": true,
+                          "overwrite": true
+                        },
+                        "meta": [
+                          {
+                            "name": "name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "path",
+                            "type": "text"
+                          },
+                          {
+                            "name": "url",
+                            "type": "text"
+                          },
+                          {
+                            "name": "type",
+                            "type": "text"
+                          },
+                          {
+                            "name": "size",
+                            "type": "text"
+                          },
+                          {
+                            "name": "error",
+                            "type": "number"
+                          }
+                        ],
+                        "outputType": "file",
+                        "output": false
+                      },
+                      {
+                        "name": "fileExists",
+                        "module": "fs",
+                        "action": "exists",
+                        "options": {
+                          "path": "{{'/public'+GetImageName.image}}",
+                          "then": {
+                            "steps": {
+                              "name": "fileRemove",
+                              "module": "fs",
+                              "action": "remove",
+                              "options": {
+                                "path": "{{'/public'+GetImageName.image}}"
+                              },
+                              "outputType": "boolean"
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "putFile_edit",
+                        "module": "s3",
+                        "action": "putFile",
+                        "options": {
+                          "provider": "do_s3_fra",
+                          "bucket": "images",
+                          "path": "{{upload.path}}",
+                          "key": "Operators/{{identity}}/{{upload.name}}",
+                          "acl": "public-read"
+                        },
+                        "outputType": "boolean",
+                        "output": true,
+                        "disabled": true
+                      },
+                      {
+                        "name": "LocPic_copy",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "m_operator",
+                                "column": "image",
+                                "type": "text",
+                                "value": "{{upload.name}}",
+                                "condition": "{{upload.name}}"
+                              }
+                            ],
+                            "table": "m_operator",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "field": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.OperatorId}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "UPDATE m_operator\nSET image = :P1 /* {{upload.name}} */\nWHERE id = :P2 /* {{$_POST.OperatorId}} */",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{upload.name}}"
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{$_POST.OperatorId}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ],
+                        "output": true,
+                        "disabled": true
+                      },
+                      {
+                        "name": "removeLocPic_edit",
+                        "module": "fs",
+                        "action": "remove",
+                        "options": {
+                          "path": "{{GetImageName.image}}"
+                        },
+                        "outputType": "boolean",
+                        "output": true,
+                        "disabled": true
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean",
+                "output": false
+              },
+              {
+                "name": "GetOpRepeat",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "m_operator",
+                        "column": "operator_name",
+                        "alias": "CountOpName",
+                        "aggregate": "COUNT"
+                      }
+                    ],
+                    "table": {
+                      "name": "m_operator"
+                    },
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "m_operator.id",
+                          "field": "m_operator.id",
+                          "type": "double",
+                          "operator": "not_equal",
+                          "value": "{{$_POST.OperatorId}}",
+                          "data": {
+                            "table": "m_operator",
+                            "column": "id",
+                            "type": "number"
+                          },
+                          "operation": "<>"
+                        },
+                        {
+                          "id": "m_operator.operator_name",
+                          "field": "m_operator.operator_name",
+                          "type": "string",
+                          "operator": "equal",
+                          "value": "{{$_POST.name}}",
+                          "data": {
+                            "table": "m_operator",
+                            "column": "operator_name",
+                            "type": "text"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "groupBy": [],
+                    "query": "SELECT COUNT(operator_name) AS CountOpName\nFROM m_operator\nWHERE id <> :P1 /* {{$_POST.OperatorId}} */ AND operator_name = :P2 /* {{$_POST.name}} */",
+                    "params": [
+                      {
+                        "operator": "not_equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.OperatorId}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{$_POST.name}}"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "text",
+                    "name": "CountOpName"
+                  }
+                ],
+                "outputType": "object"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{GetOpRepeat.CountOpName < 1}}",
+                  "then": {
+                    "steps": {
+                      "name": "OperatorEdit",
+                      "module": "dbupdater",
+                      "action": "update",
+                      "options": {
+                        "connection": "postgres_gcpServer",
+                        "sql": {
+                          "type": "update",
+                          "values": [
+                            {
+                              "table": "m_operator",
+                              "column": "status",
+                              "type": "number",
+                              "value": "{{$_POST.op_status == 'true' ? 1 : 0}}"
+                            },
+                            {
+                              "table": "m_operator",
+                              "column": "updated_by",
+                              "type": "number",
+                              "value": "{{identity}}"
+                            },
+                            {
+                              "table": "m_operator",
+                              "column": "updated_on",
+                              "type": "datetime",
+                              "value": "{{NOW}}"
+                            },
+                            {
+                              "table": "m_operator",
+                              "column": "service_id",
+                              "type": "number",
+                              "value": "{{$_POST.service}}"
+                            },
+                            {
+                              "table": "m_operator",
+                              "column": "is_gst",
+                              "type": "number",
+                              "value": "{{$_POST.is_gst == 'true' ? 1 : 0}}"
+                            },
+                            {
+                              "table": "m_operator",
+                              "column": "is_tds",
+                              "type": "number",
+                              "value": "{{$_POST.is_tds == 'true' ? 1 : 0}}"
+                            },
+                            {
+                              "table": "m_operator",
+                              "column": "min_amount",
+                              "type": "number",
+                              "value": "{{$_POST.min_amt}}"
+                            },
+                            {
+                              "table": "m_operator",
+                              "column": "max_amount",
+                              "type": "text",
+                              "value": "{{$_POST.max_amount}}"
+                            },
+                            {
+                              "table": "m_operator",
+                              "column": "image",
+                              "type": "text",
+                              "value": "{{!upload_edit.name ? GetImageName.image : +'/assets/images/operators/'+upload_edit.name}}",
+                              "condition": "{{'/assets/images/operators/'+upload_edit.name}}"
+                            },
+                            {
+                              "table": "m_operator",
+                              "column": "operator_name",
+                              "type": "text",
+                              "value": "{{$_POST.name}}"
+                            }
+                          ],
+                          "table": "m_operator",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "id",
+                                "field": "id",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{$_POST.OperatorId}}",
+                                "data": {
+                                  "column": "id"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "query": "UPDATE m_operator\nSET status = :P1 /* {{$_POST.op_status == 'true' ? 1 : 0}} */, updated_by = :P2 /* {{identity}} */, updated_on = :P3 /* {{NOW}} */, service_id = :P4 /* {{$_POST.service}} */, is_gst = :P5 /* {{$_POST.is_gst == 'true' ? 1 : 0}} */, is_tds = :P6 /* {{$_POST.is_tds == 'true' ? 1 : 0}} */, min_amount = :P7 /* {{$_POST.min_amt}} */, max_amount = :P8 /* {{$_POST.max_amount}} */, image = :P9 /* {{!upload_edit.name ? GetImageName.image : +'/assets/images/operators/'+upload_edit.name}} */, operator_name = :P10 /* {{$_POST.name}} */\nWHERE id = :P11 /* {{$_POST.OperatorId}} */",
+                          "params": [
+                            {
+                              "name": ":P1",
+                              "type": "expression",
+                              "value": "{{$_POST.op_status == 'true' ? 1 : 0}}"
+                            },
+                            {
+                              "name": ":P2",
+                              "type": "expression",
+                              "value": "{{identity}}"
+                            },
+                            {
+                              "name": ":P3",
+                              "type": "expression",
+                              "value": "{{NOW}}"
+                            },
+                            {
+                              "name": ":P4",
+                              "type": "expression",
+                              "value": "{{$_POST.service}}"
+                            },
+                            {
+                              "name": ":P5",
+                              "type": "expression",
+                              "value": "{{$_POST.is_gst == 'true' ? 1 : 0}}"
+                            },
+                            {
+                              "name": ":P6",
+                              "type": "expression",
+                              "value": "{{$_POST.is_tds == 'true' ? 1 : 0}}"
+                            },
+                            {
+                              "name": ":P7",
+                              "type": "expression",
+                              "value": "{{$_POST.min_amt}}"
+                            },
+                            {
+                              "name": ":P8",
+                              "type": "expression",
+                              "value": "{{$_POST.max_amount}}"
+                            },
+                            {
+                              "name": ":P9",
+                              "type": "expression",
+                              "value": "{{!upload_edit.name ? GetImageName.image : +'/assets/images/operators/'+upload_edit.name}}"
+                            },
+                            {
+                              "name": ":P10",
+                              "type": "expression",
+                              "value": "{{$_POST.name}}"
+                            },
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P11",
+                              "value": "{{$_POST.OperatorId}}"
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ],
+                      "output": true
+                    }
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "Resp",
+                      "module": "core",
+                      "action": "response",
+                      "options": {
+                        "status": 403,
+                        "data": "Operator name already exists, Please try with different name"
+                      },
+                      "output": true
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "validate",
+                "module": "validator",
+                "action": "validate",
+                "options": {
+                  "data": [
+                    {
+                      "name": "validate_1",
+                      "value": "{{$_POST.name}}",
+                      "rules": {
+                        "db:notexists": {
+                          "param": {
+                            "connection": "postgres_gcpServer",
+                            "table": "m_operator",
+                            "column": "operator_name"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.filelogo != 'null' && $_POST.filelogo}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "upload",
+                        "module": "upload",
+                        "action": "upload",
+                        "options": {
+                          "fields": "{{$_POST.filelogo}}",
+                          "path": "/public/assets/images/operators",
+                          "template": "{guid}{ext}",
+                          "replaceSpace": true,
+                          "replaceDiacritics": true,
+                          "asciiOnly": true,
+                          "throwErrors": true,
+                          "overwrite": true
+                        },
+                        "meta": [
+                          {
+                            "name": "name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "path",
+                            "type": "text"
+                          },
+                          {
+                            "name": "url",
+                            "type": "text"
+                          },
+                          {
+                            "name": "type",
+                            "type": "text"
+                          },
+                          {
+                            "name": "size",
+                            "type": "text"
+                          },
+                          {
+                            "name": "error",
+                            "type": "number"
+                          }
+                        ],
+                        "outputType": "file",
+                        "output": true
+                      },
+                      {
+                        "name": "putFile",
+                        "module": "s3",
+                        "action": "putFile",
+                        "options": {
+                          "provider": "do_s3_fra",
+                          "bucket": "images",
+                          "path": "{{upload.path}}",
+                          "key": "Operators/{{identity}}/{{upload.name}}",
+                          "acl": "public-read"
+                        },
+                        "outputType": "boolean",
+                        "output": true,
+                        "disabled": true
+                      },
+                      {
+                        "name": "removeLocPic",
+                        "module": "fs",
+                        "action": "remove",
+                        "options": {
+                          "path": "{{upload.path}}"
+                        },
+                        "outputType": "boolean",
+                        "output": true,
+                        "disabled": true
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean",
+                "output": true
+              },
+              {
+                "name": "OperatorAdd",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "m_operator",
+                        "column": "operator_name",
+                        "type": "text",
+                        "value": "{{$_POST.name}}"
+                      },
+                      {
+                        "table": "m_operator",
+                        "column": "service_id",
+                        "type": "number",
+                        "value": "{{$_POST.service}}"
+                      },
+                      {
+                        "table": "m_operator",
+                        "column": "status",
+                        "type": "number",
+                        "value": "{{$_POST.op_status == 'true' ? 1 : 0}}"
+                      },
+                      {
+                        "table": "m_operator",
+                        "column": "is_gst",
+                        "type": "number",
+                        "value": "{{$_POST.is_gst == 'true' ? 1 : 0}}"
+                      },
+                      {
+                        "table": "m_operator",
+                        "column": "is_tds",
+                        "type": "number",
+                        "value": "{{$_POST.is_tds == 'true' ? 1 : 0}}"
+                      },
+                      {
+                        "table": "m_operator",
+                        "column": "min_amount",
+                        "type": "number",
+                        "value": "{{$_POST.min_amt}}"
+                      },
+                      {
+                        "table": "m_operator",
+                        "column": "max_amount",
+                        "type": "text",
+                        "value": "{{$_POST.max_amount}}"
+                      },
+                      {
+                        "table": "m_operator",
+                        "column": "created_by",
+                        "type": "number",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "table": "m_operator",
+                        "column": "created_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "m_operator",
+                        "column": "image",
+                        "type": "text",
+                        "value": "{{'/assets/images/operators/'+upload.name}}",
+                        "condition": "{{'/assets/images/operators/'+upload.name}}"
+                      }
+                    ],
+                    "table": "m_operator",
+                    "returning": "id",
+                    "query": "INSERT INTO m_operator\n(operator_name, service_id, status, is_gst, is_tds, min_amount, max_amount, created_by, created_on, image) VALUES (:P1 /* {{$_POST.name}} */, :P2 /* {{$_POST.service}} */, :P3 /* {{$_POST.op_status == 'true' ? 1 : 0}} */, :P4 /* {{$_POST.is_gst == 'true' ? 1 : 0}} */, :P5 /* {{$_POST.is_tds == 'true' ? 1 : 0}} */, :P6 /* {{$_POST.min_amt}} */, :P7 /* {{$_POST.max_amount}} */, :P8 /* {{identity}} */, :P9 /* {{NOW}} */, :P10 /* {{'/assets/images/operators/'+upload.name}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.name}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_POST.service}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{$_POST.op_status == 'true' ? 1 : 0}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{$_POST.is_gst == 'true' ? 1 : 0}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{$_POST.is_tds == 'true' ? 1 : 0}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{$_POST.min_amt}}"
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{$_POST.max_amount}}"
+                      },
+                      {
+                        "name": ":P8",
+                        "type": "expression",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "name": ":P9",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P10",
+                        "type": "expression",
+                        "value": "{{'/assets/images/operators/'+upload.name}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

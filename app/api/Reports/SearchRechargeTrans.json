@@ -1,0 +1,325 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "search_component"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "Search",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "tt_balance",
+                "column": "transaction_type"
+              },
+              {
+                "table": "tt_balance",
+                "column": "tr_date"
+              },
+              {
+                "table": "tt_balance",
+                "column": "crdr_type"
+              },
+              {
+                "table": "tt_balance",
+                "column": "pay_ref_id"
+              },
+              {
+                "table": "tt_rt",
+                "column": "user_number"
+              },
+              {
+                "table": "tt_rt",
+                "column": "details"
+              },
+              {
+                "table": "tt_rt",
+                "column": "status"
+              },
+              {
+                "table": "tt_rt",
+                "column": "tr_type"
+              },
+              {
+                "table": "tt_rt",
+                "column": "tr_mode"
+              }
+            ],
+            "table": {
+              "name": "tt_balance"
+            },
+            "joins": [
+              {
+                "table": "tt_recharge_trans",
+                "column": "*",
+                "alias": "tt_rt",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "tt_rt",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "tt_balance",
+                        "column": "pay_ref_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                }
+              }
+            ],
+            "wheres": {
+              "condition": "OR",
+              "rules": [
+                {
+                  "id": "tt_balance.transaction_type",
+                  "field": "tt_balance.transaction_type",
+                  "type": "string",
+                  "operator": "contains",
+                  "value": "{{$_GET.search_component}}",
+                  "data": {
+                    "table": "tt_balance",
+                    "column": "transaction_type",
+                    "type": "text"
+                  },
+                  "operation": "LIKE"
+                },
+                {
+                  "id": "tt_balance.tr_date",
+                  "field": "tt_balance.tr_date",
+                  "type": "string",
+                  "operator": "contains",
+                  "value": "{{$_GET.search_component}}",
+                  "data": {
+                    "table": "tt_balance",
+                    "column": "tr_date",
+                    "type": "text"
+                  },
+                  "operation": "LIKE"
+                },
+                {
+                  "id": "tt_balance.crdr_type",
+                  "field": "tt_balance.crdr_type",
+                  "type": "string",
+                  "operator": "contains",
+                  "value": "{{$_GET.search_component}}",
+                  "data": {
+                    "table": "tt_balance",
+                    "column": "crdr_type",
+                    "type": "text"
+                  },
+                  "operation": "LIKE"
+                },
+                {
+                  "id": "tt_balance.pay_ref_id",
+                  "field": "tt_balance.pay_ref_id",
+                  "type": "double",
+                  "operator": "in",
+                  "value": "{{$_GET.search_component}}",
+                  "data": {
+                    "table": "tt_balance",
+                    "column": "pay_ref_id",
+                    "type": "number"
+                  },
+                  "operation": "IN"
+                },
+                {
+                  "id": "tt_rt.user_number",
+                  "field": "tt_rt.user_number",
+                  "type": "string",
+                  "operator": "contains",
+                  "value": "{{$_GET.search_component}}",
+                  "data": {
+                    "table": "tt_rt",
+                    "column": "user_number",
+                    "type": "text"
+                  },
+                  "operation": "LIKE"
+                },
+                {
+                  "id": "tt_rt.details",
+                  "field": "tt_rt.details",
+                  "type": "string",
+                  "operator": "contains",
+                  "value": "{{$_GET.search_component}}",
+                  "data": {
+                    "table": "tt_rt",
+                    "column": "details",
+                    "type": "text"
+                  },
+                  "operation": "LIKE"
+                },
+                {
+                  "id": "tt_rt.status",
+                  "field": "tt_rt.status",
+                  "type": "string",
+                  "operator": "contains",
+                  "value": "{{$_GET.search_component}}",
+                  "data": {
+                    "table": "tt_rt",
+                    "column": "status",
+                    "type": "text"
+                  },
+                  "operation": "LIKE"
+                },
+                {
+                  "id": "tt_rt.tr_type",
+                  "field": "tt_rt.tr_type",
+                  "type": "string",
+                  "operator": "contains",
+                  "value": "{{$_GET.search_component}}",
+                  "data": {
+                    "table": "tt_rt",
+                    "column": "tr_type",
+                    "type": "text"
+                  },
+                  "operation": "LIKE"
+                },
+                {
+                  "id": "tt_rt.tr_mode",
+                  "field": "tt_rt.tr_mode",
+                  "type": "string",
+                  "operator": "contains",
+                  "value": "{{$_GET.search_component}}",
+                  "data": {
+                    "table": "tt_rt",
+                    "column": "tr_mode",
+                    "type": "text"
+                  },
+                  "operation": "LIKE"
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT tt_balance.transaction_type, tt_balance.tr_date, tt_balance.crdr_type, tt_balance.pay_ref_id, tt_rt.user_number, tt_rt.details, tt_rt.status, tt_rt.tr_type, tt_rt.tr_mode\nFROM tt_balance\nINNER JOIN tt_recharge_trans AS tt_rt ON (tt_rt.id = tt_balance.pay_ref_id)\nWHERE tt_balance.transaction_type LIKE :P1 /* {{$_GET.search_component}} */ OR tt_balance.tr_date LIKE :P2 /* {{$_GET.search_component}} */ OR tt_balance.crdr_type LIKE :P3 /* {{$_GET.search_component}} */ OR tt_balance.pay_ref_id IN ({{$_GET.search_component}}) OR tt_rt.user_number LIKE :P4 /* {{$_GET.search_component}} */ OR tt_rt.details LIKE :P5 /* {{$_GET.search_component}} */ OR tt_rt.status LIKE :P6 /* {{$_GET.search_component}} */ OR tt_rt.tr_type LIKE :P7 /* {{$_GET.search_component}} */ OR tt_rt.tr_mode LIKE :P8 /* {{$_GET.search_component}} */",
+            "params": [
+              {
+                "operator": "contains",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.search_component}}"
+              },
+              {
+                "operator": "contains",
+                "type": "expression",
+                "name": ":P2",
+                "value": "{{$_GET.search_component}}"
+              },
+              {
+                "operator": "contains",
+                "type": "expression",
+                "name": ":P3",
+                "value": "{{$_GET.search_component}}"
+              },
+              {
+                "operator": "contains",
+                "type": "expression",
+                "name": ":P4",
+                "value": "{{$_GET.search_component}}"
+              },
+              {
+                "operator": "contains",
+                "type": "expression",
+                "name": ":P5",
+                "value": "{{$_GET.search_component}}"
+              },
+              {
+                "operator": "contains",
+                "type": "expression",
+                "name": ":P6",
+                "value": "{{$_GET.search_component}}"
+              },
+              {
+                "operator": "contains",
+                "type": "expression",
+                "name": ":P7",
+                "value": "{{$_GET.search_component}}"
+              },
+              {
+                "operator": "contains",
+                "type": "expression",
+                "name": ":P8",
+                "value": "{{$_GET.search_component}}"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "text",
+            "name": "transaction_type"
+          },
+          {
+            "type": "text",
+            "name": "tr_date"
+          },
+          {
+            "type": "text",
+            "name": "crdr_type"
+          },
+          {
+            "type": "number",
+            "name": "pay_ref_id"
+          },
+          {
+            "type": "text",
+            "name": "user_number"
+          },
+          {
+            "type": "text",
+            "name": "details"
+          },
+          {
+            "type": "text",
+            "name": "status"
+          },
+          {
+            "type": "text",
+            "name": "tr_type"
+          },
+          {
+            "type": "text",
+            "name": "tr_mode"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

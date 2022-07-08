@@ -1,0 +1,995 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "name": "todate"
+      },
+      {
+        "type": "text",
+        "name": "user_id"
+      },
+      {
+        "type": "text",
+        "name": "txnstatus"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.txnstatus=='All'}}",
+          "then": {
+            "steps": {
+              "name": "GetAllTxn",
+              "module": "dbconnector",
+              "action": "select",
+              "options": {
+                "sql": {
+                  "type": "SELECT",
+                  "columns": [
+                    {
+                      "table": "tt_balance",
+                      "column": "old_balance"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "amount"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "netamt"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "new_balance"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "transaction_type"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "tr_date"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "status"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "tr_date"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "ip_address"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "crdr_type"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "pay_ref_id"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "remarks"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "user_number",
+                      "alias": "recharge_number"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "tr_mode"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "tr_type"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "tr_id"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "api_logs",
+                      "alias": "api_name"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "reason"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "is_processed"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "operator_ref"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "api_ref"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "api_response_id"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "process_mode"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "live"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "dtcommamt"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "dtchargeamt"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "mdtcommamt"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "mdtchargeamt"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "bank_ac_no"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "remitter_id"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "blank1"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "operator_name"
+                    },
+                    {
+                      "table": "ms",
+                      "column": "service_name"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "id",
+                      "alias": "table_id"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "comm_amt"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "charge_amt"
+                    }
+                  ],
+                  "table": {
+                    "name": "tt_balance"
+                  },
+                  "primary": "id",
+                  "joins": [
+                    {
+                      "table": "tt_recharge_trans",
+                      "column": "*",
+                      "alias": "ttrech_txn",
+                      "type": "LEFT",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "ttrech_txn",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "tt_balance",
+                              "column": "pay_ref_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "*",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "m_operator",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "ttrech_txn",
+                              "column": "op_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "*",
+                      "alias": "ms",
+                      "type": "LEFT",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "ms",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "ttrech_txn",
+                              "column": "service_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    }
+                  ],
+                  "query": "SELECT tt_balance.old_balance, tt_balance.amount, tt_balance.netamt, tt_balance.new_balance, tt_balance.transaction_type, tt_balance.tr_date, tt_balance.status, tt_balance.tr_date, tt_balance.ip_address, tt_balance.crdr_type, tt_balance.pay_ref_id, tt_balance.remarks, ttrech_txn.user_number AS recharge_number, ttrech_txn.tr_mode, ttrech_txn.tr_type, ttrech_txn.tr_id, ttrech_txn.api_logs AS api_name, ttrech_txn.reason, ttrech_txn.is_processed, ttrech_txn.operator_ref, ttrech_txn.api_ref, ttrech_txn.api_response_id, ttrech_txn.process_mode, ttrech_txn.live, ttrech_txn.dtcommamt, ttrech_txn.dtchargeamt, ttrech_txn.mdtcommamt, ttrech_txn.mdtchargeamt, ttrech_txn.bank_ac_no, ttrech_txn.remitter_id, ttrech_txn.blank1, m_operator.operator_name, ms.service_name, tt_balance.id AS table_id, ttrech_txn.comm_amt, ttrech_txn.charge_amt\nFROM tt_balance\nLEFT JOIN tt_recharge_trans AS ttrech_txn ON (ttrech_txn.id = tt_balance.pay_ref_id) INNER JOIN m_operator ON (m_operator.id = ttrech_txn.op_id) LEFT JOIN m_service AS ms ON (ms.id = ttrech_txn.service_id)\nWHERE ttrech_txn.tr_date BETWEEN :P1 /* {{$_GET.fromdate}} */ AND :P2 /* {{$_GET.todate}} */ AND ttrech_txn.transaction_by = :P3 /* {{$_GET.user_id}} */\nORDER BY ttrech_txn.id DESC",
+                  "params": [
+                    {
+                      "operator": "between",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_GET.fromdate}}"
+                    },
+                    {
+                      "operator": "between",
+                      "type": "expression",
+                      "name": ":P2",
+                      "value": "{{$_GET.todate}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P3",
+                      "value": "{{$_GET.user_id}}"
+                    }
+                  ],
+                  "orders": [
+                    {
+                      "table": "ttrech_txn",
+                      "column": "id",
+                      "direction": "DESC",
+                      "recid": 1
+                    }
+                  ],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "ttrech_txn.tr_date",
+                        "field": "ttrech_txn.tr_date",
+                        "type": "datetime",
+                        "operator": "between",
+                        "value": [
+                          "{{$_GET.fromdate}}",
+                          "{{$_GET.todate}}"
+                        ],
+                        "data": {
+                          "table": "ttrech_txn",
+                          "column": "tr_date",
+                          "type": "datetime",
+                          "columnObj": {
+                            "type": "timestamp",
+                            "primary": false,
+                            "nullable": false,
+                            "unique": false,
+                            "name": "tr_date"
+                          }
+                        },
+                        "operation": "BETWEEN"
+                      },
+                      {
+                        "id": "ttrech_txn.transaction_by",
+                        "field": "ttrech_txn.transaction_by",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_GET.user_id}}",
+                        "data": {
+                          "table": "ttrech_txn",
+                          "column": "transaction_by",
+                          "type": "number",
+                          "columnObj": {
+                            "type": "integer",
+                            "primary": false,
+                            "nullable": true,
+                            "unique": false,
+                            "name": "transaction_by"
+                          }
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  }
+                },
+                "connection": "postgres_gcpServer"
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "text",
+                  "name": "old_balance"
+                },
+                {
+                  "type": "text",
+                  "name": "amount"
+                },
+                {
+                  "type": "text",
+                  "name": "netamt"
+                },
+                {
+                  "type": "text",
+                  "name": "new_balance"
+                },
+                {
+                  "type": "text",
+                  "name": "transaction_type"
+                },
+                {
+                  "type": "text",
+                  "name": "tr_date"
+                },
+                {
+                  "type": "text",
+                  "name": "status"
+                },
+                {
+                  "type": "text",
+                  "name": "ip_address"
+                },
+                {
+                  "type": "text",
+                  "name": "crdr_type"
+                },
+                {
+                  "type": "number",
+                  "name": "pay_ref_id"
+                },
+                {
+                  "type": "text",
+                  "name": "remarks"
+                },
+                {
+                  "type": "text",
+                  "name": "recharge_number"
+                },
+                {
+                  "type": "text",
+                  "name": "tr_mode"
+                },
+                {
+                  "type": "text",
+                  "name": "tr_type"
+                },
+                {
+                  "type": "text",
+                  "name": "tr_id"
+                },
+                {
+                  "type": "text",
+                  "name": "api_name"
+                },
+                {
+                  "type": "text",
+                  "name": "reason"
+                },
+                {
+                  "type": "text",
+                  "name": "is_processed"
+                },
+                {
+                  "type": "text",
+                  "name": "operator_ref"
+                },
+                {
+                  "type": "text",
+                  "name": "api_ref"
+                },
+                {
+                  "type": "number",
+                  "name": "api_response_id"
+                },
+                {
+                  "type": "text",
+                  "name": "process_mode"
+                },
+                {
+                  "type": "text",
+                  "name": "live"
+                },
+                {
+                  "type": "text",
+                  "name": "dtcommamt"
+                },
+                {
+                  "type": "text",
+                  "name": "dtchargeamt"
+                },
+                {
+                  "type": "text",
+                  "name": "mdtcommamt"
+                },
+                {
+                  "type": "text",
+                  "name": "mdtchargeamt"
+                },
+                {
+                  "type": "text",
+                  "name": "bank_ac_no"
+                },
+                {
+                  "type": "text",
+                  "name": "remitter_id"
+                },
+                {
+                  "type": "text",
+                  "name": "blank1"
+                },
+                {
+                  "type": "text",
+                  "name": "operator_name"
+                },
+                {
+                  "type": "text",
+                  "name": "service_name"
+                },
+                {
+                  "type": "number",
+                  "name": "table_id"
+                },
+                {
+                  "type": "text",
+                  "name": "comm_amt"
+                },
+                {
+                  "type": "text",
+                  "name": "charge_amt"
+                }
+              ],
+              "outputType": "array"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "GetAllTxn",
+              "module": "dbconnector",
+              "action": "select",
+              "options": {
+                "sql": {
+                  "type": "SELECT",
+                  "columns": [
+                    {
+                      "table": "tt_balance",
+                      "column": "old_balance"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "amount"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "netamt"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "new_balance"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "transaction_type"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "tr_date"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "status"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "tr_date"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "ip_address"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "crdr_type"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "pay_ref_id"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "remarks"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "user_number",
+                      "alias": "recharge_number"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "tr_mode"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "tr_type"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "tr_id"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "api_logs",
+                      "alias": "api_name"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "reason"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "is_processed"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "operator_ref"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "api_ref"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "api_response_id"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "process_mode"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "live"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "dtcommamt"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "dtchargeamt"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "mdtcommamt"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "mdtchargeamt"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "bank_ac_no"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "remitter_id"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "blank1"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "operator_name"
+                    },
+                    {
+                      "table": "ms",
+                      "column": "service_name"
+                    },
+                    {
+                      "table": "tt_balance",
+                      "column": "id",
+                      "alias": "table_id"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "comm_amt"
+                    },
+                    {
+                      "table": "ttrech_txn",
+                      "column": "charge_amt"
+                    }
+                  ],
+                  "table": {
+                    "name": "tt_balance"
+                  },
+                  "primary": "id",
+                  "joins": [
+                    {
+                      "table": "tt_recharge_trans",
+                      "column": "*",
+                      "alias": "ttrech_txn",
+                      "type": "LEFT",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "ttrech_txn",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "tt_balance",
+                              "column": "pay_ref_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_operator",
+                      "column": "*",
+                      "type": "INNER",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "m_operator",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "ttrech_txn",
+                              "column": "op_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "m_service",
+                      "column": "*",
+                      "alias": "ms",
+                      "type": "LEFT",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "ms",
+                            "column": "id",
+                            "operator": "equal",
+                            "value": {
+                              "table": "ttrech_txn",
+                              "column": "service_id"
+                            },
+                            "operation": "="
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    }
+                  ],
+                  "query": "SELECT tt_balance.old_balance, tt_balance.amount, tt_balance.netamt, tt_balance.new_balance, tt_balance.transaction_type, tt_balance.tr_date, tt_balance.status, tt_balance.tr_date, tt_balance.ip_address, tt_balance.crdr_type, tt_balance.pay_ref_id, tt_balance.remarks, ttrech_txn.user_number AS recharge_number, ttrech_txn.tr_mode, ttrech_txn.tr_type, ttrech_txn.tr_id, ttrech_txn.api_logs AS api_name, ttrech_txn.reason, ttrech_txn.is_processed, ttrech_txn.operator_ref, ttrech_txn.api_ref, ttrech_txn.api_response_id, ttrech_txn.process_mode, ttrech_txn.live, ttrech_txn.dtcommamt, ttrech_txn.dtchargeamt, ttrech_txn.mdtcommamt, ttrech_txn.mdtchargeamt, ttrech_txn.bank_ac_no, ttrech_txn.remitter_id, ttrech_txn.blank1, m_operator.operator_name, ms.service_name, tt_balance.id AS table_id, ttrech_txn.comm_amt, ttrech_txn.charge_amt\nFROM tt_balance\nLEFT JOIN tt_recharge_trans AS ttrech_txn ON (ttrech_txn.id = tt_balance.pay_ref_id) INNER JOIN m_operator ON (m_operator.id = ttrech_txn.op_id) LEFT JOIN m_service AS ms ON (ms.id = ttrech_txn.service_id)\nWHERE ttrech_txn.tr_date BETWEEN :P1 /* {{$_GET.fromdate}} */ AND :P2 /* {{$_GET.todate}} */ AND ttrech_txn.transaction_by = :P3 /* {{$_GET.user_id}} */ AND ttrech_txn.status = :P4 /* {{$_GET.txnstatus}} */\nORDER BY ttrech_txn.id DESC",
+                  "params": [
+                    {
+                      "operator": "between",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_GET.fromdate}}"
+                    },
+                    {
+                      "operator": "between",
+                      "type": "expression",
+                      "name": ":P2",
+                      "value": "{{$_GET.todate}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P3",
+                      "value": "{{$_GET.user_id}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P4",
+                      "value": "{{$_GET.txnstatus}}"
+                    }
+                  ],
+                  "orders": [
+                    {
+                      "table": "ttrech_txn",
+                      "column": "id",
+                      "direction": "DESC",
+                      "recid": 1
+                    }
+                  ],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "ttrech_txn.tr_date",
+                        "field": "ttrech_txn.tr_date",
+                        "type": "datetime",
+                        "operator": "between",
+                        "value": [
+                          "{{$_GET.fromdate}}",
+                          "{{$_GET.todate}}"
+                        ],
+                        "data": {
+                          "table": "ttrech_txn",
+                          "column": "tr_date",
+                          "type": "datetime",
+                          "columnObj": {
+                            "type": "timestamp",
+                            "primary": false,
+                            "nullable": false,
+                            "unique": false,
+                            "name": "tr_date"
+                          }
+                        },
+                        "operation": "BETWEEN"
+                      },
+                      {
+                        "id": "ttrech_txn.transaction_by",
+                        "field": "ttrech_txn.transaction_by",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_GET.user_id}}",
+                        "data": {
+                          "table": "ttrech_txn",
+                          "column": "transaction_by",
+                          "type": "number",
+                          "columnObj": {
+                            "type": "integer",
+                            "primary": false,
+                            "nullable": true,
+                            "unique": false,
+                            "name": "transaction_by"
+                          }
+                        },
+                        "operation": "="
+                      },
+                      {
+                        "id": "ttrech_txn.status",
+                        "field": "ttrech_txn.status",
+                        "type": "string",
+                        "operator": "equal",
+                        "value": "{{$_GET.txnstatus}}",
+                        "data": {
+                          "table": "ttrech_txn",
+                          "column": "status",
+                          "type": "text",
+                          "columnObj": {
+                            "type": "string",
+                            "primary": false,
+                            "nullable": true,
+                            "maxLength": -5,
+                            "unique": false,
+                            "name": "status"
+                          }
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  }
+                },
+                "connection": "postgres_gcpServer"
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "text",
+                  "name": "old_balance"
+                },
+                {
+                  "type": "text",
+                  "name": "amount"
+                },
+                {
+                  "type": "text",
+                  "name": "netamt"
+                },
+                {
+                  "type": "text",
+                  "name": "new_balance"
+                },
+                {
+                  "type": "text",
+                  "name": "transaction_type"
+                },
+                {
+                  "type": "text",
+                  "name": "tr_date"
+                },
+                {
+                  "type": "text",
+                  "name": "status"
+                },
+                {
+                  "type": "text",
+                  "name": "ip_address"
+                },
+                {
+                  "type": "text",
+                  "name": "crdr_type"
+                },
+                {
+                  "type": "number",
+                  "name": "pay_ref_id"
+                },
+                {
+                  "type": "text",
+                  "name": "remarks"
+                },
+                {
+                  "type": "text",
+                  "name": "recharge_number"
+                },
+                {
+                  "type": "text",
+                  "name": "tr_mode"
+                },
+                {
+                  "type": "text",
+                  "name": "tr_type"
+                },
+                {
+                  "type": "text",
+                  "name": "tr_id"
+                },
+                {
+                  "type": "text",
+                  "name": "api_name"
+                },
+                {
+                  "type": "text",
+                  "name": "reason"
+                },
+                {
+                  "type": "text",
+                  "name": "is_processed"
+                },
+                {
+                  "type": "text",
+                  "name": "operator_ref"
+                },
+                {
+                  "type": "text",
+                  "name": "api_ref"
+                },
+                {
+                  "type": "number",
+                  "name": "api_response_id"
+                },
+                {
+                  "type": "text",
+                  "name": "process_mode"
+                },
+                {
+                  "type": "text",
+                  "name": "live"
+                },
+                {
+                  "type": "text",
+                  "name": "dtcommamt"
+                },
+                {
+                  "type": "text",
+                  "name": "dtchargeamt"
+                },
+                {
+                  "type": "text",
+                  "name": "mdtcommamt"
+                },
+                {
+                  "type": "text",
+                  "name": "mdtchargeamt"
+                },
+                {
+                  "type": "text",
+                  "name": "bank_ac_no"
+                },
+                {
+                  "type": "text",
+                  "name": "remitter_id"
+                },
+                {
+                  "type": "text",
+                  "name": "blank1"
+                },
+                {
+                  "type": "text",
+                  "name": "operator_name"
+                },
+                {
+                  "type": "text",
+                  "name": "service_name"
+                },
+                {
+                  "type": "number",
+                  "name": "table_id"
+                },
+                {
+                  "type": "text",
+                  "name": "comm_amt"
+                },
+                {
+                  "type": "text",
+                  "name": "charge_amt"
+                }
+              ],
+              "outputType": "array"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

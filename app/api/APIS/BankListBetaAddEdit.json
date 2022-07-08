@@ -1,0 +1,397 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/add-bank-list-beta.ejs",
+      "linkedForm": "formAddEditBank"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "EditBankId",
+        "name": "EditBankId"
+      },
+      {
+        "type": "text",
+        "fieldName": "bank_name",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Bank Name is required."
+            },
+            "core:maxlength": {
+              "param": "100"
+            }
+          }
+        },
+        "name": "bank_name"
+      },
+      {
+        "type": "text",
+        "fieldName": "bank_code",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "bank_code"
+      },
+      {
+        "type": "text",
+        "fieldName": "ifsc",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "ifsc"
+      },
+      {
+        "type": "text",
+        "fieldName": "is_imps",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "is_imps"
+      },
+      {
+        "type": "text",
+        "fieldName": "is_neft",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "is_neft"
+      },
+      {
+        "type": "text",
+        "fieldName": "is_ac_verify",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "is_ac_verify"
+      },
+      {
+        "type": "text",
+        "fieldName": "op_status",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "op_status"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.EditBankId}}",
+          "then": {
+            "steps": {
+              "name": "UpBank",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "bank_name",
+                      "type": "text",
+                      "value": "{{$_POST.bank_name}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "bank_code",
+                      "type": "text",
+                      "value": "{{$_POST.bank_code}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "is_imps",
+                      "type": "text",
+                      "value": "{{$_POST.is_imps}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "is_neft",
+                      "type": "text",
+                      "value": "{{$_POST.is_neft}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "is_ac_verify_available",
+                      "type": "text",
+                      "value": "{{$_POST.is_ac_verify}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "ifsc",
+                      "type": "text",
+                      "value": "{{$_POST.ifsc}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "status",
+                      "type": "text",
+                      "value": "{{$_POST.op_status}}"
+                    }
+                  ],
+                  "table": "t_bank_list_beta",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.EditBankId}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "returning": "id",
+                  "query": "UPDATE t_bank_list_beta\nSET bank_name = :P1 /* {{$_POST.bank_name}} */, bank_code = :P2 /* {{$_POST.bank_code}} */, is_imps = :P3 /* {{$_POST.is_imps}} */, is_neft = :P4 /* {{$_POST.is_neft}} */, is_ac_verify_available = :P5 /* {{$_POST.is_ac_verify}} */, ifsc = :P6 /* {{$_POST.ifsc}} */, status = :P7 /* {{$_POST.op_status}} */\nWHERE id = :P8 /* {{$_POST.EditBankId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.bank_name}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.bank_code}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.is_imps}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.is_neft}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.is_ac_verify}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{$_POST.ifsc}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{$_POST.op_status}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P8",
+                      "value": "{{$_POST.EditBankId}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "AddBank",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "bank_name",
+                      "type": "text",
+                      "value": "{{$_POST.bank_name}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "bank_code",
+                      "type": "text",
+                      "value": "{{$_POST.bank_code}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "is_imps",
+                      "type": "text",
+                      "value": "{{$_POST.is_imps}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "is_neft",
+                      "type": "text",
+                      "value": "{{$_POST.is_neft}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "is_ac_verify_available",
+                      "type": "text",
+                      "value": "{{$_POST.is_ac_verify}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "ifsc",
+                      "type": "text",
+                      "value": "{{$_POST.ifsc}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "status",
+                      "type": "text",
+                      "value": "{{$_POST.op_status}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "t_bank_list_beta",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "t_bank_list_beta",
+                  "returning": "id",
+                  "query": "INSERT INTO t_bank_list_beta\n(bank_name, bank_code, is_imps, is_neft, is_ac_verify_available, ifsc, status, created_by, created_on) VALUES (:P1 /* {{$_POST.bank_name}} */, :P2 /* {{$_POST.bank_code}} */, :P3 /* {{$_POST.is_imps}} */, :P4 /* {{$_POST.is_neft}} */, :P5 /* {{$_POST.is_ac_verify}} */, :P6 /* {{$_POST.ifsc}} */, :P7 /* {{$_POST.op_status}} */, :P8 /* {{identity}} */, :P9 /* {{NOW}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.bank_name}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.bank_code}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.is_imps}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.is_neft}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.is_ac_verify}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{$_POST.ifsc}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{$_POST.op_status}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P9",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+.sw-bg-col-primary{
+    background-color: #1ebea5 !important;
+    color: #ffffff;
+}
+.sw-col-ar{
+    color: #16b916 !important;
+}
+.sw-col-br{
+    color: #b91660 !important;
+}
+.sw-col-cr{
+    color: #1641b9 !important;
+}
+.sw-col-dr {
+    color: #ef091f !important;
+}
+.sw-col-fail{
+    background: #ff572261;
+}
+.sw-col-pending{
+background: #cddc3994;
+}
+@media (min-width: 1200px){
+.container, .container-lg, .container-md, .container-sm, .container-xl {
+    max-width: 1300px !important;
+}
+}
+.page-item.active .page-link {
+    color: #0d6efd  !important;
+}
+.page-item.active .page-link:hover {
+    color: #fff  !important;
+}

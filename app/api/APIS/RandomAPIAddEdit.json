@@ -1,0 +1,616 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/random-rooting.ejs",
+      "linkedForm": "formAPIRooting"
+    },
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "service_id",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "service_id"
+      },
+      {
+        "type": "text",
+        "fieldName": "operator_id",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "operator_id"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_id",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "api_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.operator_id != 0}}",
+          "then": {
+            "steps": {
+              "name": "ApiRootingAdd",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "t_random_root",
+                      "column": "service_id",
+                      "type": "number",
+                      "value": "{{$_POST.service_id}}"
+                    },
+                    {
+                      "table": "t_random_root",
+                      "column": "op_id",
+                      "type": "number",
+                      "value": "{{$_POST.operator_id}}"
+                    },
+                    {
+                      "table": "t_random_root",
+                      "column": "api_id",
+                      "type": "number",
+                      "value": "{{$_POST.api_id}}"
+                    },
+                    {
+                      "table": "t_random_root",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "t_random_root",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "t_random_root",
+                  "query": "INSERT INTO t_random_root\n(service_id, op_id, api_id, created_by, created_on) VALUES (:P1 /* {{$_POST.service_id}} */, :P2 /* {{$_POST.operator_id}} */, :P3 /* {{$_POST.api_id}} */, :P4 /* {{identity}} */, :P5 /* {{NOW}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.service_id}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.operator_id}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.api_id}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "returning": "id"
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "GetAllOperator",
+                "module": "dbconnector",
+                "action": "select",
+                "options": {
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "m_operator",
+                        "column": "id",
+                        "alias": "op_id"
+                      }
+                    ],
+                    "table": {
+                      "name": "m_operator"
+                    },
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "m_operator.service_id",
+                          "field": "m_operator.service_id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.service_id}}",
+                          "data": {
+                            "table": "m_operator",
+                            "column": "service_id",
+                            "type": "number"
+                          },
+                          "operation": "="
+                        },
+                        {
+                          "id": "m_operator.status",
+                          "field": "m_operator.status",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": 1,
+                          "data": {
+                            "table": "m_operator",
+                            "column": "status",
+                            "type": "number"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "SELECT id AS op_id\nFROM m_operator\nWHERE service_id = :P1 /* {{$_POST.service_id}} */ AND status = 1",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.service_id}}"
+                      }
+                    ],
+                    "primary": "id"
+                  },
+                  "connection": "postgres_gcpServer"
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "op_id"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "repeat",
+                "module": "core",
+                "action": "repeat",
+                "options": {
+                  "repeat": "{{GetAllOperator}}",
+                  "outputFields": [],
+                  "exec": {
+                    "steps": [
+                      {
+                        "name": "CheckDataAvailable",
+                        "module": "dbconnector",
+                        "action": "select",
+                        "options": {
+                          "sql": {
+                            "type": "SELECT",
+                            "columns": [
+                              {
+                                "table": "m_api_forward",
+                                "column": "id",
+                                "alias": "countId",
+                                "aggregate": "COUNT"
+                              }
+                            ],
+                            "table": {
+                              "name": "m_api_forward"
+                            },
+                            "joins": [],
+                            "groupBy": [],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "m_api_forward.service_id",
+                                  "field": "m_api_forward.service_id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.service_id}}",
+                                  "data": {
+                                    "table": "m_api_forward",
+                                    "column": "service_id",
+                                    "type": "number",
+                                    "columnObj": {
+                                      "type": "integer",
+                                      "primary": false,
+                                      "nullable": false,
+                                      "unique": false,
+                                      "name": "service_id"
+                                    }
+                                  },
+                                  "operation": "="
+                                },
+                                {
+                                  "id": "m_api_forward.operator_id",
+                                  "field": "m_api_forward.operator_id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{op_id}}",
+                                  "data": {
+                                    "table": "m_api_forward",
+                                    "column": "operator_id",
+                                    "type": "number",
+                                    "columnObj": {
+                                      "type": "integer",
+                                      "primary": false,
+                                      "nullable": false,
+                                      "unique": false,
+                                      "name": "operator_id"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "SELECT COUNT(id) AS countId\nFROM m_api_forward\nWHERE service_id = :P1 /* {{$_POST.service_id}} */ AND operator_id = :P2 /* {{op_id}} */",
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{$_POST.service_id}}"
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{op_id}}"
+                              }
+                            ]
+                          },
+                          "connection": "postgres_gcpServer"
+                        },
+                        "output": true,
+                        "meta": [
+                          {
+                            "type": "number",
+                            "name": "countId"
+                          }
+                        ],
+                        "outputType": "array"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{CheckDataAvailable[0].countId > 0}}",
+                          "then": {
+                            "steps": {
+                              "name": "ApiRoutingUpAll",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "t_random_root",
+                                      "column": "api_id",
+                                      "type": "number",
+                                      "value": "{{$_POST.api_id}}"
+                                    },
+                                    {
+                                      "table": "t_random_root",
+                                      "column": "created_by",
+                                      "type": "number",
+                                      "value": "{{identity}}"
+                                    },
+                                    {
+                                      "table": "t_random_root",
+                                      "column": "created_on",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    }
+                                  ],
+                                  "table": "t_random_root",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "service_id",
+                                        "field": "service_id",
+                                        "type": "double",
+                                        "operator": "equal",
+                                        "value": "{{$_POST.service_id}}",
+                                        "data": {
+                                          "column": "service_id"
+                                        },
+                                        "operation": "="
+                                      },
+                                      {
+                                        "id": "op_id",
+                                        "field": "op_id",
+                                        "type": "double",
+                                        "operator": "equal",
+                                        "value": "{{op_id}}",
+                                        "data": {
+                                          "column": "op_id"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "query": "UPDATE t_random_root\nSET api_id = :P1 /* {{$_POST.api_id}} */, created_by = :P2 /* {{identity}} */, created_on = :P3 /* {{NOW}} */\nWHERE service_id = :P4 /* {{$_POST.service_id}} */ AND op_id = :P5 /* {{op_id}} */",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{$_POST.api_id}}"
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{identity}}"
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P4",
+                                      "value": "{{$_POST.service_id}}"
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P5",
+                                      "value": "{{op_id}}"
+                                    }
+                                  ],
+                                  "returning": "id"
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ],
+                              "output": true
+                            }
+                          },
+                          "else": {
+                            "steps": {
+                              "name": "ApiRoutingAddAll",
+                              "module": "dbupdater",
+                              "action": "insert",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "insert",
+                                  "values": [
+                                    {
+                                      "table": "t_random_root",
+                                      "column": "service_id",
+                                      "type": "number",
+                                      "value": "{{$_POST.service_id}}"
+                                    },
+                                    {
+                                      "table": "t_random_root",
+                                      "column": "op_id",
+                                      "type": "number",
+                                      "value": "{{op_id}}"
+                                    },
+                                    {
+                                      "table": "t_random_root",
+                                      "column": "api_id",
+                                      "type": "number",
+                                      "value": "{{$_POST.api_id}}"
+                                    },
+                                    {
+                                      "table": "t_random_root",
+                                      "column": "created_by",
+                                      "type": "number",
+                                      "value": "{{identity}}"
+                                    },
+                                    {
+                                      "table": "t_random_root",
+                                      "column": "created_on",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    }
+                                  ],
+                                  "table": "t_random_root",
+                                  "query": "INSERT INTO t_random_root\n(service_id, op_id, api_id, created_by, created_on) VALUES (:P1 /* {{$_POST.service_id}} */, :P2 /* {{op_id}} */, :P3 /* {{$_POST.api_id}} */, :P4 /* {{identity}} */, :P5 /* {{NOW}} */)",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{$_POST.service_id}}"
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{op_id}}"
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{$_POST.api_id}}"
+                                    },
+                                    {
+                                      "name": ":P4",
+                                      "type": "expression",
+                                      "value": "{{identity}}"
+                                    },
+                                    {
+                                      "name": ":P5",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    }
+                                  ],
+                                  "returning": "id"
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "identity",
+                                  "type": "text"
+                                },
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ],
+                              "output": true
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "$index",
+                    "type": "number"
+                  },
+                  {
+                    "name": "$number",
+                    "type": "number"
+                  },
+                  {
+                    "name": "$name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "$value",
+                    "type": "object"
+                  },
+                  {
+                    "name": "op_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "CheckDataAvailable",
+                    "type": "array",
+                    "sub": [
+                      {
+                        "type": "number",
+                        "name": "countId"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "ApiRoutingUpAll",
+                    "type": "text",
+                    "sub": [
+                      {
+                        "name": "affected",
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "ApiRoutingAddAll",
+                    "type": "text",
+                    "sub": [
+                      {
+                        "name": "identity",
+                        "type": "text"
+                      },
+                      {
+                        "name": "affected",
+                        "type": "number"
+                      }
+                    ]
+                  }
+                ],
+                "outputType": "array"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

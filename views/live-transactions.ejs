@@ -1,0 +1,127 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="livetransactions" appConnect="local" components="{dmxSockets:{},dmxDataTraversal:{}}" -->
+<meta name="ac:route" content="/live-transactions">
+<dmx-serverconnect id="scLiveRech" url="api/Reports/LiveTransactions" sockets="true" dmx-param:date="dateNow.datetime.formatDate('yyyy-MM-dd')"></dmx-serverconnect>
+
+<div class="row align-items-center justify-content-between px-4 mb-3 sd-secondary-header mx-0">
+    <div class="col-12 col-md-auto me-auto ps-4">
+        <h1 class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">
+            Live Transactions
+            <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scLiveRech.state.executing"></span>
+        </h1>
+    </div>
+</div>
+<div class="container px-4" id="Pendingrecharge">
+    <div class="card mb-5">
+        <div class="card-header sw-bg-col-primary">
+            <b>Live Transactions (Today's latest 50)</b>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover table-sm  sw-font-11">
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Order Id</th>
+                            <th>Tr.By</th>
+                            <th>Mobile/ A/C. No.</th>
+                            <th>Operator</th>
+                            <th>Amount</th>
+                            <th>API</th>
+                            <th>Status</th>
+                            <th>Tr. Id</th>
+                            <th>Tr. Mode</th>
+                            <th>Date</th>
+                            <th>Response</th>
+                        </tr>
+                    </thead>
+                    <tbody is="dmx-repeat" dmx-generator="bs5table" id="tableRepeat1" dmx-bind:repeat="scLiveRech.data.LiveReport">
+                        <tr dmx-class:sw-col-fail="status == 'FAILED'" dmx-class:sw-col-pending="status=='Pending'||status=='PENDING'">
+                            <td>{{$index+1}}</td>
+                            <td dmx-text="id"></td>
+                            <td dmx-text="user_id+' | '+user_fname+' | '+user_mobile"></td>
+                            <td dmx-text="recharge_mobile"></td>
+                            <td dmx-text="operator_name"></td>
+                            <td dmx-text="amount.toNumber().toFixed(2)"></td>
+                            <td dmx-text="api_logs"></td>
+                            <td class="fw-bold" dmx-text="status" dmx-class:text-success="status == 'SUCCESS'" dmx-class:text-warning="status == 'PENDING'" dmx-class:text-danger="status == 'FAILED'" dmx-class:text-primary="status == 'REFUND'"></td>
+                            <td dmx-text="api_ref"></td>
+                            <td dmx-text="tr_mode"></td>
+                            <td dmx-text="tr_date.formatDate('dd-MM-yyyy hh:mm:ss A')"></td>
+                            <td style="max-width: 200px; overflow: hidden;" dmx-text="operator_ref"></td>
+                        </tr>
+                    </tbody>
+                    <tbody dmx-show="content.scLiveRech.data.LiveReport.length==0">
+                        <tr class="text-center fw-bold text-danger fs-4">
+                            <td colspan="19">No Record Found!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header sw-bg-col-primary">
+            <b>Live AEPS Transactions (Latest 50)</b>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover table-sm  sw-font-11">
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Order Id</th>
+                            <th>Tr.By</th>
+                            <th>Mobile/ A/C. No.</th>
+                            <th>Operator</th>
+                            <th>Amount</th>
+                            <th>API</th>
+                            <th>Status</th>
+                            <th>Req. Id</th>
+                            <th>Tr. Id</th>
+                            <th>Tr. Mode</th>
+                            <th>Date</th>
+                            <th>Response</th>
+                            <th>Benef. Id</th>
+                            <th>Benef. Name</th>
+                            <th>Bank Name</th>
+                            <th>Bank A/C</th>
+                            <th>Service Type</th>
+                        </tr>
+                    </thead>
+                    <tbody is="dmx-repeat" dmx-generator="bs5table" id="tableRepeat2" dmx-bind:repeat="scLiveRech.data.LiveAEPSReport">
+                        <tr>
+                            <td>{{$index+1}}</td>
+                            <td dmx-text="id"></td>
+                            <td dmx-text="user_id+' | '+user_fname+' | '+user_mobile"></td>
+                            <td dmx-text="aeps_number"></td>
+                            <td dmx-text="operator_name"></td>
+                            <td dmx-text="amount.toNumber().toFixed(2)"></td>
+                            <td dmx-text="api_logs"></td>
+                            <td class="fw-bold" dmx-text="status" dmx-class:text-success="status == 'SUCCESS'" dmx-class:text-warning="status == 'Pending'" dmx-class:text-danger="status == 'FAILED'" dmx-class:text-primary="status == 'REFUND'"></td>
+                            <td dmx-text="tr_id"></td>
+                            <td dmx-text="api_ref"></td>
+                            <td dmx-text="tr_mode"></td>
+                            <td dmx-text="tr_date.formatDate('dd-MM-yyyy hh:mm:ss A')"></td>
+                            <td style="max-width: 200px; overflow: hidden;" dmx-text="operator_ref"></td>
+                            <th dmx-text="benef_id"></th>
+                            <th dmx-text="banef_name"></th>
+                            <th dmx-text="bank_name"></th>
+                            <th dmx-text="banef_acno">Bank A/C</th>
+                            <th dmx-text="service_api"></th>
+                        </tr>
+                    </tbody>
+                    <tbody dmx-show="content.scLiveRech.data.LiveAEPSReport.length==0">
+                        <tr class="text-center fw-bold text-danger fs-4">
+                            <td colspan="19">No Record Found!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <script>
+    setTimeout(function () { scLiveRecharge.reload(1); }, 10000);
+</script> -->

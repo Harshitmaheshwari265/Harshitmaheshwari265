@@ -1,0 +1,261 @@
+{
+    "meta": {
+        "$_GET": [
+            {
+                "type": "text",
+                "name": "date"
+            }
+        ]
+    },
+    "exec": {
+        "steps": [
+            {
+                "name": "",
+                "module": "auth",
+                "action": "restrict",
+                "options": {
+                    "provider": "securityLogin",
+                    "permissions": [
+                        "write"
+                    ],
+                    "loginUrl": "/login",
+                    "forbiddenUrl": "/403-forbidden"
+                }
+            },
+            {
+                "name": "LiveReport",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                    "connection": "postgres_gcpServer",
+                    "sql": {
+                        "query": "select trt.id, trt.user_number as recharge_mobile, trt.opening_balance, trt.amount, trt.comm_amt, trt.charge_amt, trt.net_amt, trt.closing_balance,\ntrt.tr_mode, trt.status, trt.tr_id, trt.api_logs, trt.api_ref, trt.operator_ref, trt.live, trt.tr_date::text, mo.operator_name, ms.service_name, mu.user_id, mu.user_fname, mu.user_mobile \nfrom tt_recharge_trans trt\nleft join m_operator mo on mo.id = trt.op_id and mo.service_id = trt.service_id \nleft join m_service ms on ms.id = trt.service_id \nleft join m_users mu on mu.id = trt.user_id \nwhere (ms.service_name = 'Mobile' or ms.service_name = 'Postpaid' or ms.service_name = 'DTH' or ms.service_name = 'Money' or is_bbps = 1) and TO_DATE(trt.tr_date::text, 'yyyy/mm/dd') = TO_DATE(@date::text, 'yyyy/mm/dd')\norder by trt.id desc limit 50;",
+                        "params": [
+                            {
+                                "name": "@date",
+                                "value": "{{$_GET.date}}",
+                                "test": "2022-05-28"
+                            }
+                        ]
+                    }
+                },
+                "output": true,
+                "meta": [
+                    {
+                        "name": "id",
+                        "type": "number"
+                    },
+                    {
+                        "name": "recharge_mobile",
+                        "type": "text"
+                    },
+                    {
+                        "name": "opening_balance",
+                        "type": "text"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "text"
+                    },
+                    {
+                        "name": "comm_amt",
+                        "type": "text"
+                    },
+                    {
+                        "name": "charge_amt",
+                        "type": "text"
+                    },
+                    {
+                        "name": "net_amt",
+                        "type": "text"
+                    },
+                    {
+                        "name": "closing_balance",
+                        "type": "text"
+                    },
+                    {
+                        "name": "tr_mode",
+                        "type": "text"
+                    },
+                    {
+                        "name": "status",
+                        "type": "text"
+                    },
+                    {
+                        "name": "tr_id",
+                        "type": "text"
+                    },
+                    {
+                        "name": "api_logs",
+                        "type": "text"
+                    },
+                    {
+                        "name": "api_ref",
+                        "type": "text"
+                    },
+                    {
+                        "name": "operator_ref",
+                        "type": "text"
+                    },
+                    {
+                        "name": "live",
+                        "type": "text"
+                    },
+                    {
+                        "name": "tr_date",
+                        "type": "text"
+                    },
+                    {
+                        "name": "operator_name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "service_name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "user_id",
+                        "type": "text"
+                    },
+                    {
+                        "name": "user_fname",
+                        "type": "text"
+                    },
+                    {
+                        "name": "user_mobile",
+                        "type": "text"
+                    }
+                ],
+                "outputType": "array"
+            },
+            {
+                "name": "LiveAEPSReport",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                    "connection": "postgres_gcpServer",
+                    "sql": {
+                        "query": "select tat.id, tat.aeps_number, tat.op_bal, tat.amount, tat.comm_amt, tat.charge_amt, tat.net_amt, tat.closing_bal, tat.merchant_id, tat.user_rt_id, tat.bank_acno, tat.benef_name, tat.benef_id, \ntat.bank_name, tat.service_api, tat.tr_mode, tat.status, tat.tr_id, tat.api_logs, tat.api_ref, tat.operator_ref, tat.live, tat.tr_date::text, mo.operator_name, ms.service_name, mu.user_id, mu.user_fname, mu.user_mobile \nfrom tt_aeps_trans tat \nleft join m_operator mo on mo.id = tat.op_id and mo.service_id = tat.service_id \nleft join m_service ms on ms.id = tat.service_id \nleft join m_users mu on mu.id = tat.user_id \nwhere TO_CHAR(tat.tr_date :: DATE, 'yyyy/mm/dd') = TO_CHAR(NOW() :: DATE, 'yyyy/mm/dd')\norder by tat.id desc limit 50;",
+                        "params": []
+                    }
+                },
+                "output": true,
+                "meta": [
+                    {
+                        "name": "id",
+                        "type": "number"
+                    },
+                    {
+                        "name": "aeps_number",
+                        "type": "text"
+                    },
+                    {
+                        "name": "op_bal",
+                        "type": "text"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "text"
+                    },
+                    {
+                        "name": "comm_amt",
+                        "type": "text"
+                    },
+                    {
+                        "name": "charge_amt",
+                        "type": "text"
+                    },
+                    {
+                        "name": "net_amt",
+                        "type": "text"
+                    },
+                    {
+                        "name": "closing_bal",
+                        "type": "text"
+                    },
+                    {
+                        "name": "merchant_id",
+                        "type": "text"
+                    },
+                    {
+                        "name": "user_rt_id",
+                        "type": "text"
+                    },
+                    {
+                        "name": "bank_acno",
+                        "type": "text"
+                    },
+                    {
+                        "name": "benef_name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "benef_id",
+                        "type": "text"
+                    },
+                    {
+                        "name": "bank_name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "service_api",
+                        "type": "text"
+                    },
+                    {
+                        "name": "tr_mode",
+                        "type": "text"
+                    },
+                    {
+                        "name": "status",
+                        "type": "text"
+                    },
+                    {
+                        "name": "tr_id",
+                        "type": "text"
+                    },
+                    {
+                        "name": "api_logs",
+                        "type": "text"
+                    },
+                    {
+                        "name": "api_ref",
+                        "type": "text"
+                    },
+                    {
+                        "name": "operator_ref",
+                        "type": "text"
+                    },
+                    {
+                        "name": "live",
+                        "type": "text"
+                    },
+                    {
+                        "name": "tr_date",
+                        "type": "text"
+                    },
+                    {
+                        "name": "operator_name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "service_name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "user_id",
+                        "type": "text"
+                    },
+                    {
+                        "name": "user_fname",
+                        "type": "text"
+                    },
+                    {
+                        "name": "user_mobile",
+                        "type": "text"
+                    }
+                ],
+                "outputType": "array"
+            }
+        ]
+    }
+}

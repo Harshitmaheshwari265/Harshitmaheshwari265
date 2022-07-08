@@ -1,0 +1,554 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/scheme-commision-set.ejs",
+      "linkedForm": "formAddEditCommision"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "commisionid",
+        "name": "commisionid"
+      },
+      {
+        "type": "text",
+        "fieldName": "op_id",
+        "name": "op_id"
+      },
+      {
+        "type": "text",
+        "fieldName": "scheme_id",
+        "name": "scheme_id"
+      },
+      {
+        "type": "text",
+        "fieldName": "comm_percent",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            },
+            "core:maxlength": {
+              "param": "10"
+            }
+          }
+        },
+        "name": "comm_percent"
+      },
+      {
+        "type": "text",
+        "fieldName": "comm_val",
+        "options": {
+          "rules": {
+            "core:number": {
+              "param": ""
+            }
+          }
+        },
+        "name": "comm_val"
+      },
+      {
+        "type": "text",
+        "fieldName": "charge_percent",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "5"
+            }
+          }
+        },
+        "name": "charge_percent"
+      },
+      {
+        "type": "text",
+        "fieldName": "charge_val",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "10"
+            }
+          }
+        },
+        "name": "charge_val"
+      },
+      {
+        "type": "text",
+        "fieldName": "status",
+        "name": "status"
+      },
+      {
+        "type": "text",
+        "name": "service_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.commisionid != ''}}",
+          "then": {
+            "steps": {
+              "name": "update",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "m_commission",
+                      "column": "operator_id",
+                      "type": "number",
+                      "value": "{{$_POST.op_id}}"
+                    },
+                    {
+                      "table": "m_commission",
+                      "column": "user_id",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_commission",
+                      "column": "api_id",
+                      "type": "number",
+                      "value": "1"
+                    },
+                    {
+                      "table": "m_commission",
+                      "column": "scheme_id",
+                      "type": "number",
+                      "value": "{{$_POST.scheme_id}}"
+                    },
+                    {
+                      "table": "m_commission",
+                      "column": "comm_per",
+                      "type": "text",
+                      "value": "{{$_POST.comm_percent}}"
+                    },
+                    {
+                      "table": "m_commission",
+                      "column": "comm_val",
+                      "type": "number",
+                      "value": "{{$_POST.comm_val}}"
+                    },
+                    {
+                      "table": "m_commission",
+                      "column": "service_charge_per",
+                      "type": "text",
+                      "value": "{{$_POST.charge_percent}}"
+                    },
+                    {
+                      "table": "m_commission",
+                      "column": "service_charge_val",
+                      "type": "text",
+                      "value": "{{$_POST.charge_val}}"
+                    },
+                    {
+                      "table": "m_commission",
+                      "column": "is_active",
+                      "type": "number",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "table": "m_commission",
+                      "column": "updated_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_commission",
+                      "column": "updated_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "m_commission",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.commisionid}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE m_commission\nSET operator_id = :P1 /* {{$_POST.op_id}} */, user_id = :P2 /* {{identity}} */, api_id = '1', scheme_id = :P3 /* {{$_POST.scheme_id}} */, comm_per = :P4 /* {{$_POST.comm_percent}} */, comm_val = :P5 /* {{$_POST.comm_val}} */, service_charge_per = :P6 /* {{$_POST.charge_percent}} */, service_charge_val = :P7 /* {{$_POST.charge_val}} */, is_active = :P8 /* {{$_POST.status}} */, updated_by = :P9 /* {{identity}} */, updated_on = :P10 /* {{NOW}} */\nWHERE id = :P11 /* {{$_POST.commisionid}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.op_id}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.scheme_id}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.comm_percent}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.comm_val}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{$_POST.charge_percent}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{$_POST.charge_val}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "name": ":P9",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P10",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P11",
+                      "value": "{{$_POST.commisionid}}"
+                    }
+                  ],
+                  "returning": "id"
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "GetComm",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "m_commission",
+                        "column": "id",
+                        "alias": "CountId",
+                        "aggregate": "COUNT"
+                      }
+                    ],
+                    "table": {
+                      "name": "m_commission"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "groupBy": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "m_commission.operator_id",
+                          "field": "m_commission.operator_id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.op_id}}",
+                          "data": {
+                            "table": "m_commission",
+                            "column": "operator_id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "integer",
+                              "primary": false,
+                              "nullable": false,
+                              "unique": false,
+                              "name": "operator_id"
+                            }
+                          },
+                          "operation": "="
+                        },
+                        {
+                          "id": "m_commission.scheme_id",
+                          "field": "m_commission.scheme_id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.scheme_id}}",
+                          "data": {
+                            "table": "m_commission",
+                            "column": "scheme_id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "integer",
+                              "primary": false,
+                              "nullable": true,
+                              "unique": false,
+                              "name": "scheme_id"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "SELECT COUNT(id) AS CountId\nFROM m_commission\nWHERE operator_id = :P1 /* {{$_POST.op_id}} */ AND scheme_id = :P2 /* {{$_POST.scheme_id}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.op_id}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{$_POST.scheme_id}}"
+                      }
+                    ]
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "CountId"
+                  }
+                ],
+                "outputType": "object"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{GetComm.CountId<1}}",
+                  "then": {
+                    "steps": {
+                      "name": "insert",
+                      "module": "dbupdater",
+                      "action": "insert",
+                      "options": {
+                        "connection": "postgres_gcpServer",
+                        "sql": {
+                          "type": "insert",
+                          "values": [
+                            {
+                              "table": "m_commission",
+                              "column": "operator_id",
+                              "type": "number",
+                              "value": "{{$_POST.op_id}}"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "user_id",
+                              "type": "number",
+                              "value": "{{identity}}"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "api_id",
+                              "type": "number",
+                              "value": "1"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "scheme_id",
+                              "type": "number",
+                              "value": "{{$_POST.scheme_id}}"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "comm_per",
+                              "type": "text",
+                              "value": "{{$_POST.comm_percent}}"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "comm_val",
+                              "type": "number",
+                              "value": "{{$_POST.comm_val}}"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "service_charge_per",
+                              "type": "text",
+                              "value": "{{$_POST.charge_percent}}"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "service_charge_val",
+                              "type": "text",
+                              "value": "{{$_POST.charge_val}}"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "is_active",
+                              "type": "number",
+                              "value": "{{$_POST.status}}"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "created_by",
+                              "type": "number",
+                              "value": "{{identity}}"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "created_on",
+                              "type": "datetime",
+                              "value": "{{NOW}}"
+                            },
+                            {
+                              "table": "m_commission",
+                              "column": "service_id",
+                              "type": "text",
+                              "value": "{{$_POST.service_id}}"
+                            }
+                          ],
+                          "table": "m_commission",
+                          "returning": "id",
+                          "query": "INSERT INTO m_commission\n(operator_id, user_id, api_id, scheme_id, comm_per, comm_val, service_charge_per, service_charge_val, is_active, created_by, created_on, service_id) VALUES (:P1 /* {{$_POST.op_id}} */, :P2 /* {{identity}} */, '1', :P3 /* {{$_POST.scheme_id}} */, :P4 /* {{$_POST.comm_percent}} */, :P5 /* {{$_POST.comm_val}} */, :P6 /* {{$_POST.charge_percent}} */, :P7 /* {{$_POST.charge_val}} */, :P8 /* {{$_POST.status}} */, :P9 /* {{identity}} */, :P10 /* {{NOW}} */, :P11 /* {{$_POST.service_id}} */)",
+                          "params": [
+                            {
+                              "name": ":P1",
+                              "type": "expression",
+                              "value": "{{$_POST.op_id}}"
+                            },
+                            {
+                              "name": ":P2",
+                              "type": "expression",
+                              "value": "{{identity}}"
+                            },
+                            {
+                              "name": ":P3",
+                              "type": "expression",
+                              "value": "{{$_POST.scheme_id}}"
+                            },
+                            {
+                              "name": ":P4",
+                              "type": "expression",
+                              "value": "{{$_POST.comm_percent}}"
+                            },
+                            {
+                              "name": ":P5",
+                              "type": "expression",
+                              "value": "{{$_POST.comm_val}}"
+                            },
+                            {
+                              "name": ":P6",
+                              "type": "expression",
+                              "value": "{{$_POST.charge_percent}}"
+                            },
+                            {
+                              "name": ":P7",
+                              "type": "expression",
+                              "value": "{{$_POST.charge_val}}"
+                            },
+                            {
+                              "name": ":P8",
+                              "type": "expression",
+                              "value": "{{$_POST.status}}"
+                            },
+                            {
+                              "name": ":P9",
+                              "type": "expression",
+                              "value": "{{identity}}"
+                            },
+                            {
+                              "name": ":P10",
+                              "type": "expression",
+                              "value": "{{NOW}}"
+                            },
+                            {
+                              "name": ":P11",
+                              "type": "expression",
+                              "value": "{{$_POST.service_id}}"
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "identity",
+                          "type": "text"
+                        },
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ],
+                      "output": true
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

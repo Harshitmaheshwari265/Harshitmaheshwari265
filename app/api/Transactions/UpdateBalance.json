@@ -1,0 +1,259 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/update_nan_balance.ejs",
+      "linkedForm": "formAddDebit"
+    },
+    "$_POST": [
+      {
+        "type": "number",
+        "fieldName": "wallet_bal",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            },
+            "core:number": {}
+          }
+        },
+        "name": "wallet_bal"
+      },
+      {
+        "type": "number",
+        "fieldName": "aeps_bal",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            },
+            "core:number": {}
+          }
+        },
+        "name": "aeps_bal"
+      },
+      {
+        "type": "number",
+        "fieldName": "wallet_tpin",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            },
+            "core:number": {}
+          }
+        },
+        "name": "wallet_tpin"
+      },
+      {
+        "type": "text",
+        "fieldName": "user_type",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "user_type"
+      },
+      {
+        "type": "text",
+        "fieldName": "user_id",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "user_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "AdminInfo",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_users",
+                "column": "user_tpin"
+              }
+            ],
+            "table": {
+              "name": "m_users"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_users.id",
+                  "field": "m_users.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{identity}}",
+                  "data": {
+                    "table": "m_users",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "nullable": false,
+                      "unique": true,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT user_tpin\nFROM m_users\nWHERE id = :P1 /* {{identity}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{identity}}"
+              }
+            ]
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "text",
+            "name": "user_tpin"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{AdminInfo.user_tpin==$_POST.wallet_tpin}}",
+          "then": {
+            "steps": {
+              "name": "UpBal",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "m_users",
+                      "column": "balance_amt",
+                      "type": "text",
+                      "value": "{{$_POST.wallet_bal}}"
+                    },
+                    {
+                      "table": "m_users",
+                      "column": "aeps_balance",
+                      "type": "text",
+                      "value": "{{$_POST.aeps_bal}}"
+                    }
+                  ],
+                  "table": "m_users",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.user_id}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "returning": "id",
+                  "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{$_POST.wallet_bal}} */, aeps_balance = :P2 /* {{$_POST.aeps_bal}} */\nWHERE id = :P3 /* {{$_POST.user_id}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.wallet_bal}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.aeps_bal}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P3",
+                      "value": "{{$_POST.user_id}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "Resp",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 403,
+                "data": "T-Pin Mismatched"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "scheme_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "AllCommisionScheme",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "select tssc.id, msb.id as service_id, msb.service_name, tssc.status \nfrom m_services_broad msb \nleft join t_service_scheme_control tssc on tssc.service_id = msb.id and tssc.scheme_id = @scheme\norder by msb.service_name asc;",
+            "params": [
+              {
+                "name": "@scheme",
+                "value": "{{$_GET.scheme_id}}",
+                "test": "1"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "text"
+          },
+          {
+            "name": "service_id",
+            "type": "number"
+          },
+          {
+            "name": "service_name",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

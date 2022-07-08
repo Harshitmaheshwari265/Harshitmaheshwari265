@@ -1,0 +1,177 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "GetPending",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "SELECT tt_recharge_trans.id, tt_recharge_trans.api_id, tt_recharge_trans.user_number, tt_recharge_trans.details, tt_recharge_trans.opening_balance, tt_recharge_trans.amount, tt_recharge_trans.comm_per, tt_recharge_trans.comm_val, tt_recharge_trans.comm_amt, tt_recharge_trans.other_charge, tt_recharge_trans.charge_per, tt_recharge_trans.charge_amt, tt_recharge_trans.net_amt, tt_recharge_trans.closing_balance, tt_recharge_trans.tr_mode, tt_recharge_trans.tr_type, tt_recharge_trans.status, tt_recharge_trans.tr_id, tt_recharge_trans.reason, tt_recharge_trans.api_logs, tt_recharge_trans.is_processed, tt_recharge_trans.operator_ref, tt_recharge_trans.api_ref, tt_recharge_trans.api_response_id, tt_recharge_trans.process_mode, tt_recharge_trans.live, tt_recharge_trans.tr_date::text, m_operator.operator_name, m_users.user_id, m_users.user_fname, m_users.user_mobile FROM tt_recharge_trans AS tt_recharge_trans\nLEFT JOIN m_operator AS m_operator ON (m_operator.id = tt_recharge_trans.op_id) \nLEFT JOIN m_users AS m_users ON (m_users.id = tt_recharge_trans.user_id) WHERE tt_recharge_trans.status = @status ORDER BY tt_recharge_trans.id ASC",
+            "params": [
+              {
+                "name": "@status",
+                "value": "{{'PENDING'}}",
+                "test": "PENDING"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "api_id",
+            "type": "number"
+          },
+          {
+            "name": "user_number",
+            "type": "text"
+          },
+          {
+            "name": "details",
+            "type": "text"
+          },
+          {
+            "name": "opening_balance",
+            "type": "text"
+          },
+          {
+            "name": "amount",
+            "type": "text"
+          },
+          {
+            "name": "comm_per",
+            "type": "text"
+          },
+          {
+            "name": "comm_val",
+            "type": "text"
+          },
+          {
+            "name": "comm_amt",
+            "type": "text"
+          },
+          {
+            "name": "other_charge",
+            "type": "text"
+          },
+          {
+            "name": "charge_per",
+            "type": "text"
+          },
+          {
+            "name": "charge_amt",
+            "type": "text"
+          },
+          {
+            "name": "net_amt",
+            "type": "text"
+          },
+          {
+            "name": "closing_balance",
+            "type": "text"
+          },
+          {
+            "name": "tr_mode",
+            "type": "text"
+          },
+          {
+            "name": "tr_type",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "tr_id",
+            "type": "text"
+          },
+          {
+            "name": "reason",
+            "type": "text"
+          },
+          {
+            "name": "api_logs",
+            "type": "text"
+          },
+          {
+            "name": "is_processed",
+            "type": "text"
+          },
+          {
+            "name": "operator_ref",
+            "type": "text"
+          },
+          {
+            "name": "api_ref",
+            "type": "text"
+          },
+          {
+            "name": "api_response_id",
+            "type": "number"
+          },
+          {
+            "name": "process_mode",
+            "type": "text"
+          },
+          {
+            "name": "live",
+            "type": "text"
+          },
+          {
+            "name": "tr_date",
+            "type": "text"
+          },
+          {
+            "name": "operator_name",
+            "type": "text"
+          },
+          {
+            "name": "user_id",
+            "type": "text"
+          },
+          {
+            "name": "user_fname",
+            "type": "text"
+          },
+          {
+            "name": "user_mobile",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

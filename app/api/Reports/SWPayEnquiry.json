@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "name": "todate"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "FetchContactUs",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "SELECT mscu.id, mscu.user_mobile, mscu.user_name, mscu.ip, mscu.user_email, mscu.message, mscu.status, mscu.created_on::text\nFROM m_swpay_contact_us mscu \nWHERE mscu.created_on BETWEEN @fromdate AND @todate ORDER BY mscu.id desc;",
+            "params": [
+              {
+                "name": "@fromdate",
+                "value": "{{$_GET.fromdate}}",
+                "test": "2022-05-26 00:00:00"
+              },
+              {
+                "name": "@todate",
+                "value": "{{$_GET.todate}}",
+                "test": "2022-06-26 23:59:59"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "sms_message",
+            "type": "text"
+          },
+          {
+            "name": "sender_mobile",
+            "type": "text"
+          },
+          {
+            "name": "created_on",
+            "type": "text"
+          },
+          {
+            "name": "sms_type",
+            "type": "text"
+          },
+          {
+            "name": "ip_address",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "response",
+            "type": "text"
+          },
+          {
+            "name": "user_id",
+            "type": "number"
+          },
+          {
+            "name": "extra1",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

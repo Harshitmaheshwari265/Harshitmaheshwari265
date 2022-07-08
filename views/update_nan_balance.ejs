@@ -1,0 +1,79 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="update_nan_balance" appConnect="local" components="{dmxDataTraversal:{}}" -->
+<meta name="ac:route" content="/update_nan_balance">
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<dmx-value id="varBalance" dmx-bind:value="0"></dmx-value>
+<dmx-value id="varAb" dmx-bind:value=""></dmx-value>
+<script is="dmx-flow" id="flowFetchUser" type="text/dmx-flow">{
+  condition: {
+    if: "{{(formAddDebit.UserTypeSelf.value)}}",
+    then: {
+      steps: {
+        run: {action: "{{scUserSchemPrio.load({})}}"}
+      }
+    }
+  }
+}</script>
+<dmx-serverconnect id="scBalance" url="api/Transactions/GetBalanceInfo" dmx-param:user_id="formAddDebit.inp_target_user.value"></dmx-serverconnect>
+<dmx-serverconnect id="scUserType" url="api/Users/UserType"></dmx-serverconnect>
+<dmx-serverconnect id="scUserSchemPrio" url="api/Scheme/FetchSchPrioUser" dmx-param:user_type="formAddDebit.UserTypeSelf.value" noload></dmx-serverconnect>
+<dmx-data-detail id="ddUserScheme" dmx-bind:data="scUserSchemPrio.data.UserDetails" key="id"></dmx-data-detail>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 id="DebitHeading" class="text-center align-self-center">Update NaN Balance</h1>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container pb-3">
+    <div class="card ">
+        <div class="card-header sw-bg-col-primary">
+            <b>Update NaN Balance</b>
+        </div>
+
+        <div class="card-body">
+            <form is="dmx-serverconnect-form" id="formAddDebit" method="post" action="api/Transactions/UpdateBalance" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAddDebit.data ? scNotif.success('Amount Updated Successfully') : scNotif.success('Amount Updated');formAddDebit.reset(); scBalance.load();scAdminBalance.load();formAddDebit.reset()" dmx-on:error="scNotif.warning('An error occurred'); " dmx-on:forbidden="scNotif.warning(lastError.response)">
+                <div class="row">
+                    <div class="col-12 col-lg-2 p-2">
+                        <label>User Type</label>
+                        <select id="UserTypeSelf" name="user_type" class="form-control form-select col-12 px-2" dmx-bind:options="scUserType.data.GetUserType" optiontext="user_type" optionvalue="id" dmx-on:changed="flowFetchUser.run()" required="">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-7 p-2">
+                        <label>Select User</label>
+                        <select class="form-control form-select" id="inp_target_user" name="user_id" aria-describedby="inp_target_user_help" dmx-bind:options="scUserSchemPrio.data.UserDetails" optiontext="user_mobile+' - '+user_id+' - '+user_fname+' :: Current Balance = Rs. '+balance_amt" optionvalue="id" required="">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-2 p-2">
+                        <label>Wallet Balance</label>
+                        <input type="number" id="wallet_bal" name="wallet_bal" class="form-control" placeholder="E.g: 1452" required="" dmx-bind:value="content.scBalance.data.GetBal.balance_amt">
+                    </div>
+                    <div class="col-12 col-lg-2 p-2">
+                        <label>AEPS Balance</label>
+                        <input type="number" id="aeps_bal" name="aeps_bal" class="form-control" placeholder="E.g: 1452" required="" dmx-bind:value="content.scBalance.data.GetBal.aeps_balance">
+                    </div>
+                    <div class="col-12 col-lg-2 p-2">
+                        <label>TPIN</label>
+                        <input type="number" id="wallet_tpin" name="wallet_tpin" class="form-control" placeholder="E.g: 1452" required="">
+                    </div>
+                    <div class="col-4 p-0 ms-3">
+                        <button id="btn1" class="btn btn-info mt-md-4" type="submit" dmx-bind:disabled="state.executing">Submit<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+<script>
+    var $disabledResults = $("#inp_target_user");
+    $disabledResults.select2();
+</script>

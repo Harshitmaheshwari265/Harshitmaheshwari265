@@ -1,0 +1,156 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="addbanklistbeta" appConnect="local" components="{dmxDataTraversal:{},dmxBootstrap5Navigation:{},dmxBootstrap5Modal:{}}" -->
+<meta name="ac:route" content="/add-bank-list-beta">
+<dmx-serverconnect id="scBankListBeta" url="api/APIS/BankListBeta"></dmx-serverconnect>
+<dmx-data-view id="dvBankListBeta" dmx-bind:data="scBankListBeta.data.GetBankList" filter="(bank_name.lowercase().contains(formSearchUser.Search.value.lowercase()) || bank_code.lowercase().contains(formSearchUser.Search.value.lowercase()))"></dmx-data-view>
+<dmx-data-detail id="ddBankListBeta" key="id" dmx-bind:data="dvBankListBeta.data"></dmx-data-detail>
+<div class="row align-items-center justify-content-between px-4 mb-3 sd-secondary-header mx-0">
+    <div class="col-12 col-md-auto me-auto ps-4">
+        <h1 class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">
+            DMT Bank List Beta
+            <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scBankListBeta.state.executing"></span>
+        </h1>
+    </div>
+    <div class="col-auto order-2 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+        <button id="btnAdd" class="btn btn-primary" dmx-on:click="modalAddBank.show(); ddBankListBeta.select(0);">Add Bank</button>
+    </div>
+    <div class="col-auto order-1 order-md-3 d-flex align-items-center justify-content-center">
+        <form id="formSearchUser" class="sd-search-form">
+            <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                <input type="text" class="form-control sd-search-input rounded-pill" id="Search" name="Search" placeholder="Search">
+                <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="container px-4" id="Recharges">
+    <div class="card">
+        <div class="card-header sw-bg-col-primary">
+            <b>Bank List</b>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover table-sm sw-font-11">
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Bank Name</th>
+                            <th>Beta Bank Code</th>
+                            <th>IFSC</th>
+                            <th>Is NEFT</th>
+                            <th>Is IMPS</th>
+                            <th>Is A/C Verify Available</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="dvBankListBeta.data" id="tableRepeat1" key="id">
+                        <tr>
+                            <td>{{$index+1}}</td>
+                            <td dmx-text="bank_name"></td>
+                            <td dmx-text="bank_code"></td>
+                            <td dmx-text="ifsc"></td>
+                            <td dmx-text="is_neft"></td>
+                            <td dmx-text="is_imps"></td>
+                            <td dmx-text="is_ac_verify_available"></td>
+                            <td class="fw-bold" dmx-text="status" dmx-class:text-success="status == 'Active'" dmx-class:text-danger="status == 'InActive'"></td>
+                            <td><a class="dropdown-item" href="#" dmx-on:click="ddBankListBeta.select(id);modalAddBank.show()" data-bs-toggle="modal" data-bs-target="#modalAddBank"><i class="fas fa-edit sw-col-ar" title="Edit Add/ Edit Bank"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Add Add Bank -->
+<div class="modal fade" id="modalAddBank" is="dmx-bs5-modal" tabindex="-1" nocloseonclick="true" nokeyboard="true" nofocus="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ddBankListBeta.data.id ? 'Edit Bank' : 'Add Bank'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" dmx-on:click="formAddEditBank.reset()"></button>
+            </div>
+            <div class="modal-body">
+                <form is="dmx-serverconnect-form" id="formAddEditBank" method="post" action="api/APIS/BankListBetaAddEdit" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAddEditBank.data.AddEdit ? scNotif.success('New Operator Added') : scNotif.success('Operator Updated'); formAddEditBank.reset(); scOperator.load()" dmx-on:error="scNotif.warning('An error occurred'); modalAddOperators.hide();formAddEditBank.reset()" dmx-on:forbidden="scNotif.warning(lastError.response)" dmx-on:unauthorized="scNotif.warning(lastError.response)" dmx-on:invalid="scNotif.warning(lastError.message)">
+
+                    <input type="hidden" name="EditBankId" dmx-bind:value="ddBankListBeta.data.id">
+                    <div class="mb-3 row">
+                        <label for="inp_name" class="col-sm-2 col-form-label">Bank Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_bank_name" name="bank_name" aria-describedby="inp_name_help" placeholder="" maxlength="100" required="" data-msg-required="Bank Name is required." dmx-bind:value="ddBankListBeta.data.bank_name">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_bank_code" class="col-sm-2 col-form-label">Bank Code</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_bank_code" name="bank_code" aria-describedby="inp_bank_code_help" placeholder="Enter bank Code" dmx-bind:value="ddBankListBeta.data.bank_code" required="">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_ifsc" class="col-sm-2 col-form-label">IFSC</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_ifsc" name="ifsc" aria-describedby="inp_is_ifsc_help" dmx-bind:value="ddBankListBeta.data.ifsc" required="">
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row mx-0">
+                        <label for="inp_is_imps" class="col-sm-2 col-form-label">Is IMPS</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_imps" name="is_imps" aria-describedby="inp_is_imps_help" dmx-bind:value="ddBankListBeta.data.is_imps" required="">
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 col-6 px-0 row">
+                        <label for="inp_is_neft" class="col-sm-2 col-form-label">Is NEFT</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_neft" name="is_neft" aria-describedby="inp_is_neft_help" dmx-bind:value="ddBankListBeta.data.is_neft" required="">
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row mx-0">
+                        <div class="mb-3 col-6 px-0 row">
+                            <label for="inp_is_ac_verify" class="col-sm-2 col-form-label">Is AC Verify Available</label>
+                            <div class="col-sm-10">
+                                <select type="text" class="form-control form-select" id="is_ac_verify" name="is_ac_verify" aria-describedby="inp_is_ac_verify_help" dmx-bind:value="ddBankListBeta.data.is_ac_verify_available" required="">
+                                    <option value="">Select</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3 col-6 px-0 row">
+                            <label for="inp_status" class="col-5 col-form-label">Status</label>
+                            <div class="col-sm-10">
+                                <select type="text" class="form-control form-select" id="inp_status" name="op_status" aria-describedby="inp_is_status_help" dmx-bind:value="ddBankListBeta.data.status" required="">
+                                    <option value="">Select</option>
+                                    <option value="Active">Active</option>
+                                    <option value="InActive">InActive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-2">&nbsp;</div>
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">Submit<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" dmx-on:click="formAddEditBank.reset()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

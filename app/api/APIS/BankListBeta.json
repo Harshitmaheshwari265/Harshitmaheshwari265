@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "GetBankList",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "t_bank_list_beta",
+                "column": "id"
+              },
+              {
+                "table": "t_bank_list_beta",
+                "column": "bank_name"
+              },
+              {
+                "table": "t_bank_list_beta",
+                "column": "bank_code"
+              },
+              {
+                "table": "t_bank_list_beta",
+                "column": "is_imps"
+              },
+              {
+                "table": "t_bank_list_beta",
+                "column": "is_neft"
+              },
+              {
+                "table": "t_bank_list_beta",
+                "column": "is_ac_verify_available"
+              },
+              {
+                "table": "t_bank_list_beta",
+                "column": "ifsc"
+              },
+              {
+                "table": "t_bank_list_beta",
+                "column": "status"
+              }
+            ],
+            "table": {
+              "name": "t_bank_list_beta"
+            },
+            "joins": [],
+            "primary": "id",
+            "query": "SELECT id, bank_name, bank_code, is_imps, is_neft, is_ac_verify_available, ifsc, status\nFROM t_bank_list_beta\nORDER BY bank_name ASC\nOFFSET  ROWS",
+            "params": [],
+            "limit": "",
+            "offset": "",
+            "sort": "",
+            "dir": "",
+            "orders": [
+              {
+                "table": "t_bank_list_beta",
+                "column": "bank_name",
+                "direction": "ASC"
+              }
+            ]
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "bank_name"
+          },
+          {
+            "type": "text",
+            "name": "bank_code"
+          },
+          {
+            "type": "text",
+            "name": "is_imps"
+          },
+          {
+            "type": "text",
+            "name": "is_neft"
+          },
+          {
+            "type": "text",
+            "name": "is_ac_verify_available"
+          },
+          {
+            "type": "text",
+            "name": "ifsc"
+          },
+          {
+            "type": "text",
+            "name": "status"
+          }
+        ],
+        "outputType": "array",
+        "type": "dbconnector_select"
+      }
+    ]
+  }
+}

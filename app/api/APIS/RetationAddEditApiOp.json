@@ -1,0 +1,313 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/relation-op-api.ejs",
+      "linkedForm": "formAddEditApiOp"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "OpApiId",
+        "name": "OpApiId"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_code",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "10"
+            }
+          }
+        },
+        "name": "api_code"
+      },
+      {
+        "type": "text",
+        "fieldName": "operator_id",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "operator_id"
+      },
+      {
+        "type": "text",
+        "fieldName": "inp_api_id",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "inp_api_id"
+      },
+      {
+        "type": "text",
+        "fieldName": "status",
+        "name": "status"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_sequence",
+        "options": {
+          "rules": {}
+        },
+        "name": "api_sequence"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.OpApiId != ''}}",
+          "then": {
+            "steps": {
+              "name": "APICodeUpdate",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "t_op_api",
+                      "column": "code",
+                      "type": "text",
+                      "value": "{{$_POST.api_code}}"
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "status",
+                      "type": "number",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "updated_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "updated_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "api_hit_serial",
+                      "type": "number",
+                      "value": "{{$_POST.api_sequence}}"
+                    }
+                  ],
+                  "table": "t_op_api",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.OpApiId}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE t_op_api\nSET code = :P1 /* {{$_POST.api_code}} */, status = :P2 /* {{$_POST.status}} */, updated_by = :P3 /* {{identity}} */, updated_on = :P4 /* {{NOW}} */, api_hit_serial = :P5 /* {{$_POST.api_sequence}} */\nWHERE id = :P6 /* {{$_POST.OpApiId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.api_sequence}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P6",
+                      "value": "{{$_POST.OpApiId}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "APIAdd",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "t_op_api",
+                      "column": "op_id",
+                      "type": "number",
+                      "value": "{{$_POST.operator_id}}"
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "api_id",
+                      "type": "number",
+                      "value": "{{$_POST.inp_api_id}}"
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "code",
+                      "type": "text",
+                      "value": "{{$_POST.api_code}}"
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "status",
+                      "type": "number",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "api_hit_serial",
+                      "type": "number",
+                      "value": "{{$_POST.api_sequence}}"
+                    }
+                  ],
+                  "table": "t_op_api",
+                  "returning": "id",
+                  "query": "INSERT INTO t_op_api\n(op_id, api_id, code, status, created_by, created_on, api_hit_serial) VALUES (:P1 /* {{$_POST.operator_id}} */, :P2 /* {{$_POST.inp_api_id}} */, :P3 /* {{$_POST.api_code}} */, :P4 /* {{$_POST.status}} */, :P5 /* {{identity}} */, :P6 /* {{NOW}} */, :P7 /* {{$_POST.api_sequence}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.operator_id}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.inp_api_id}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{$_POST.api_sequence}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

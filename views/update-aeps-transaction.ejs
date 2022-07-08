@@ -1,0 +1,215 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="updateaepstransaction" appConnect="local" components="{dmxDataTraversal:{},dmxDatePicker:{},dmxBootstrap5Modal:{},dmxFormatter:{}}" -->
+<meta name="ac:route" content="/update-aeps-transaction">
+<dmx-serverconnect id="scFetchAEPSTrans" url="api/Reports/AEPSTransUpFetch" dmx-param:fromdate="formDatePicker.daterange.start" dmx-param:todate="formDatePicker.daterange.end" dmx-param:selectstatus="content.selectstatus.value"></dmx-serverconnect>
+<dmx-data-view id="dvFetchTrns" dmx-bind:data="scFetchAEPSTrans.data.GetAEPSTxn.data"></dmx-data-view>
+<dmx-data-detail id="ddFetchTrans" dmx-bind:data="content.dvFetchTrns.data" key="id">
+</dmx-data-detail>
+<div class="row align-items-center justify-content-between px-4 mb-3 sd-secondary-header mx-0">
+    <div class="col-12 col-md-auto me-auto ps-4">
+        <h1 class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">
+            Update AEPS Transaction
+            <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scFetchAEPSTrans.state.executing"></span>
+        </h1>
+    </div>
+    <div class="col-auto order-3 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+        <select class="form-control form-select" id="selectstatus">
+            <option value="0">All</option>
+            <option value="SUCCESS">SUCCESS</option>
+            <option value="FAILED">FAILED</option>
+            <option value="PENDING">PENDING</option>
+            <option value="REFUND">REFUND</option>
+        </select>
+    </div>
+    <div class="col-auto order-2 order-md-2 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+        <form id="formDatePicker"><label class="sw-datepicker">
+                <span class="btn bg-light"><img src="assets/images/icons/calendar.svg" class="img-fluid" width="20px"></span>
+                <input type="text" is="dmx-date-range-picker" format="DD MMM YY" class="" placeholder="Nov 2021 - Dec 2021" id="daterange" dmx-bind:startdate="dateNow.datetime.addDays(0)" dmx-bind:enddate="dateNow.datetime.formatDate('yyyy-MM-dd 23:59:59')" autoapply="true">
+            </label>
+        </form>
+    </div>
+    <div class="col-auto order-1 order-md-3 d-flex align-items-center justify-content-center">
+        <form id="formSearchUser" class="sd-search-form">
+            <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                <input type="text" class="form-control sd-search-input rounded-pill" id="Search" name="Search" placeholder="Search">
+                <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="container px-4" id="Pendingrecharge">
+    <div class="card">
+        <div class="card-header sw-bg-col-primary">
+            <b>Update AEPS Transaction</b>
+            <!-- <button class="btn btn-primary btn-sm right" dmx-on:click="modalMultiUp.show();">Update All</button> -->
+        </div>
+
+        <div class="card-body">
+            <form is="dmx-serverconnect-form" id="UpdateMultiForm" method="post" role="form" action="api/Transactions/MultiTransUp" dmx-on:success="scNotif.success('Action Success'); scFetchAEPSTrans.load();modalMultiUp.hide();modalMultiUp.formMultiShow.reset();UpdateMultiForm.reset(true)" dmx-on:error="scNotif.warning('An error occurred');" dmx-on:forbidden="scNotif.danger(lastError.response)">
+                <input type="hidden" name="tr_status" dmx-bind:value="modalMultiUp.formMultiShow.MultiStatus.value">
+                <input type="hidden" name="tpin" dmx-bind:value="modalMultiUp.formMultiShow.MultiTPIN.value">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover table-sm sw-font-11">
+                        <thead>
+                            <tr>
+                                <th>Sl. No.</th>
+                                <th>Tr. Id</th>
+                                <th>API Ref.</th>
+                                <th>Tr.By</th>
+                                <th>Mobile</th>
+                                <th style="    min-width: 150px;">Operator</th>
+                                <th>Mode</th>
+                                <th>Opening Balance</th>
+                                <th>Amount</th>
+                                <th>Comm. Amt</th>
+                                <th>Charge. Amt.</th>
+                                <th>Net Amt.</th>
+                                <th>Closing Balance</th>
+                                <th>Tr. Id</th>
+                                <th>API</th>
+                                <th>Tr. Status</th>
+                                <th>Complain Status</th>
+                                <th style="    min-width: 80px;">Tr. Date</th>
+                                <th style="    min-width: 80px;">Up. Date</th>
+                                <th>Single Action</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody is="dmx-repeat" dmx-generator="bs5table" id="tableRepeat1" dmx-bind:repeat="dvFetchTrns.data" key="id">
+                            <tr dmx-bind:id="abc{{$index}}">
+                                <td>{{$index+1}}</td>
+                                <td dmx-text="id"></td>
+                                <td dmx-text="api_ref"></td>
+                                <td dmx-text="user_rt_id+'|'+user_fname+'| '+user_mobile"></td>
+                                <td dmx-text="aeps_number"></td>
+                                <td dmx-text="operator_name+' ( '+service_name+' )'"></td>
+                                <td dmx-text="tr_mode"></td>
+                                <td dmx-text="op_bal.toNumber().toFixed(2)"></td>
+                                <td dmx-text="amount.toNumber().toFixed(2)"></td>
+                                <td dmx-text="comm_amt.toNumber().toFixed(2)"></td>
+                                <td dmx-text="charge_amt.toNumber().toFixed(2)"></td>
+                                <td dmx-text="net_amt.toNumber().toFixed(2)"></td>
+                                <td dmx-text="closing_bal.toNumber().toFixed(2)"></td>
+                                <td dmx-text="tr_id"></td>
+                                <td dmx-text="api_name"></td>
+                                <td class="fw-bold" dmx-text="status" dmx-class:text-success="status == 'SUCCESS'" dmx-class:text-warning="status == 'PENDING'" dmx-class:text-danger="status == 'FAILED'" dmx-class:text-primary="status == 'REFUND'"></td>
+                                <td class="fw-bold" dmx-text="(raise_complain==2 || raise_complain==3)?'Closed':'N/A'" dmx-class:text-success="(raise_complain == 2 || raise_complain==3)" dmx-class:text-primary="raise_complain < 1"></td>
+                                <td dmx-text="tr_date.formatDate('dd-MM-yyyy hh:mm:ss A')"></td>
+                                <!-- .addHours(-05.30) -->
+                                <td dmx-text="updated_on.formatDate('dd-MM-yyyy hh:mm:ss A')"></td>
+                                <td><button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalReply" dmx-on:click="ddFetchTrans.select(id)">Update</button></td>
+                                <td>
+                                    <input type="checkbox" dmx-bind:value="id" dmx-bind:id="checkPendingT{{$index}}">
+                                    <input type="hidden" name="MultiTrans[]" dmx-bind:id="checkValue{{$index}}" dmx-bind:value="checkbox.checked?checkbox.value :''" dmx-bind:disabled="!checkbox.checked">
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody dmx-show="content.scFetchAEPSTrans.data.GetTrans.length==0">
+                            <tr class="text-center fw-bold text-danger fs-4">
+                                <td colspan="21">No Record Found!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade fixed-left sw-right-sidebar-40" id="modalReply" is="dmx-bs5-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-aside my-0 modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content rounded-0 px-3">
+            <div class="modal-header">
+                <h3 class="modal-title">Update Transactions</h3>
+                <button type="button" class="bg-transparent border-1 ms-auto p-0 px-1" data-bs-dismiss="modal" aria-label="Close" dmx-on:click="modalReply.UpdateTrForm.reset()">
+                    <i class="fas fa-times" alt="icon"></i>
+                </button>
+            </div>
+            <form is="dmx-serverconnect-form" id="UpdateTrForm" method="post" action="api/Transactions/UpdateAEPSTxn" dmx-on:success="scNotif.success('Action Success'); scFetchAEPSTrans.load();modalReply.hide(); modalReply.UpdateTrForm.reset()" dmx-on:error="scNotif.warning('An error occurred');" dmx-on:forbidden="scNotif.danger(lastError.response)">
+                <div class="modal-body">
+                    <input type="hidden" name="transid" dmx-bind:value="ddFetchTrans.data.id">
+                    <div class="row align-items-baseline">
+                        <div class="col-12">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">User Details:</label>&emsp;<span>{{ddFetchTrans.data.user_rt_id+' | '+ddFetchTrans.data.user_fname+' | '+ddFetchTrans.data.user_mobile}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Operaotr:</label>&emsp;<span>{{ddFetchTrans.data.operator_name}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold"> Mobile:</label>&emsp;<span>{{ddFetchTrans.data.aeps_number}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Amount:</label>&emsp;<span>{{ddFetchTrans.data.amount}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Actual Deduction:</label>&emsp;<span>{{ddFetchTrans.data.net_amt}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold"> IP:</label>&emsp;<span>{{ddFetchTrans.data.ip_address}}</span>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Tr. Date:</label>&emsp;<span>{{ddFetchTrans.data.tr_date.formatDate('dd-MM-yyyy hh:mm:ss A')}}</span>
+                        </div>
+                        <div class="col-12 col-md-6 my-3">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">API Ref. Id./ Operaotr Id :</label>&emsp;
+                            <input type="text" name="api_ref" dmx-bind:value="ddFetchTrans.data.api_ref" class="form-control">
+                        </div>
+                        <div class="col-12 col-md-6 my-3"><label class="form-label text-black fw-bold">Status:</label>
+                            <select type="text" name="tr_status" class="form-control form-select" required="">
+                                <option value="SUCCESS">Success</option>
+                                <option value="FAILED">Failed</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6 my-3">
+                            <label for="inpTPIN" class="form-label text-black fw-bold">T-PIN :</label>&emsp;
+                            <input type="text" name="tpin" class="form-control" required="">
+                        </div>
+                        <div class="col-12 col-md-6 my-3">
+                            <label for="inpFromReply" class="form-label text-black fw-bold">Response MSG (Optional)</label>&emsp;
+                            <textarea id="response" name="response" class="form-control" dmx-bind:value="ddFetchTrans.data.response"></textarea>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-warning" dmx-bind:disabled="state.executing">Submit<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close" dmx-on:click="modalReply.UpdateTrForm.reset()">Close
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade fixed-left sw-right-sidebar-40" id="modalMultiUp" is="dmx-bs5-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-aside my-0 modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content rounded-0 px-3">
+            <form id="formMultiShow">
+                <div class="modal-header">
+                    <h3 class="modal-title">Update All Selected</h3>
+                    <button type="button" class="bg-transparent border-1 ms-auto p-0 px-1" data-bs-dismiss="modal" aria-label="Close" dmx-on:click="UpdateMultiForm.reset()">
+                        <i class="fas fa-times" alt="icon"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row align-items-baseline">
+                        <div class="col-12 col-md-6 my-3"><label class="form-label text-black fw-bold">Status:</label>
+                            <select type="text" id="MultiStatus" name="tr_status" class="form-control form-select" required="">
+                                <option value="">Select Option</option>
+                                <option value="SUCCESS">Success</option>
+                                <option value="FAILED">Failed</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6 my-3">
+                            <label for="inpTPIN" class="form-label text-black fw-bold">T-PIN :</label>&emsp;
+                            <input type="text" id="MultiTPIN" name="tpin" class="form-control" required="">
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-warning" dmx-on:click="UpdateMultiForm.submit(true)" dmx-bind:disabled="UpdateMultiForm.state.executing">Submit<span class="spinner-border spinner-border-sm" role="status" dmx-show="UpdateMultiForm.state.executing"></span></button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close" dmx-on:click="UpdateMultiForm.reset()">Close
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

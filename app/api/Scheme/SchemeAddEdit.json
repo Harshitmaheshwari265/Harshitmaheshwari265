@@ -1,0 +1,309 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/scheme.ejs",
+      "linkedForm": "formAddEditScheme"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "SchemeId",
+        "name": "SchemeId"
+      },
+      {
+        "type": "text",
+        "fieldName": "name",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Scheme Name is required."
+            },
+            "core:maxlength": {
+              "param": "100"
+            }
+          }
+        },
+        "name": "name"
+      },
+      {
+        "type": "text",
+        "fieldName": "scheme_desc",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Desc. id is required."
+            },
+            "core:maxlength": {
+              "param": 200
+            }
+          }
+        },
+        "name": "scheme_desc"
+      },
+      {
+        "type": "number",
+        "fieldName": "scheme_type",
+        "options": {
+          "rules": {
+            "core:number": {}
+          }
+        },
+        "name": "scheme_type"
+      },
+      {
+        "type": "text",
+        "fieldName": "status",
+        "name": "status"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.SchemeId != ''}}",
+          "then": {
+            "steps": {
+              "name": "SchemeEdit",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "m_scheme",
+                      "column": "scheme_name",
+                      "type": "text",
+                      "value": "{{$_POST.name}}"
+                    },
+                    {
+                      "table": "m_scheme",
+                      "column": "scheme_desc",
+                      "type": "text",
+                      "value": "{{$_POST.scheme_desc}}"
+                    },
+                    {
+                      "table": "m_scheme",
+                      "column": "scheme_type",
+                      "type": "text",
+                      "value": "{{$_POST.scheme_type}}"
+                    },
+                    {
+                      "table": "m_scheme",
+                      "column": "updated_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_scheme",
+                      "column": "updated_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "m_scheme",
+                      "column": "status",
+                      "type": "number",
+                      "value": "{{$_POST.status}}"
+                    }
+                  ],
+                  "table": "m_scheme",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.SchemeId}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE m_scheme\nSET scheme_name = :P1 /* {{$_POST.name}} */, scheme_desc = :P2 /* {{$_POST.scheme_desc}} */, scheme_type = :P3 /* {{$_POST.scheme_type}} */, updated_by = :P4 /* {{identity}} */, updated_on = :P5 /* {{NOW}} */, status = :P6 /* {{$_POST.status}} */\nWHERE id = :P7 /* {{$_POST.SchemeId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.name}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.scheme_desc}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.scheme_type}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P7",
+                      "value": "{{$_POST.SchemeId}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "SchemeAdd",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "m_scheme",
+                      "column": "scheme_name",
+                      "type": "text",
+                      "value": "{{$_POST.name}}"
+                    },
+                    {
+                      "table": "m_scheme",
+                      "column": "scheme_desc",
+                      "type": "text",
+                      "value": "{{$_POST.scheme_desc}}"
+                    },
+                    {
+                      "table": "m_scheme",
+                      "column": "scheme_type",
+                      "type": "text",
+                      "value": "{{$_POST.scheme_type}}"
+                    },
+                    {
+                      "table": "m_scheme",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_scheme",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "m_scheme",
+                      "column": "status",
+                      "type": "number",
+                      "value": "{{$_POST.status}}"
+                    }
+                  ],
+                  "table": "m_scheme",
+                  "returning": "id",
+                  "query": "INSERT INTO m_scheme\n(scheme_name, scheme_desc, scheme_type, created_by, created_on, status) VALUES (:P1 /* {{$_POST.name}} */, :P2 /* {{$_POST.scheme_desc}} */, :P3 /* {{$_POST.scheme_type}} */, :P4 /* {{identity}} */, :P5 /* {{NOW}} */, :P6 /* {{$_POST.status}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.name}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.scheme_desc}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.scheme_type}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{$_POST.status}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

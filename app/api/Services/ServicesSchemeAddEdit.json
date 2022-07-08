@@ -1,0 +1,355 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/manage-services.ejs",
+      "linkedForm": "formAddEditCommision"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "tableid",
+        "name": "tableid"
+      },
+      {
+        "type": "text",
+        "fieldName": "service_id",
+        "name": "service_id"
+      },
+      {
+        "type": "text",
+        "fieldName": "scheme_id",
+        "name": "scheme_id"
+      },
+      {
+        "type": "text",
+        "fieldName": "status",
+        "name": "status"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.tableid}}",
+          "then": {
+            "steps": {
+              "name": "update",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "t_service_scheme_control",
+                      "column": "service_id",
+                      "type": "number",
+                      "value": "{{$_POST.service_id}}"
+                    },
+                    {
+                      "table": "t_service_scheme_control",
+                      "column": "scheme_id",
+                      "type": "number",
+                      "value": "{{$_POST.scheme_id}}"
+                    },
+                    {
+                      "table": "t_service_scheme_control",
+                      "column": "status",
+                      "type": "number",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "table": "t_service_scheme_control",
+                      "column": "updated_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "t_service_scheme_control",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.tableid}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE t_service_scheme_control\nSET service_id = :P1 /* {{$_POST.service_id}} */, scheme_id = :P2 /* {{$_POST.scheme_id}} */, status = :P3 /* {{$_POST.status}} */, updated_on = :P4 /* {{NOW}} */\nWHERE id = :P5 /* {{$_POST.tableid}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.service_id}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.scheme_id}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.status}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P5",
+                      "value": "{{$_POST.tableid}}"
+                    }
+                  ],
+                  "returning": "id"
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "GetService",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "t_service_scheme_control",
+                        "column": "id",
+                        "alias": "CountId",
+                        "aggregate": "COUNT"
+                      }
+                    ],
+                    "table": {
+                      "name": "t_service_scheme_control"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "query": "SELECT COUNT(id) AS CountId\nFROM t_service_scheme_control\nWHERE service_id = :P1 /* {{$_POST.service_id}} */ AND scheme_id = :P2 /* {{$_POST.scheme_id}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.service_id}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{$_POST.scheme_id}}"
+                      }
+                    ],
+                    "groupBy": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "t_service_scheme_control.service_id",
+                          "field": "t_service_scheme_control.service_id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.service_id}}",
+                          "data": {
+                            "table": "t_service_scheme_control",
+                            "column": "service_id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "integer",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "name": "service_id"
+                            }
+                          },
+                          "operation": "="
+                        },
+                        {
+                          "id": "t_service_scheme_control.scheme_id",
+                          "field": "t_service_scheme_control.scheme_id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.scheme_id}}",
+                          "data": {
+                            "table": "t_service_scheme_control",
+                            "column": "scheme_id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "integer",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "name": "scheme_id"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    }
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "CountId"
+                  }
+                ],
+                "outputType": "object"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{GetService.CountId<1}}",
+                  "then": {
+                    "steps": {
+                      "name": "insertServiceScheme",
+                      "module": "dbupdater",
+                      "action": "insert",
+                      "options": {
+                        "connection": "postgres_gcpServer",
+                        "sql": {
+                          "type": "insert",
+                          "values": [
+                            {
+                              "table": "t_service_scheme_control",
+                              "column": "service_id",
+                              "type": "number",
+                              "value": "{{$_POST.service_id}}"
+                            },
+                            {
+                              "table": "t_service_scheme_control",
+                              "column": "scheme_id",
+                              "type": "number",
+                              "value": "{{$_POST.scheme_id}}"
+                            },
+                            {
+                              "table": "t_service_scheme_control",
+                              "column": "status",
+                              "type": "number",
+                              "value": "{{$_POST.status}}"
+                            },
+                            {
+                              "table": "t_service_scheme_control",
+                              "column": "created_by",
+                              "type": "number",
+                              "value": "{{identity}}"
+                            },
+                            {
+                              "table": "t_service_scheme_control",
+                              "column": "created_on",
+                              "type": "datetime",
+                              "value": "{{NOW}}"
+                            }
+                          ],
+                          "table": "t_service_scheme_control",
+                          "returning": "id",
+                          "query": "INSERT INTO t_service_scheme_control\n(service_id, scheme_id, status, created_by, created_on) VALUES (:P1 /* {{$_POST.service_id}} */, :P2 /* {{$_POST.scheme_id}} */, :P3 /* {{$_POST.status}} */, :P4 /* {{identity}} */, :P5 /* {{NOW}} */)",
+                          "params": [
+                            {
+                              "name": ":P1",
+                              "type": "expression",
+                              "value": "{{$_POST.service_id}}"
+                            },
+                            {
+                              "name": ":P2",
+                              "type": "expression",
+                              "value": "{{$_POST.scheme_id}}"
+                            },
+                            {
+                              "name": ":P3",
+                              "type": "expression",
+                              "value": "{{$_POST.status}}"
+                            },
+                            {
+                              "name": ":P4",
+                              "type": "expression",
+                              "value": "{{identity}}"
+                            },
+                            {
+                              "name": ":P5",
+                              "type": "expression",
+                              "value": "{{NOW}}"
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "identity",
+                          "type": "text"
+                        },
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ],
+                      "output": true
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

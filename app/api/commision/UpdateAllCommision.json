@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/scheme-commision-set.ejs",
+      "linkedForm": "formUpdateAllCommision"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "scheme_id_all",
+        "name": "scheme_id_all"
+      },
+      {
+        "type": "number",
+        "fieldName": "commision_percent",
+        "options": {
+          "rules": {
+            "core:number": {}
+          }
+        },
+        "name": "commision_percent"
+      },
+      {
+        "type": "number",
+        "fieldName": "commision_value",
+        "options": {
+          "rules": {
+            "core:number": {}
+          }
+        },
+        "name": "commision_value"
+      },
+      {
+        "type": "number",
+        "fieldName": "charge_percent",
+        "options": {
+          "rules": {
+            "core:number": {}
+          }
+        },
+        "name": "charge_percent"
+      },
+      {
+        "type": "number",
+        "fieldName": "charge_value",
+        "options": {
+          "rules": {
+            "core:number": {}
+          }
+        },
+        "name": "charge_value"
+      },
+      {
+        "type": "text",
+        "fieldName": "service",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "service"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "update",
+        "module": "dbupdater",
+        "action": "update",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "update",
+            "values": [
+              {
+                "table": "m_commission",
+                "column": "user_id",
+                "type": "number",
+                "value": "{{identity}}"
+              },
+              {
+                "table": "m_commission",
+                "column": "comm_per",
+                "type": "text",
+                "value": "{{$_POST.commision_percent}}"
+              },
+              {
+                "table": "m_commission",
+                "column": "comm_val",
+                "type": "number",
+                "value": "{{$_POST.commision_value}}"
+              },
+              {
+                "table": "m_commission",
+                "column": "service_charge_per",
+                "type": "text",
+                "value": "{{$_POST.charge_percent}}"
+              },
+              {
+                "table": "m_commission",
+                "column": "service_charge_val",
+                "type": "text",
+                "value": "{{$_POST.charge_value}}"
+              },
+              {
+                "table": "m_commission",
+                "column": "is_active",
+                "type": "number",
+                "value": "1"
+              },
+              {
+                "table": "m_commission",
+                "column": "updated_by",
+                "type": "number",
+                "value": "{{identity}}"
+              },
+              {
+                "table": "m_commission",
+                "column": "updated_on",
+                "type": "datetime",
+                "value": "{{NOW}}"
+              }
+            ],
+            "table": "m_commission",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "scheme_id",
+                  "field": "scheme_id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.scheme_id_all}}",
+                  "data": {
+                    "column": "scheme_id"
+                  },
+                  "operation": "="
+                },
+                {
+                  "id": "service_id",
+                  "field": "service_id",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "{{$_POST.service}}",
+                  "data": {
+                    "column": "service_id"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "UPDATE m_commission\nSET user_id = :P1 /* {{identity}} */, comm_per = :P2 /* {{$_POST.commision_percent}} */, comm_val = :P3 /* {{$_POST.commision_value}} */, service_charge_per = :P4 /* {{$_POST.charge_percent}} */, service_charge_val = :P5 /* {{$_POST.charge_value}} */, is_active = '1', updated_by = :P6 /* {{identity}} */, updated_on = :P7 /* {{NOW}} */\nWHERE scheme_id = :P8 /* {{$_POST.scheme_id_all}} */ AND service_id = :P9 /* {{$_POST.service}} */",
+            "params": [
+              {
+                "name": ":P1",
+                "type": "expression",
+                "value": "{{identity}}"
+              },
+              {
+                "name": ":P2",
+                "type": "expression",
+                "value": "{{$_POST.commision_percent}}"
+              },
+              {
+                "name": ":P3",
+                "type": "expression",
+                "value": "{{$_POST.commision_value}}"
+              },
+              {
+                "name": ":P4",
+                "type": "expression",
+                "value": "{{$_POST.charge_percent}}"
+              },
+              {
+                "name": ":P5",
+                "type": "expression",
+                "value": "{{$_POST.charge_value}}"
+              },
+              {
+                "name": ":P6",
+                "type": "expression",
+                "value": "{{identity}}"
+              },
+              {
+                "name": ":P7",
+                "type": "expression",
+                "value": "{{NOW}}"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P8",
+                "value": "{{$_POST.scheme_id_all}}"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P9",
+                "value": "{{$_POST.service}}"
+              }
+            ],
+            "returning": "id"
+          }
+        },
+        "meta": [
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ],
+        "output": true
+      }
+    ]
+  }
+}

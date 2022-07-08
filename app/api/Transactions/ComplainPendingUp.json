@@ -1,0 +1,1840 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/complain-browse-tickets.ejs",
+      "linkedForm": "ResponseForm"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "transid",
+        "name": "transid"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_ref",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "api_ref"
+      },
+      {
+        "type": "text",
+        "fieldName": "refdeclval",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "refdeclval"
+      },
+      {
+        "type": "text",
+        "fieldName": "response",
+        "name": "response"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "REMOTE_ADDR"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "ComplainTicketUp",
+        "module": "dbupdater",
+        "action": "update",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "update",
+            "values": [
+              {
+                "table": "t_ticket",
+                "column": "status",
+                "type": "text",
+                "value": "{{$_POST.refdeclval}}"
+              },
+              {
+                "table": "t_ticket",
+                "column": "response",
+                "type": "text",
+                "value": "{{$_POST.response}}"
+              },
+              {
+                "table": "t_ticket",
+                "column": "reply_date",
+                "type": "datetime",
+                "value": "{{NOW}}"
+              }
+            ],
+            "table": "t_ticket",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "tran_id",
+                  "field": "tran_id",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "{{$_POST.transid}}",
+                  "data": {
+                    "column": "tran_id"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "UPDATE t_ticket\nSET status = :P1 /* {{$_POST.refdeclval}} */, response = :P2 /* {{$_POST.response}} */, reply_date = :P3 /* {{NOW}} */\nWHERE tran_id = :P4 /* {{$_POST.transid}} */",
+            "params": [
+              {
+                "name": ":P1",
+                "type": "expression",
+                "value": "{{$_POST.refdeclval}}"
+              },
+              {
+                "name": ":P2",
+                "type": "expression",
+                "value": "{{$_POST.response}}"
+              },
+              {
+                "name": ":P3",
+                "type": "expression",
+                "value": "{{NOW}}"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P4",
+                "value": "{{$_POST.transid}}"
+              }
+            ],
+            "returning": "id"
+          }
+        },
+        "meta": [
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ],
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.refdeclval.toNumber()==3}}",
+          "then": {
+            "steps": {
+              "name": "RechTransUpDecline",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "tt_recharge_trans",
+                      "column": "api_ref",
+                      "type": "text",
+                      "value": "{{$_POST.api_ref}}"
+                    },
+                    {
+                      "table": "tt_recharge_trans",
+                      "column": "extra2",
+                      "type": "text",
+                      "value": "{{$_POST.refdeclval}}"
+                    }
+                  ],
+                  "table": "tt_recharge_trans",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.transid}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE tt_recharge_trans\nSET api_ref = :P1 /* {{$_POST.api_ref}} */, extra2 = :P2 /* {{$_POST.refdeclval}} */\nWHERE id = :P3 /* {{$_POST.transid}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.api_ref}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.refdeclval}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P3",
+                      "value": "{{$_POST.transid}}"
+                    }
+                  ],
+                  "returning": "id"
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": false
+            }
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.refdeclval.toNumber()==2}}",
+          "then": {
+            "steps": [
+              {
+                "name": "GetTTBal",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "user_id"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "amount"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "net_amt"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "comm_per"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "comm_val"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "comm_amt"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "other_charge"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "charge_per"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "charge_amt"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "dtcommval"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "dtcommamt"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "dtchargeper"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "dtchargeval"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "dtchargeamt"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "mdtcommper"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "mdtcommval"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "mdtcommamt"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "mdtchargeper"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "mdtchargeval"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "mdtchargeamt"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "opening_balance"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "transaction_type"
+                      }
+                    ],
+                    "table": {
+                      "name": "tt_recharge_trans",
+                      "alias": "tt_recharge_trans"
+                    },
+                    "joins": [
+                      {
+                        "table": "tt_balance",
+                        "column": "*",
+                        "alias": "tt_balance",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "tt_balance",
+                              "column": "pay_ref_id",
+                              "operator": "equal",
+                              "value": {
+                                "table": "tt_recharge_trans",
+                                "column": "id"
+                              },
+                              "operation": "="
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      }
+                    ],
+                    "query": "SELECT tt_recharge_trans.user_id, tt_recharge_trans.amount, tt_recharge_trans.net_amt, tt_recharge_trans.comm_per, tt_recharge_trans.comm_val, tt_recharge_trans.comm_amt, tt_recharge_trans.other_charge, tt_recharge_trans.charge_per, tt_recharge_trans.charge_amt, tt_recharge_trans.dtcommval, tt_recharge_trans.dtcommamt, tt_recharge_trans.dtchargeper, tt_recharge_trans.dtchargeval, tt_recharge_trans.dtchargeamt, tt_recharge_trans.mdtcommper, tt_recharge_trans.mdtcommval, tt_recharge_trans.mdtcommamt, tt_recharge_trans.mdtchargeper, tt_recharge_trans.mdtchargeval, tt_recharge_trans.mdtchargeamt, tt_recharge_trans.opening_balance, tt_balance.transaction_type\nFROM tt_recharge_trans AS tt_recharge_trans\nLEFT JOIN tt_balance AS tt_balance ON (tt_balance.pay_ref_id = tt_recharge_trans.id)\nWHERE tt_recharge_trans.id = :P1 /* {{$_POST.transid}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.transid}}"
+                      }
+                    ],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "tt_recharge_trans.id",
+                          "field": "tt_recharge_trans.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.transid}}",
+                          "data": {
+                            "table": "tt_recharge_trans",
+                            "column": "id",
+                            "type": "number"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "primary": "id"
+                  },
+                  "connection": "postgres_gcpServer"
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "user_id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "amount"
+                  },
+                  {
+                    "type": "text",
+                    "name": "net_amt"
+                  },
+                  {
+                    "type": "text",
+                    "name": "comm_per"
+                  },
+                  {
+                    "type": "text",
+                    "name": "comm_val"
+                  },
+                  {
+                    "type": "text",
+                    "name": "comm_amt"
+                  },
+                  {
+                    "type": "text",
+                    "name": "other_charge"
+                  },
+                  {
+                    "type": "text",
+                    "name": "charge_per"
+                  },
+                  {
+                    "type": "text",
+                    "name": "charge_amt"
+                  },
+                  {
+                    "type": "text",
+                    "name": "dtcommval"
+                  },
+                  {
+                    "type": "text",
+                    "name": "dtcommamt"
+                  },
+                  {
+                    "type": "text",
+                    "name": "dtchargeper"
+                  },
+                  {
+                    "type": "text",
+                    "name": "dtchargeval"
+                  },
+                  {
+                    "type": "text",
+                    "name": "dtchargeamt"
+                  },
+                  {
+                    "type": "text",
+                    "name": "mdtcommper"
+                  },
+                  {
+                    "type": "text",
+                    "name": "mdtcommval"
+                  },
+                  {
+                    "type": "text",
+                    "name": "mdtcommamt"
+                  },
+                  {
+                    "type": "text",
+                    "name": "mdtchargeper"
+                  },
+                  {
+                    "type": "text",
+                    "name": "mdtchargeval"
+                  },
+                  {
+                    "type": "text",
+                    "name": "mdtchargeamt"
+                  },
+                  {
+                    "type": "text",
+                    "name": "opening_balance"
+                  },
+                  {
+                    "type": "text",
+                    "name": "transaction_type"
+                  }
+                ],
+                "outputType": "object",
+                "type": "dbconnector_single"
+              },
+              {
+                "name": "GetUserBalance",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "m_users",
+                        "column": "balance_amt"
+                      },
+                      {
+                        "table": "m_users",
+                        "column": "md_id"
+                      },
+                      {
+                        "table": "m_users",
+                        "column": "ds_id"
+                      }
+                    ],
+                    "table": {
+                      "name": "m_users",
+                      "alias": "m_users"
+                    },
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "m_users.id",
+                          "field": "m_users.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{GetTTBal.user_id}}",
+                          "data": {
+                            "table": "m_users",
+                            "column": "id",
+                            "type": "number"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "SELECT balance_amt, md_id, ds_id\nFROM m_users AS m_users\nWHERE id = :P1 /* {{GetTTBal.user_id}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{GetTTBal.user_id}}"
+                      }
+                    ],
+                    "primary": "id"
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "text",
+                    "name": "balance_amt"
+                  },
+                  {
+                    "type": "text",
+                    "name": "md_id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "ds_id"
+                  }
+                ],
+                "outputType": "object"
+              },
+              {
+                "name": "UserBalance",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{GetUserBalance.balance_amt.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "RTNetAmt",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{GetTTBal.net_amt.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "RTClosingBal",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{UserBalance.toNumber()+RTNetAmt.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "RechTransUpRefund",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "extra2",
+                        "type": "text",
+                        "value": "{{$_POST.refdeclval}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "api_ref",
+                        "type": "text",
+                        "value": "{{$_POST.api_ref}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'FAILED'}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "operator_ref",
+                        "type": "text",
+                        "value": "{{'Transaction Failed and Refund'}}"
+                      },
+                      {
+                        "table": "tt_recharge_trans",
+                        "column": "closing_balance",
+                        "type": "text",
+                        "value": "{{GetTTBal.opening_balance}}"
+                      }
+                    ],
+                    "table": "tt_recharge_trans",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.transid}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "UPDATE tt_recharge_trans\nSET extra2 = :P1 /* {{$_POST.refdeclval}} */, api_ref = :P2 /* {{$_POST.api_ref}} */, status = :P3 /* {{'FAILED'}} */, operator_ref = :P4 /* {{'Transaction Failed and Refund'}} */, closing_balance = :P5 /* {{GetTTBal.opening_balance}} */\nWHERE id = :P6 /* {{$_POST.transid}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.refdeclval}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_POST.api_ref}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{'FAILED'}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{'Transaction Failed and Refund'}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{GetTTBal.opening_balance}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P6",
+                        "value": "{{$_POST.transid}}"
+                      }
+                    ],
+                    "returning": "id"
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              },
+              {
+                "name": "ttBalanceUpRefund",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_balance",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'FAILED'}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "updated_by",
+                        "type": "number",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "updated_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      }
+                    ],
+                    "table": "tt_balance",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "pay_ref_id",
+                          "field": "pay_ref_id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.transid}}",
+                          "data": {
+                            "column": "pay_ref_id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "UPDATE tt_balance\nSET status = :P1 /* {{'FAILED'}} */, updated_by = :P2 /* {{identity}} */, updated_on = :P3 /* {{NOW}} */\nWHERE pay_ref_id = :P4 /* {{$_POST.transid}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{'FAILED'}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P4",
+                        "value": "{{$_POST.transid}}"
+                      }
+                    ],
+                    "returning": "id"
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              },
+              {
+                "name": "ttBalanceAddRefund",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "tt_balance",
+                        "column": "user_id",
+                        "type": "number",
+                        "value": "{{GetTTBal.user_id}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "old_balance",
+                        "type": "text",
+                        "value": "{{GetUserBalance.balance_amt.toNumber()}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "amount",
+                        "type": "text",
+                        "value": "{{GetTTBal.amount}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "new_balance",
+                        "type": "text",
+                        "value": "{{RTClosingBal.toNumber()}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "transaction_type",
+                        "type": "text",
+                        "value": "{{GetTTBal.transaction_type+' Refund'}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "tr_date",
+                        "type": "text",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "ip_address",
+                        "type": "text",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "crdr_type",
+                        "type": "text",
+                        "value": "{{'Credit'}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "pay_ref_id",
+                        "type": "number",
+                        "value": "{{$_POST.transid}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "remarks",
+                        "type": "text",
+                        "value": "{{'Refund of Amount '+GetTTBal.netamt+' for the transaction id '+$_POST.transid}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "created_by",
+                        "type": "number",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "created_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "netamt",
+                        "type": "text",
+                        "value": "{{GetTTBal.net_amt}}"
+                      },
+                      {
+                        "table": "tt_balance",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'ADDREFUND'}}"
+                      }
+                    ],
+                    "table": "tt_balance",
+                    "returning": "id",
+                    "query": "INSERT INTO tt_balance\n(user_id, old_balance, amount, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on, netamt, status) VALUES (:P1 /* {{GetTTBal.user_id}} */, :P2 /* {{GetUserBalance.balance_amt.toNumber()}} */, :P3 /* {{GetTTBal.amount}} */, :P4 /* {{RTClosingBal.toNumber()}} */, :P5 /* {{GetTTBal.transaction_type+' Refund'}} */, :P6 /* {{NOW}} */, :P7 /* {{$_SERVER.REMOTE_ADDR}} */, :P8 /* {{'Credit'}} */, :P9 /* {{$_POST.transid}} */, :P10 /* {{'Refund of Amount '+GetTTBal.netamt+' for the transaction id '+$_POST.transid}} */, :P11 /* {{identity}} */, :P12 /* {{NOW}} */, :P13 /* {{GetTTBal.net_amt}} */, :P14 /* {{'ADDREFUND'}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{GetTTBal.user_id}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{GetUserBalance.balance_amt.toNumber()}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{GetTTBal.amount}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{RTClosingBal.toNumber()}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{GetTTBal.transaction_type+' Refund'}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "name": ":P8",
+                        "type": "expression",
+                        "value": "{{'Credit'}}"
+                      },
+                      {
+                        "name": ":P9",
+                        "type": "expression",
+                        "value": "{{$_POST.transid}}"
+                      },
+                      {
+                        "name": ":P10",
+                        "type": "expression",
+                        "value": "{{'Refund of Amount '+GetTTBal.netamt+' for the transaction id '+$_POST.transid}}"
+                      },
+                      {
+                        "name": ":P11",
+                        "type": "expression",
+                        "value": "{{identity}}"
+                      },
+                      {
+                        "name": ":P12",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P13",
+                        "type": "expression",
+                        "value": "{{GetTTBal.net_amt}}"
+                      },
+                      {
+                        "name": ":P14",
+                        "type": "expression",
+                        "value": "{{'ADDREFUND'}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              },
+              {
+                "name": "UserBalUp",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "m_users",
+                        "column": "balance_amt",
+                        "type": "text",
+                        "value": "{{RTClosingBal.toNumber()}}"
+                      }
+                    ],
+                    "table": "m_users",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{GetTTBal.user_id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{RTClosingBal.toNumber()}} */\nWHERE id = :P2 /* {{GetTTBal.user_id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{RTClosingBal.toNumber()}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{GetTTBal.user_id}}"
+                      }
+                    ],
+                    "returning": "id"
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{GetUserBalance.ds_id > 0}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "GetDTUser",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "SELECT",
+                            "columns": [
+                              {
+                                "table": "m_users",
+                                "column": "balance_amt"
+                              }
+                            ],
+                            "table": {
+                              "name": "m_users"
+                            },
+                            "joins": [],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "m_users.id",
+                                  "field": "m_users.id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetUserBalance.ds_id}}",
+                                  "data": {
+                                    "table": "m_users",
+                                    "column": "id",
+                                    "type": "number"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "SELECT balance_amt\nFROM m_users\nWHERE id = :P1 /* {{GetUserBalance.ds_id}} */",
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{GetUserBalance.ds_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "output": true,
+                        "meta": [
+                          {
+                            "type": "text",
+                            "name": "balance_amt"
+                          }
+                        ],
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "GetDTBalcance",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "SELECT",
+                            "columns": [
+                              {
+                                "table": "t_charge_cal",
+                                "column": "amount"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "netamt"
+                              }
+                            ],
+                            "table": {
+                              "name": "t_charge_cal"
+                            },
+                            "joins": [],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "t_charge_cal.pay_ref_id",
+                                  "field": "t_charge_cal.pay_ref_id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.transid}}",
+                                  "data": {
+                                    "table": "t_charge_cal",
+                                    "column": "pay_ref_id",
+                                    "type": "number"
+                                  },
+                                  "operation": "="
+                                },
+                                {
+                                  "id": "t_charge_cal.user_id",
+                                  "field": "t_charge_cal.user_id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetUserBalance.ds_id}}",
+                                  "data": {
+                                    "table": "t_charge_cal",
+                                    "column": "user_id",
+                                    "type": "number"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "SELECT amount, netamt\nFROM t_charge_cal\nWHERE pay_ref_id = :P1 /* {{$_POST.transid}} */ AND user_id = :P2 /* {{GetUserBalance.ds_id}} */",
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{$_POST.transid}}"
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{GetUserBalance.ds_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "output": true,
+                        "meta": [
+                          {
+                            "type": "text",
+                            "name": "amount"
+                          },
+                          {
+                            "type": "text",
+                            "name": "netamt"
+                          }
+                        ],
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "DTClosingBal",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{GetDTUser.balance_amt.toNumber()-GetDTBalcance.netamt.toNumber()}}"
+                        },
+                        "meta": [],
+                        "outputType": "text",
+                        "output": true
+                      },
+                      {
+                        "name": "DTDeductComm",
+                        "module": "dbupdater",
+                        "action": "insert",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "insert",
+                            "values": [
+                              {
+                                "table": "t_charge_cal",
+                                "column": "user_id",
+                                "type": "number",
+                                "value": "{{GetUserBalance.ds_id}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "old_balance",
+                                "type": "text",
+                                "value": "{{GetDTUser.balance_amt}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "amount",
+                                "type": "text",
+                                "value": "{{GetDTBalcance.amount}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "netamt",
+                                "type": "text",
+                                "value": "{{GetDTBalcance.netamt}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "new_balance",
+                                "type": "text",
+                                "value": "{{DTClosingBal}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "transaction_type",
+                                "type": "text",
+                                "value": "{{'Recharge Comm Reversal'}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "tr_date",
+                                "type": "text",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "ip_address",
+                                "type": "text",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "crdr_type",
+                                "type": "text",
+                                "value": "{{'Debit'}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "pay_ref_id",
+                                "type": "number",
+                                "value": "{{$_POST.transid}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "remarks",
+                                "type": "text",
+                                "value": "{{'Recharge Reversal | Amount: '+GetDTBalcance.amount+' | Charge & Comm Debit | Ref. Id:\\n '+$_POST.transid}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "created_by",
+                                "type": "number",
+                                "value": "{{identity}}"
+                              },
+                              {
+                                "table": "t_charge_cal",
+                                "column": "created_on",
+                                "type": "datetime",
+                                "value": "{{NOW}}"
+                              }
+                            ],
+                            "table": "t_charge_cal",
+                            "returning": "id",
+                            "query": "INSERT INTO t_charge_cal\n(user_id, old_balance, amount, netamt, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on) VALUES (:P1 /* {{GetUserBalance.ds_id}} */, :P2 /* {{GetDTUser.balance_amt}} */, :P3 /* {{GetDTBalcance.amount}} */, :P4 /* {{GetDTBalcance.netamt}} */, :P5 /* {{DTClosingBal}} */, :P6 /* {{'Recharge Comm Reversal'}} */, :P7 /* {{NOW}} */, :P8 /* {{$_SERVER.REMOTE_ADDR}} */, :P9 /* {{'Debit'}} */, :P10 /* {{$_POST.transid}} */, :P11 /* {{'Recharge Reversal | Amount: '+GetDTBalcance.amount+' | Charge & Comm Debit | Ref. Id:\\n '+$_POST.transid}} */, :P12 /* {{identity}} */, :P13 /* {{NOW}} */)",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{GetUserBalance.ds_id}}"
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{GetDTUser.balance_amt}}"
+                              },
+                              {
+                                "name": ":P3",
+                                "type": "expression",
+                                "value": "{{GetDTBalcance.amount}}"
+                              },
+                              {
+                                "name": ":P4",
+                                "type": "expression",
+                                "value": "{{GetDTBalcance.netamt}}"
+                              },
+                              {
+                                "name": ":P5",
+                                "type": "expression",
+                                "value": "{{DTClosingBal}}"
+                              },
+                              {
+                                "name": ":P6",
+                                "type": "expression",
+                                "value": "{{'Recharge Comm Reversal'}}"
+                              },
+                              {
+                                "name": ":P7",
+                                "type": "expression",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "name": ":P8",
+                                "type": "expression",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "name": ":P9",
+                                "type": "expression",
+                                "value": "{{'Debit'}}"
+                              },
+                              {
+                                "name": ":P10",
+                                "type": "expression",
+                                "value": "{{$_POST.transid}}"
+                              },
+                              {
+                                "name": ":P11",
+                                "type": "expression",
+                                "value": "{{'Recharge Reversal | Amount: '+GetDTBalcance.amount+' | Charge & Comm Debit | Ref. Id:\\n '+$_POST.transid}}"
+                              },
+                              {
+                                "name": ":P12",
+                                "type": "expression",
+                                "value": "{{identity}}"
+                              },
+                              {
+                                "name": ":P13",
+                                "type": "expression",
+                                "value": "{{NOW}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "identity",
+                            "type": "text"
+                          },
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ],
+                        "output": false
+                      },
+                      {
+                        "name": "DTUserWalletUp",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "m_users",
+                                "column": "balance_amt",
+                                "type": "text",
+                                "value": "{{DTClosingBal}}"
+                              }
+                            ],
+                            "table": "m_users",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "field": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetUserBalance.ds_id}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{DTClosingBal}} */\nWHERE id = :P2 /* {{GetUserBalance.ds_id}} */",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{DTClosingBal}}"
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{GetUserBalance.ds_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ],
+                        "output": false
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{GetUserBalance.md_id > 0}}",
+                          "then": {
+                            "steps": [
+                              {
+                                "name": "GetMDTUser",
+                                "module": "dbconnector",
+                                "action": "single",
+                                "options": {
+                                  "connection": "postgres_gcpServer",
+                                  "sql": {
+                                    "type": "SELECT",
+                                    "columns": [
+                                      {
+                                        "table": "m_users",
+                                        "column": "balance_amt"
+                                      }
+                                    ],
+                                    "table": {
+                                      "name": "m_users"
+                                    },
+                                    "joins": [],
+                                    "wheres": {
+                                      "condition": "AND",
+                                      "rules": [
+                                        {
+                                          "id": "m_users.id",
+                                          "field": "m_users.id",
+                                          "type": "double",
+                                          "operator": "equal",
+                                          "value": "{{GetUserBalance.md_id}}",
+                                          "data": {
+                                            "table": "m_users",
+                                            "column": "id",
+                                            "type": "number"
+                                          },
+                                          "operation": "="
+                                        }
+                                      ],
+                                      "conditional": null,
+                                      "valid": true
+                                    },
+                                    "query": "SELECT balance_amt\nFROM m_users\nWHERE id = :P1 /* {{GetUserBalance.md_id}} */",
+                                    "params": [
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P1",
+                                        "value": "{{GetUserBalance.md_id}}"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "output": true,
+                                "meta": [
+                                  {
+                                    "type": "text",
+                                    "name": "balance_amt"
+                                  }
+                                ],
+                                "outputType": "object"
+                              },
+                              {
+                                "name": "GetMDTBalcance",
+                                "module": "dbconnector",
+                                "action": "single",
+                                "options": {
+                                  "connection": "postgres_gcpServer",
+                                  "sql": {
+                                    "type": "SELECT",
+                                    "columns": [
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "amount"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "netamt"
+                                      }
+                                    ],
+                                    "table": {
+                                      "name": "t_charge_cal"
+                                    },
+                                    "joins": [],
+                                    "wheres": {
+                                      "condition": "AND",
+                                      "rules": [
+                                        {
+                                          "id": "t_charge_cal.pay_ref_id",
+                                          "field": "t_charge_cal.pay_ref_id",
+                                          "type": "double",
+                                          "operator": "equal",
+                                          "value": "{{$_POST.transid}}",
+                                          "data": {
+                                            "table": "t_charge_cal",
+                                            "column": "pay_ref_id",
+                                            "type": "number"
+                                          },
+                                          "operation": "="
+                                        },
+                                        {
+                                          "id": "t_charge_cal.user_id",
+                                          "field": "t_charge_cal.user_id",
+                                          "type": "double",
+                                          "operator": "equal",
+                                          "value": "{{GetUserBalance.md_id}}",
+                                          "data": {
+                                            "table": "t_charge_cal",
+                                            "column": "user_id",
+                                            "type": "number"
+                                          },
+                                          "operation": "="
+                                        }
+                                      ],
+                                      "conditional": null,
+                                      "valid": true
+                                    },
+                                    "query": "SELECT amount, netamt\nFROM t_charge_cal\nWHERE pay_ref_id = :P1 /* {{$_POST.transid}} */ AND user_id = :P2 /* {{GetUserBalance.md_id}} */",
+                                    "params": [
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P1",
+                                        "value": "{{$_POST.transid}}"
+                                      },
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P2",
+                                        "value": "{{GetUserBalance.md_id}}"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "output": true,
+                                "meta": [
+                                  {
+                                    "type": "text",
+                                    "name": "amount"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "name": "netamt"
+                                  }
+                                ],
+                                "outputType": "object"
+                              },
+                              {
+                                "name": "MDTClosingBal",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{GetMDTUser.balance_amt.toNumber()-GetMDTBalcance.netamt.toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "text",
+                                "output": true
+                              },
+                              {
+                                "name": "MDTDeductComm",
+                                "module": "dbupdater",
+                                "action": "insert",
+                                "options": {
+                                  "connection": "postgres_gcpServer",
+                                  "sql": {
+                                    "type": "insert",
+                                    "values": [
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "user_id",
+                                        "type": "number",
+                                        "value": "{{GetUserBalance.md_id}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "old_balance",
+                                        "type": "text",
+                                        "value": "{{GetMDTUser.balance_amt}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "amount",
+                                        "type": "text",
+                                        "value": "{{GetMDTBalcance.amount}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "netamt",
+                                        "type": "text",
+                                        "value": "{{GetMDTBalcance.netamt}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "new_balance",
+                                        "type": "text",
+                                        "value": "{{MDTClosingBal}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "transaction_type",
+                                        "type": "text",
+                                        "value": "{{'Recharge Comm Reversal'}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "tr_date",
+                                        "type": "text",
+                                        "value": "{{NOW}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "ip_address",
+                                        "type": "text",
+                                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "crdr_type",
+                                        "type": "text",
+                                        "value": "{{'Debit'}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "pay_ref_id",
+                                        "type": "number",
+                                        "value": "{{$_POST.transid}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "remarks",
+                                        "type": "text",
+                                        "value": "{{'Recharge Reversal | Amount: '+GetMDTBalcance.amount+' | Charge & Comm Debit | Ref. Id:  '+$_POST.transid}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "created_by",
+                                        "type": "number",
+                                        "value": "{{identity}}"
+                                      },
+                                      {
+                                        "table": "t_charge_cal",
+                                        "column": "created_on",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      }
+                                    ],
+                                    "table": "t_charge_cal",
+                                    "returning": "id",
+                                    "query": "INSERT INTO t_charge_cal\n(user_id, old_balance, amount, netamt, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on) VALUES (:P1 /* {{GetUserBalance.md_id}} */, :P2 /* {{GetMDTUser.balance_amt}} */, :P3 /* {{GetMDTBalcance.amount}} */, :P4 /* {{GetMDTBalcance.netamt}} */, :P5 /* {{MDTClosingBal}} */, :P6 /* {{'Recharge Comm Reversal'}} */, :P7 /* {{NOW}} */, :P8 /* {{$_SERVER.REMOTE_ADDR}} */, :P9 /* {{'Debit'}} */, :P10 /* {{$_POST.transid}} */, :P11 /* {{'Recharge Reversal | Amount: '+GetMDTBalcance.amount+' | Charge & Comm Debit | Ref. Id:  '+$_POST.transid}} */, :P12 /* {{identity}} */, :P13 /* {{NOW}} */)",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{GetUserBalance.md_id}}"
+                                      },
+                                      {
+                                        "name": ":P2",
+                                        "type": "expression",
+                                        "value": "{{GetMDTUser.balance_amt}}"
+                                      },
+                                      {
+                                        "name": ":P3",
+                                        "type": "expression",
+                                        "value": "{{GetMDTBalcance.amount}}"
+                                      },
+                                      {
+                                        "name": ":P4",
+                                        "type": "expression",
+                                        "value": "{{GetMDTBalcance.netamt}}"
+                                      },
+                                      {
+                                        "name": ":P5",
+                                        "type": "expression",
+                                        "value": "{{MDTClosingBal}}"
+                                      },
+                                      {
+                                        "name": ":P6",
+                                        "type": "expression",
+                                        "value": "{{'Recharge Comm Reversal'}}"
+                                      },
+                                      {
+                                        "name": ":P7",
+                                        "type": "expression",
+                                        "value": "{{NOW}}"
+                                      },
+                                      {
+                                        "name": ":P8",
+                                        "type": "expression",
+                                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                      },
+                                      {
+                                        "name": ":P9",
+                                        "type": "expression",
+                                        "value": "{{'Debit'}}"
+                                      },
+                                      {
+                                        "name": ":P10",
+                                        "type": "expression",
+                                        "value": "{{$_POST.transid}}"
+                                      },
+                                      {
+                                        "name": ":P11",
+                                        "type": "expression",
+                                        "value": "{{'Recharge Reversal | Amount: '+GetMDTBalcance.amount+' | Charge & Comm Debit | Ref. Id:  '+$_POST.transid}}"
+                                      },
+                                      {
+                                        "name": ":P12",
+                                        "type": "expression",
+                                        "value": "{{identity}}"
+                                      },
+                                      {
+                                        "name": ":P13",
+                                        "type": "expression",
+                                        "value": "{{NOW}}"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "identity",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ],
+                                "output": false
+                              },
+                              {
+                                "name": "MDTUserWalletUp",
+                                "module": "dbupdater",
+                                "action": "update",
+                                "options": {
+                                  "connection": "postgres_gcpServer",
+                                  "sql": {
+                                    "type": "update",
+                                    "values": [
+                                      {
+                                        "table": "m_users",
+                                        "column": "balance_amt",
+                                        "type": "text",
+                                        "value": "{{MDTClosingBal}}"
+                                      }
+                                    ],
+                                    "table": "m_users",
+                                    "wheres": {
+                                      "condition": "AND",
+                                      "rules": [
+                                        {
+                                          "id": "id",
+                                          "field": "id",
+                                          "type": "double",
+                                          "operator": "equal",
+                                          "value": "{{GetUserBalance.md_id}}",
+                                          "data": {
+                                            "column": "id"
+                                          },
+                                          "operation": "="
+                                        }
+                                      ],
+                                      "conditional": null,
+                                      "valid": true
+                                    },
+                                    "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{MDTClosingBal}} */\nWHERE id = :P2 /* {{GetUserBalance.md_id}} */",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{MDTClosingBal}}"
+                                      },
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P2",
+                                        "value": "{{GetUserBalance.md_id}}"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ],
+                                "output": false
+                              }
+                            ]
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

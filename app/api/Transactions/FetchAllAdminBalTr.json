@@ -1,0 +1,415 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "duration"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "GetAllAdminTrans",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "tt_recharge_trans",
+                "column": "user_number"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "details"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "opening_balance"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "amount"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "comm_per"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "comm_val"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "other_charge"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "comm_amt"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "charge_per"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "net_amt"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "closing_balance"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "tr_mode"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "tr_type"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "reason"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "ip_address"
+              },
+              {
+                "table": "mu",
+                "column": "user_type"
+              },
+              {
+                "table": "mu",
+                "column": "user_id"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "id",
+                "alias": "transaction_id"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "charge_amt"
+              },
+              {
+                "table": "tt_recharge_trans",
+                "column": "tr_date"
+              }
+            ],
+            "table": {
+              "name": "tt_recharge_trans"
+            },
+            "joins": [
+              {
+                "table": "m_users",
+                "column": "*",
+                "alias": "mu",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "mu",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "tt_recharge_trans",
+                        "column": "user_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                }
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "tt_recharge_trans.transaction_by",
+                  "field": "tt_recharge_trans.transaction_by",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{identity}}",
+                  "data": {
+                    "table": "tt_recharge_trans",
+                    "column": "transaction_by",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "orders": [
+              {
+                "table": "tt_recharge_trans",
+                "column": "id",
+                "direction": "DESC",
+                "condition": "",
+                "recid": 1
+              }
+            ],
+            "query": "SELECT tt_recharge_trans.user_number, tt_recharge_trans.details, tt_recharge_trans.opening_balance, tt_recharge_trans.amount, tt_recharge_trans.comm_per, tt_recharge_trans.comm_val, tt_recharge_trans.other_charge, tt_recharge_trans.comm_amt, tt_recharge_trans.charge_per, tt_recharge_trans.net_amt, tt_recharge_trans.closing_balance, tt_recharge_trans.tr_mode, tt_recharge_trans.tr_type, tt_recharge_trans.reason, tt_recharge_trans.ip_address, mu.user_type, mu.user_id, tt_recharge_trans.id AS transaction_id, tt_recharge_trans.charge_amt, tt_recharge_trans.tr_date\nFROM tt_recharge_trans\nINNER JOIN m_users AS mu ON (mu.id = tt_recharge_trans.user_id)\nWHERE tt_recharge_trans.transaction_by = :P1 /* {{identity}} */\nORDER BY tt_recharge_trans.id DESC",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{identity}}"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "text",
+            "name": "user_number"
+          },
+          {
+            "type": "text",
+            "name": "details"
+          },
+          {
+            "type": "text",
+            "name": "opening_balance"
+          },
+          {
+            "type": "text",
+            "name": "amount"
+          },
+          {
+            "type": "text",
+            "name": "comm_per"
+          },
+          {
+            "type": "text",
+            "name": "comm_val"
+          },
+          {
+            "type": "text",
+            "name": "other_charge"
+          },
+          {
+            "type": "text",
+            "name": "comm_amt"
+          },
+          {
+            "type": "text",
+            "name": "charge_per"
+          },
+          {
+            "type": "text",
+            "name": "net_amt"
+          },
+          {
+            "type": "text",
+            "name": "closing_balance"
+          },
+          {
+            "type": "text",
+            "name": "tr_mode"
+          },
+          {
+            "type": "text",
+            "name": "tr_type"
+          },
+          {
+            "type": "text",
+            "name": "reason"
+          },
+          {
+            "type": "text",
+            "name": "ip_address"
+          },
+          {
+            "type": "number",
+            "name": "user_type"
+          },
+          {
+            "type": "text",
+            "name": "user_id"
+          },
+          {
+            "type": "number",
+            "name": "transaction_id"
+          },
+          {
+            "type": "text",
+            "name": "charge_amt"
+          },
+          {
+            "type": "datetime",
+            "name": "tr_date"
+          }
+        ],
+        "outputType": "array",
+        "disabled": true
+      },
+      {
+        "name": "GetAllAdminTrans",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "SELECT trt.user_number, tb.crdr_type, trt.details, trt.opening_balance, trt.amount,\ntrt.comm_per, trt.comm_val, trt.other_charge, trt.comm_amt, \ntrt.charge_per, trt.net_amt, trt.closing_balance, trt.tr_mode, \ntrt.tr_type, trt.reason, trt.ip_address, mu.user_type, mu.user_id, \ntrt.id AS transaction_id, trt.charge_amt, trt.tr_date::text, dt.user_id as dt_id,\ndt.user_mobile as dt_number, dt.user_fname as dt_name, mdt.user_id as mdt_id, mdt.user_mobile as mdt_number, mdt.user_fname as mdt_name\nFROM tt_recharge_trans trt\nLEFT JOIN m_users AS mu ON (mu.id = trt.user_id) \nLEFT JOIN m_users as dt on (dt.id=mu.ds_id::int)\nLEFT JOIN m_users as mdt on (mdt.id=mu.md_id::int)\nLEFT JOIN tt_balance as tb on (tb.pay_ref_id=trt.id and tb.user_id=@identity)\nWHERE trt.transaction_by = @identity AND TO_CHAR(trt.tr_date :: DATE, 'yyyy-MM') = @duration\nORDER BY trt.id desc;",
+            "params": [
+              {
+                "name": "@identity",
+                "value": "{{identity}}",
+                "test": "12"
+              },
+              {
+                "name": "@duration",
+                "value": "{{$_GET.duration}}",
+                "test": "2022-05"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "user_number",
+            "type": "text"
+          },
+          {
+            "name": "crdr_type",
+            "type": "text"
+          },
+          {
+            "name": "details",
+            "type": "text"
+          },
+          {
+            "name": "opening_balance",
+            "type": "text"
+          },
+          {
+            "name": "amount",
+            "type": "text"
+          },
+          {
+            "name": "comm_per",
+            "type": "text"
+          },
+          {
+            "name": "comm_val",
+            "type": "text"
+          },
+          {
+            "name": "other_charge",
+            "type": "text"
+          },
+          {
+            "name": "comm_amt",
+            "type": "text"
+          },
+          {
+            "name": "charge_per",
+            "type": "text"
+          },
+          {
+            "name": "net_amt",
+            "type": "text"
+          },
+          {
+            "name": "closing_balance",
+            "type": "text"
+          },
+          {
+            "name": "tr_mode",
+            "type": "text"
+          },
+          {
+            "name": "tr_type",
+            "type": "text"
+          },
+          {
+            "name": "reason",
+            "type": "text"
+          },
+          {
+            "name": "ip_address",
+            "type": "text"
+          },
+          {
+            "name": "user_type",
+            "type": "number"
+          },
+          {
+            "name": "user_id",
+            "type": "text"
+          },
+          {
+            "name": "transaction_id",
+            "type": "number"
+          },
+          {
+            "name": "charge_amt",
+            "type": "text"
+          },
+          {
+            "name": "tr_date",
+            "type": "text"
+          },
+          {
+            "name": "dt_id",
+            "type": "text"
+          },
+          {
+            "name": "dt_number",
+            "type": "text"
+          },
+          {
+            "name": "dt_name",
+            "type": "text"
+          },
+          {
+            "name": "mdt_id",
+            "type": "text"
+          },
+          {
+            "name": "mdt_number",
+            "type": "text"
+          },
+          {
+            "name": "mdt_name",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

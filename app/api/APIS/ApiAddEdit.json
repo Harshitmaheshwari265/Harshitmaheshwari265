@@ -1,0 +1,443 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/api-add-update.ejs",
+      "linkedForm": "formAddEditapi"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "ApiId",
+        "name": "ApiId"
+      },
+      {
+        "type": "text",
+        "fieldName": "name",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "api Name is required."
+            },
+            "core:maxlength": {
+              "param": "100"
+            }
+          }
+        },
+        "name": "name"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_code",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": "",
+              "message": "Api Code id is required."
+            },
+            "core:maxlength": {
+              "param": "200"
+            }
+          }
+        },
+        "name": "api_code"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_status",
+        "name": "api_status"
+      },
+      {
+        "type": "text",
+        "fieldName": "response_type",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "50"
+            }
+          }
+        },
+        "name": "response_type"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_type",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "50"
+            }
+          }
+        },
+        "name": "api_type"
+      },
+      {
+        "type": "text",
+        "fieldName": "username",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "200"
+            }
+          }
+        },
+        "name": "username"
+      },
+      {
+        "type": "text",
+        "fieldName": "password",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": "200"
+            }
+          }
+        },
+        "name": "password"
+      },
+      {
+        "type": "text",
+        "name": "api_url"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.ApiId  != ''}}",
+          "then": {
+            "steps": {
+              "name": "ApiUpdate",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "m_api",
+                      "column": "api_name",
+                      "type": "text",
+                      "value": "{{$_POST.name}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_code",
+                      "type": "text",
+                      "value": "{{$_POST.api_code}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "username",
+                      "type": "text",
+                      "value": "{{$_POST.username}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_password",
+                      "type": "text",
+                      "value": "{{$_POST.password}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "status",
+                      "type": "number",
+                      "value": "{{$_POST.api_status}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "updated_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "updated_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "blank2",
+                      "type": "text",
+                      "value": "{{$_POST.response_type}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_type",
+                      "type": "text",
+                      "value": "{{$_POST.api_type}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_url",
+                      "type": "text",
+                      "value": "{{$_POST.api_url}}"
+                    }
+                  ],
+                  "table": "m_api",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.ApiId}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE m_api\nSET api_name = :P1 /* {{$_POST.name}} */, api_code = :P2 /* {{$_POST.api_code}} */, username = :P3 /* {{$_POST.username}} */, api_password = :P4 /* {{$_POST.password}} */, status = :P5 /* {{$_POST.api_status}} */, updated_by = :P6 /* {{identity}} */, updated_on = :P7 /* {{NOW}} */, blank2 = :P8 /* {{$_POST.response_type}} */, api_type = :P9 /* {{$_POST.api_type}} */, api_url = :P10 /* {{$_POST.api_url}} */\nWHERE id = :P11 /* {{$_POST.ApiId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.name}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.username}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.password}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.api_status}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{$_POST.response_type}}"
+                    },
+                    {
+                      "name": ":P9",
+                      "type": "expression",
+                      "value": "{{$_POST.api_type}}"
+                    },
+                    {
+                      "name": ":P10",
+                      "type": "expression",
+                      "value": "{{$_POST.api_url}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P11",
+                      "value": "{{$_POST.ApiId}}"
+                    }
+                  ],
+                  "returning": "id"
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "ApiAdd",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "m_api",
+                      "column": "api_name",
+                      "type": "text",
+                      "value": "{{$_POST.name}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_code",
+                      "type": "text",
+                      "value": "{{$_POST.api_code}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "username",
+                      "type": "text",
+                      "value": "{{$_POST.username}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_password",
+                      "type": "text",
+                      "value": "{{$_POST.password}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "status",
+                      "type": "number",
+                      "value": "{{$_POST.api_status}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "blank2",
+                      "type": "text",
+                      "value": "{{$_POST.response_type}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_url",
+                      "type": "text",
+                      "value": "{{$_POST.api_url}}"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_type",
+                      "type": "text",
+                      "value": "{{$_POST.api_type}}"
+                    }
+                  ],
+                  "table": "m_api",
+                  "returning": "id",
+                  "query": "INSERT INTO m_api\n(api_name, api_code, username, api_password, status, created_by, created_on, blank2, api_url, api_type) VALUES (:P1 /* {{$_POST.name}} */, :P2 /* {{$_POST.api_code}} */, :P3 /* {{$_POST.username}} */, :P4 /* {{$_POST.password}} */, :P5 /* {{$_POST.api_status}} */, :P6 /* {{identity}} */, :P7 /* {{NOW}} */, :P8 /* {{$_POST.response_type}} */, :P9 /* {{$_POST.api_url}} */, :P10 /* {{$_POST.api_type}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.name}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.username}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.password}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.api_status}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{$_POST.response_type}}"
+                    },
+                    {
+                      "name": ":P9",
+                      "type": "expression",
+                      "value": "{{$_POST.api_url}}"
+                    },
+                    {
+                      "name": ":P10",
+                      "type": "expression",
+                      "value": "{{$_POST.api_type}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean",
+        "output": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "name": "",
+    "module": "auth",
+    "action": "restrict",
+    "options": {
+      "provider": "securityLogin",
+      "permissions": [
+        "write"
+      ],
+      "loginUrl": "/login",
+      "forbiddenUrl": "/403-forbidden"
+    }
+  },
+  {
+    "name": "identity",
+    "module": "auth",
+    "action": "identify",
+    "options": {
+      "provider": "securityLogin"
+    },
+    "output": true,
+    "meta": []
+  },
+  {
+    "name": "LogoutLogo",
+    "module": "dbupdater",
+    "action": "custom",
+    "options": {
+      "connection": "postgres_gcpServer",
+      "sql": {
+        "query": "update t_login_history  \n set logout_time = @logout_time\n where user_id = @identity and id = (select max(id) from t_login_history)",
+        "params": [
+          {
+            "name": "@logout_time",
+            "value": "{{NOW}}",
+            "test": ""
+          },
+          {
+            "name": "@identity",
+            "value": "{{identity}}"
+          }
+        ]
+      }
+    },
+    "output": true,
+    "meta": [],
+    "outputType": "array"
+  },
+  {
+    "name": "",
+    "module": "auth",
+    "action": "logout",
+    "options": {
+      "provider": "securityLogin"
+    }
+  }
+]

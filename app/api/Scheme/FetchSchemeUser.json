@@ -1,0 +1,164 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "RetationSchemeUser",
+        "module": "dbconnector",
+        "action": "paged",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "t_scheme_user",
+                "column": "id"
+              },
+              {
+                "table": "t_scheme_user",
+                "column": "user_id"
+              },
+              {
+                "table": "t_scheme_user",
+                "column": "scheme1"
+              },
+              {
+                "table": "t_scheme_user",
+                "column": "scheme2"
+              },
+              {
+                "table": "t_scheme_user",
+                "column": "for_user_type"
+              }
+            ],
+            "table": {
+              "name": "t_scheme_user"
+            },
+            "joins": [],
+            "orders": [
+              {
+                "table": "t_scheme_user",
+                "column": "id",
+                "direction": "DESC",
+                "recid": 1
+              }
+            ],
+            "query": "SELECT id, user_id, scheme1, scheme2, for_user_type\nFROM t_scheme_user\nORDER BY id DESC",
+            "params": []
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "offset",
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "type": "number"
+          },
+          {
+            "name": "total",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "object",
+            "sub": [
+              {
+                "name": "offset",
+                "type": "object",
+                "sub": [
+                  {
+                    "name": "first",
+                    "type": "number"
+                  },
+                  {
+                    "name": "prev",
+                    "type": "number"
+                  },
+                  {
+                    "name": "next",
+                    "type": "number"
+                  },
+                  {
+                    "name": "last",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "current",
+                "type": "number"
+              },
+              {
+                "name": "total",
+                "type": "number"
+              }
+            ]
+          },
+          {
+            "name": "data",
+            "type": "array",
+            "sub": [
+              {
+                "name": "id",
+                "type": "text"
+              },
+              {
+                "name": "user_id",
+                "type": "number"
+              },
+              {
+                "name": "scheme1",
+                "type": "number"
+              },
+              {
+                "name": "scheme2",
+                "type": "number"
+              },
+              {
+                "name": "for_user_type",
+                "type": "number"
+              }
+            ]
+          }
+        ],
+        "outputType": "object"
+      }
+    ]
+  }
+}

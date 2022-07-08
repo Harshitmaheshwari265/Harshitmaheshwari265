@@ -1,0 +1,179 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="walletcredits" appConnect="local" components="{dmxFormatter:{},dmxDataTraversal:{},dmxValidator:{}}" -->
+<meta name="ac:route" content="/wallet-credits">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<dmx-value id="varBalance" dmx-bind:value="0"></dmx-value>
+<dmx-value id="varAb" dmx-bind:value=""></dmx-value>
+<script is="dmx-flow" id="flowFetchUser" type="text/dmx-flow">{
+  condition: {
+    if: "{{(formAddCredit.UserTypeSelf.value)}}",
+    then: {
+      steps: {
+        run: {action: "{{scUserSchemPrio.load({})}}"}
+      }
+    }
+  }
+}</script>
+<dmx-serverconnect id="scUserType" url="api/Users/UserType"></dmx-serverconnect>
+<dmx-serverconnect id="scUserSchemPrio" url="api/Scheme/FetchSchPrioUser" dmx-param:user_type="formAddCredit.UserTypeSelf.value" noload></dmx-serverconnect>
+<dmx-data-detail id="ddUserScheme" dmx-bind:data="scUserSchemPrio.data.UserDetails" key="id"></dmx-data-detail>
+<dmx-serverconnect id="scAdminTrans" url="api/Transactions/FetchAllAdminBalTr" dmx-param:duration="selectYear.value+'-'+selectMonth.value"></dmx-serverconnect>
+<dmx-data-view id="dvAdminWallet" dmx-bind:data="content.scAdminTrans.data.GetAllAdminTrans" filter="(user_number.contains(formSearchUser.Search.value) || dt_number.contains(formSearchUser.Search.value) || mdt_number.contains(formSearchUser.Search.value) || amount.contains(formSearchUser.Search.value))"></dmx-data-view>
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 id="CreditHeading" class="text-center align-self-center">SW Infotech Wallet Amount Credit<span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scAdminTrans.state.executing"></span></h1>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <div class="card">
+        <div class="card-header sw-bg-col-primary">
+            <b>Wallet Credit Add to MDT/DT/RT</b>
+        </div>
+
+        <div class="card-body">
+            <form is="dmx-serverconnect-form" id="formAddCredit" method="post" action="api/Transactions/CreditAdd" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAddCredit.data ? scNotif.success('New Credit Added') : scNotif.success('Credit Updated');formAddCredit.reset(); scCommision.load({});scAdminBalance.load();scAdminTrans.load()" dmx-on:error="scNotif.warning('An error occurred'); " dmx-on:forbidden="scNotif.warning(lastError.response)">
+                <div class="row">
+                    <div class="col-12 col-lg-2 p-2">
+                        <label>User Type<span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scUserSchemPrio.state.executing"></span></label>
+                        <select id="UserTypeSelf" name="user_type" class="form-control form-select col-12 px-2" dmx-bind:options="scUserType.data.GetUserType" optiontext="user_type" optionvalue="id" dmx-on:changed="flowFetchUser.run()" required="">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-7 p-2">
+                        <label>Select User</label>
+                        <select class="form-control form-select" id="inp_target_user" name="target_user_id" aria-describedby="inp_target_user_help" dmx-bind:options="scUserSchemPrio.data.UserDetails" optiontext="user_mobile+' - '+user_id+' - '+user_fname+' :: Current Balance = Rs. '+balance_amt" optionvalue="id" required="">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-3 p-2">
+                        <label>Credit Amount</label>
+                        <input type="number" id="credit_amount" name="credit_amount" class="form-control" placeholder="E.g: 100" required="">
+                    </div>
+                    <!-- <div class="col-12 col-md-3 p-2">
+                        <label>Current Balance</label>
+                        <b>{{scUserSchemPrio.data.UserDetails[0].balance_amt}}</b>
+                    </div> -->
+                    <div class="col-12 col-lg-2 p-2">
+                        <label>Admin TPIN</label>
+                        <input type="number" id="tpin" name="tpin" class="form-control" placeholder="E.g: 1452" required="">
+                    </div>
+                    <div class="col-12 col-lg-7 p-2">
+                        <label>Comments/ Remarks</label>
+                        <input type="text" id="comment" name="comment" class="form-control" placeholder="Add any note (optional)">
+                    </div>
+                    <div class="col-4 p-0 ms-3">
+                        <button id="btn1" class="btn btn-info mt-md-4" type="submit" dmx-bind:disabled="state.executing" dmx-on:click="scAdminTrans.load()">Credit<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="card-header sw-bg-col-primary mt-3">
+            <b>Admin Wallet Credit update</b>
+        </div>
+        <div class="card-body">
+            <form is="dmx-serverconnect-form" id="formAdminCredit" method="post" action="api/Transactions/CreditToAdmin" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAdminCredit.data ? scNotif.success('New Credit Added') : scNotif.success('Credit Updated');formAdminCredit.reset(); scCommision.load({});scAdminBalance.load();scAdminTrans.load()" dmx-on:error="scNotif.warning('An error occurred'); ">
+
+                <div class="row">
+                    <div class="col-12 col-lg-3 p-2">
+                        <label>Update Admin Credit Amount</label>
+                        <input type="number" id="admin_credit_amount" name="admin_credit_amount" class="form-control" placeholder="E.g: 100" required="">
+                    </div>
+                    <div class="col-12 col-lg-2 p-2">
+                        <label>TPIN</label>
+                        <input type="number" id="admin_tpin" name="admintpin" class="form-control" placeholder="E.g: 1452" required="">
+                    </div>
+                    <div class="col-4 p-0 ms-3">
+                        <button id="AdminCredit" class="btn btn-info mt-md-4" type="submit" dmx-bind:disabled="state.executing" dmx-on:click="scAdminTrans.load()">Admin Credit<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+<div class="container mt-5">
+    <div class="row mx-0 mb-3">
+        <div class="col-12 col-md-5">
+            <h3 class="text-primary">Monthly Wallet Credit & Debit Report</h3>
+        </div>
+        <div class="col-6 col-md-2">
+            <select id="selectMonth" class="form-select" dmx-bind:value="varDateTime.datetime.formatDate('MM')">
+                <option value="">Select Month</option>
+                <option value="01">JAN</option>
+                <option value="02">FEB</option>
+                <option value="03">MAR</option>
+                <option value="04">APR</option>
+                <option value="05">MAY</option>
+                <option value="06">JUN</option>
+                <option value="07">JUL</option>
+                <option value="08">AUG</option>
+                <option value="09">SEP</option>
+                <option value="10">OCT</option>
+                <option value="11">NOV</option>
+                <option value="12">DEC</option>
+            </select>
+        </div>
+        <div class="col-md-2 col-6">
+            <select id="selectYear" class="form-select" dmx-bind:value="varDateTime.datetime.formatDate('yyyy')">
+                <option value="2022" dmx-bind:disabled="varDateTime.datetime.formatDate('yyyy')<'2022'">2022</option>
+                <!-- <option value="2023" dmx-bind:disabled="varDateTime.datetime.formatDate('yyyy')<'2023'">2023</option> -->
+            </select>
+        </div>
+        <div class="col-md-3 col-12">
+            <form id="formSearchUser" class="sd-search-form">
+                <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                    <input type="text" class="form-control sd-search-input rounded-pill" id="Search" name="Search" placeholder="Search">
+                    <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-sm sw-font-11">
+            <thead>
+                <tr>
+                    <th>Sl No.</th>
+                    <th>Tr. Id</th>
+                    <th>User Details</th>
+                    <th>Type</th>
+                    <th>Old Bal.</th>
+                    <th>Amt.</th>
+                    <th>Comm. | Chrg. | Net Amt.</th>
+                    <th>New Val.</th>
+                    <th>Mode</th>
+                    <th>Tr. Date</th>
+                    <th>Remarks</th>
+                    <th>Parent Details</th>
+                </tr>
+            </thead>
+            <tbody is="dmx-repeat" dmx-generator="bs5table" id="tableRepeat1" dmx-bind:repeat="dvAdminWallet.data">
+                <tr>
+                    <td>{{$index+1}}</td>
+                    <td dmx-text="transaction_id"></td>
+                    <td dmx-text="details+' | '+user_number+' | '+user_id"></td>
+                    <td dmx-text="crdr_type"></td>
+                    <td dmx-text="opening_balance.toNumber().toFixed(2)"></td>
+                    <td dmx-text="amount.toNumber().toFixed(2)"></td>
+                    <td dmx-text="comm_amt.toNumber().toFixed(2)+' | '+charge_amt.toNumber().toFixed(2)+' | '+net_amt.toNumber().toFixed(2)"></td>
+                    <td dmx-text="closing_balance.toNumber().toFixed(2)"></td>
+                    <td dmx-text="tr_type+' | '+tr_mode "></td>
+                    <td dmx-text="tr_date.formatDate('dd-MM-yyyy hh:mm:ss A')"></td>
+                    <td dmx-text="reason"></td>
+                    <td dmx-text="dt_id? dt_name+' | '+dt_number+' | '+dt_id:mdt_id? mdt_name+' | '+mdt_number+' | '+mdt_id:'Admin'"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<script>
+    var $disabledResults = $("#inp_target_user");
+    $disabledResults.select2();
+</script>

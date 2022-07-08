@@ -1,0 +1,146 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="complainothertickets" appConnect="local" components="{dmxDataTraversal:{},dmxDatePicker:{},dmxBootstrap5Modal:{}}" -->
+<meta name="ac:route" content="/complain-other-tickets">
+
+<dmx-value id="varComplainFilter" dmx-bind:value="1"></dmx-value>
+<dmx-serverconnect id="scGeneralTicket" url="api/Reports/GeneralComplain" dmx-param:get_type="varComplainFilter.value" dmx-param:fromdate="formPendingDate.daterange.start" dmx-param:todate="formPendingDate.daterange.end"></dmx-serverconnect>
+<script is="dmx-flow" id="flowGetComplain" type="text/dmx-flow">
+    {
+    condition: {
+    if: "{{varComplainFilter.value}}",
+    then: {
+    steps: {
+    run: {action: "{{scGeneralTicket.load({})}}"}
+    }
+    }
+    }
+}
+</script>
+<dmx-data-view id="dvGeneralTrans" dmx-bind:data="scGeneralTicket.data.GetPendingComplaint" filter="(support_type.lowercase().contains(formSearchUser.Search.value.lowercase()) || user_mobile.contains(formSearchUser.Search.value) || user_fname.lowercase().contains(formSearchUser.Search.value.lowercase()))"></dmx-data-view>
+<dmx-data-detail id="ddGeneralTicket" dmx-bind:data="content.dvGeneralTrans.data" key="id"></dmx-data-detail>
+
+<div class="row align-items-center justify-content-between px-4 mb-3 sw-secondary-header mx-0">
+    <div class="col-12 col-md-auto me-auto ps-4">
+        <h1 class="ms-md-1 mt-md-3 text-dark fs-2 sw-fw-800 d-flex align-items-center">
+            General Tickets
+            <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scGeneralTicket.state.executing"></span>
+        </h1>
+    </div>
+    <div class="col-12 col-md-auto my-md-3 my-xxl-0 d-flex align-items-center justify-content-start justify-content-md-center col-xl justify-content-xl-end">
+        <button id="filterStatusAll" class="align-items-center btn btn-primary fw-bold btn-rounded d-flex justify-content-center px-3 px-lg-3 px-md-2 py-1 sw-fs-14 text-nowrap sw-vw-68 text-white" dmx-on:click="varComplainFilter.value != 0 ? varComplainFilter.setValue(0) : varComplainFilter.setValue(1); flowGetComplain.run()">
+            <i class="fas fa-check me-2" dmx-show="varComplainFilter.value == 0"></i>
+            All
+        </button>
+        <button id="filterStatusOpen" class="align-items-center btn btn-secondary fw-bold btn-rounded d-flex justify-content-center ms-2 px-3 px-lg-3 px-md-2 py-1 text-nowrap btn-danger text-light" dmx-on:click="varComplainFilter.value != 1 ? varComplainFilter.setValue(1) : ''; flowGetComplain.run()">
+            <i class="fas fa-check me-2" dmx-show="varComplainFilter.value == 1"></i>
+            Open
+        </button>
+        <button id="filterStatusClosed" class="align-items-center btn fw-bold btn-info-light text-info btn-rounded d-flex justify-content-center ms-2 px-3 px-lg-3 px-md-2 py-1 text-nowrap btn-success text-light" dmx-on:click="varComplainFilter.value != 2 ? varComplainFilter.setValue(2) : varComplainFilter.setValue(1); flowGetComplain.run()">
+            <!-- <input type="hidden" class="form-control" id="complain_close" name="complain_type" value="Close"> -->
+            <i class="fas fa-check me-2" dmx-show="varComplainFilter.value == 2"></i>
+            Closed
+        </button>
+    </div>
+    <div class="col-auto order-2 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+        <form id="formPendingDate"><label class="sw-datepicker">
+                <span class="btn bg-light"><img src="assets/images/icons/calendar.svg" class="img-fluid" width="20px"></span>
+                <input type="text" is="dmx-date-range-picker" format="DD MMM YY" class="" placeholder="Nov 2021 - Dec 2021" id="daterange" dmx-bind:startdate="dateNow.datetime.addDays(0)" dmx-bind:enddate="dateNow.datetime.formatDate('yyyy-MM-dd 23:59:59')" autoapply="true">
+            </label>
+        </form>
+    </div>
+    <div class="col-auto order-1 order-md-3 d-flex align-items-center justify-content-center">
+        <form id="formSearchUser" class="sw-search-form">
+            <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                <input type="text" class="form-control sw-search-input rounded-pill" id="Search" name="Search" placeholder="Search Mobile">
+                <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="container px-4" id="Pendingrecharge">
+    <div class="card">
+        <div class="card-header sw-bg-col-primary">
+            <b>General Complain/ Tickets</b>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover table-sm sw-font-11">
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>User</th>
+                            <th>Subject</th>
+                            <th>Reason</th>
+                            <th>Complain Date</th>
+                            <th>Response</th>
+                            <th>Response date</th>
+                            <th>Complain Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody is="dmx-repeat" dmx-generator="bs5table" id="tableRepeat1" dmx-bind:repeat="dvGeneralTrans.data" key="id">
+                        <tr>
+                            <td>{{$index+1}}</td>
+                            <td dmx-text="user_id+' | '+user_fname+' | '+user_mobile"></td>
+                            <td dmx-text="support_type"></td>
+                            <td dmx-text="message"></td>
+                            <td dmx-text="adddate.formatDate('dd-MM-yyyy hh:mm:ss A')"></td>
+                            <td dmx-text="response"></td>
+                            <td dmx-text="reply_date.formatDate('dd-MM-yyyy hh:mm:ss A')"></td>
+                            <td class="fw-bold" dmx-text="status==1?'Open':'Closed'" dmx-class:text-success="status == 2" dmx-class:text-danger="status == 1"></td>
+                            <td><button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalReply" dmx-on:click="ddGeneralTicket.select(id)">Reply</button></td>
+                        </tr>
+                    </tbody>
+                    <tbody dmx-show="content.scGeneralTicket.data.GetPendingComplaint.total==0">
+                        <tr class="text-center fw-bold text-danger fs-4">
+                            <td colspan="19">No Record Found!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade fixed-left sw-right-sidebar-40" id="modalReply" is="dmx-bs5-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-aside my-0 modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content rounded-0 px-3">
+            <div class="modal-header">
+                <h3 class="modal-title">Reply</h3>
+                <button type="button" class="bg-transparent border-1 ms-auto p-0 px-1" data-bs-dismiss="modal" aria-label="Close" dmx-on:click="modalReply.ResponseForm.reset()">
+                    <i class="fas fa-times" alt="icon"></i>
+                </button>
+            </div>
+            <form is="dmx-serverconnect-form" id="ResponseForm" method="post" action="api/Transactions/ComplainGeneralTicket" dmx-on:success="scNotif.success('Action Success'); scGeneralTicket.load();modalReply.hide(); modalReply.ResponseForm.reset()" dmx-on:error="scNotif.warning('An error occurred'); ">
+                <div class="modal-body">
+                    <input type="hidden" name="ComplainId" dmx-bind:value="ddGeneralTicket.data.id">
+                    <div class="row align-items-baseline">
+                        <div class="col-12">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">User Details:</label>&emsp;<span>{{ddGeneralTicket.data.user_id+' | '+ddGeneralTicket.data.user_fname+' | '+ddGeneralTicket.data.user_mobile}}</span>
+                        </div>
+                        <div class="col-12">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Subject:</label>&emsp;<span>{{ddGeneralTicket.data.support_type}}</span>
+                        </div>
+                        <div class="col-12">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Complain Details:</label>&emsp;<span>{{ddGeneralTicket.data.message}}</span>
+                        </div>
+                        <div class="col-12">
+                            <label for="inpFromDate" class="form-label text-black fw-bold">Complain Date:</label>&emsp;<span>{{ddGeneralTicket.data.adddate.formatDate('dd-MM-yyyy hh:mm:ss A')}}</span>
+                        </div>
+                        <div class="col-12 col-md-6 my-3">
+                            <label for="inpFromReply" class="form-label text-black fw-bold">Response MSG (Optional)</label>&emsp;
+                            <textarea id="response" name="response" class="form-control" dmx-bind:value="ddGeneralTicket.data.response"></textarea>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-warning">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close" dmx-on:click="modalReply.ResponseForm.reset()">Close
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,327 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "GetRelationAPI",
+        "module": "dbconnector",
+        "action": "paged",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_operator",
+                "column": "operator_name"
+              },
+              {
+                "table": "m_operator",
+                "column": "id",
+                "alias": "op_id"
+              },
+              {
+                "table": "m_operator",
+                "column": "api_code",
+                "alias": "our_code"
+              },
+              {
+                "table": "t_op_api",
+                "column": "id",
+                "alias": "t_op_id"
+              },
+              {
+                "table": "t_op_api",
+                "column": "code",
+                "alias": "api_code"
+              }
+            ],
+            "table": {
+              "name": "m_operator"
+            },
+            "joins": [
+              {
+                "table": "t_op_api",
+                "column": "*",
+                "alias": "t_op_api",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "t_op_api",
+                      "column": "op_id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "m_operator",
+                        "column": "id"
+                      },
+                      "operation": "="
+                    },
+                    {
+                      "table": "t_op_api",
+                      "column": "api_id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "m_api",
+                        "column": "id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                }
+              },
+              {
+                "table": "m_api",
+                "column": "*",
+                "alias": "m_api",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "m_api",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "t_op_api",
+                        "column": "api_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                }
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_operator.status",
+                  "field": "m_operator.status",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": 1,
+                  "data": {
+                    "table": "m_operator",
+                    "column": "status",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT m_operator.operator_name, m_operator.id AS op_id, m_operator.api_code AS our_code, t_op_api.id AS t_op_id, t_op_api.code AS api_code\nFROM m_operator\nLEFT JOIN t_op_api AS t_op_api ON (t_op_api.op_id = m_operator.id AND t_op_api.api_id = m_api.id) LEFT JOIN m_api AS m_api ON (m_api.id = t_op_api.api_id)\nWHERE m_operator.status = 1",
+            "params": []
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "offset",
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "type": "number"
+          },
+          {
+            "name": "total",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "object",
+            "sub": [
+              {
+                "name": "offset",
+                "type": "object",
+                "sub": [
+                  {
+                    "name": "first",
+                    "type": "number"
+                  },
+                  {
+                    "name": "prev",
+                    "type": "number"
+                  },
+                  {
+                    "name": "next",
+                    "type": "number"
+                  },
+                  {
+                    "name": "last",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "current",
+                "type": "number"
+              },
+              {
+                "name": "total",
+                "type": "number"
+              }
+            ]
+          },
+          {
+            "name": "data",
+            "type": "array",
+            "sub": [
+              {
+                "type": "text",
+                "name": "operator_name"
+              },
+              {
+                "type": "number",
+                "name": "op_id"
+              },
+              {
+                "type": "text",
+                "name": "our_code"
+              },
+              {
+                "type": "number",
+                "name": "t_op_id"
+              },
+              {
+                "type": "text",
+                "name": "api_code"
+              }
+            ]
+          }
+        ],
+        "outputType": "object",
+        "disabled": true
+      },
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "OPAPI",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{custom[0].opapi}}"
+        },
+        "output": true,
+        "meta": [],
+        "outputType": "text",
+        "disabled": true
+      },
+      {
+        "name": "custom",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "select distinct toa.op_id, mop.operator_name, string_agg(toa.id::character varying, ', ') as op_table_ids, string_agg(toa.api_id::character varying, ', ') as api_ids, string_agg(toa.code, ', ') as api_code, string_agg(ma.api_name || ':' || toa.api_hit_serial::character varying, ', ') as api_names\nfrom public.t_op_api toa\nleft join public.m_api ma on ma.id = toa.api_id \nleft join public.m_operator mop on mop.id = toa.op_id\ngroup by toa.op_id, mop.operator_name ;",
+            "params": []
+          }
+        },
+        "output": true,
+        "meta": [],
+        "outputType": "array"
+      },
+      {
+        "name": "FetchApiCode",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "t_op_api",
+                "column": "id",
+                "alias": "t_op_api_id"
+              },
+              {
+                "table": "t_op_api",
+                "column": "op_id"
+              },
+              {
+                "table": "t_op_api",
+                "column": "api_id"
+              },
+              {
+                "table": "t_op_api",
+                "column": "code"
+              }
+            ],
+            "table": {
+              "name": "t_op_api"
+            },
+            "joins": [],
+            "orders": [
+              {
+                "table": "t_op_api",
+                "column": "id",
+                "direction": "DESC",
+                "recid": 1
+              }
+            ],
+            "query": "SELECT id AS t_op_api_id, op_id, api_id, code\nFROM t_op_api\nORDER BY id DESC",
+            "params": []
+          }
+        },
+        "output": true,
+        "type": "dbconnector_select",
+        "meta": [
+          {
+            "type": "number",
+            "name": "t_op_api_id"
+          },
+          {
+            "type": "number",
+            "name": "op_id"
+          },
+          {
+            "type": "number",
+            "name": "api_id"
+          },
+          {
+            "type": "text",
+            "name": "code"
+          }
+        ],
+        "outputType": "array",
+        "disabled": true
+      }
+    ]
+  }
+}

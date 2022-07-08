@@ -1,0 +1,1133 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "user_type"
+      },
+      {
+        "type": "text",
+        "name": "kyc_status"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.user_type==0&&$_GET.kyc_status=='All'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "FetchUsers",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "query": "SELECT mu.id, mu.user_id, mu.user_fname, mu.user_lname, mu.user_email, mu.user_mobile, \nmu.user_type, mu.u_status, mu.user_tpin, mu.scheme_id, mu.balance_amt, mu.aadhar_no, mu.aeps_balance,\nmu.pan_no, mu.address, mu.pin, mu.state, mu.district, mu.blank1, \nmu.aeps_merchant_id, mu.kyc_status, mu.created_on::text, mu.blank3, m_scheme_user.scheme_name AS user_scheme, user_kyc.profile_pic, user_kyc.pan_card, \nuser_kyc.aadhar_front, user_kyc.aadhar_back, user_kyc.created_on AS kyc_uploaded_on, mu_parent.user_id AS parent_id, \nmu_parent.user_fname AS parent_name, mu_parent.user_mobile AS parent_phone_no FROM m_users mu\nLEFT JOIN m_scheme AS m_scheme_user ON (m_scheme_user.id = mu.scheme_id) \nLEFT JOIN t_user_kyc AS user_kyc ON (user_kyc.user_id = mu.id) \nLEFT JOIN m_users AS mu_parent ON (mu_parent.id = mu.created_by) WHERE mu.user_type!=0 AND mu.user_type!=4 AND mu.user_type!=5 AND mu.deleted_by is NULL ORDER BY mu.id desc;",
+                    "params": []
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "user_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_fname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_lname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_type",
+                    "type": "number"
+                  },
+                  {
+                    "name": "u_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_tpin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "scheme_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "balance_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_no",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_balance",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan_no",
+                    "type": "text"
+                  },
+                  {
+                    "name": "address",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "state",
+                    "type": "text"
+                  },
+                  {
+                    "name": "district",
+                    "type": "text"
+                  },
+                  {
+                    "name": "blank1",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_merchant_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "created_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "blank3",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_scheme",
+                    "type": "text"
+                  },
+                  {
+                    "name": "profile_pic",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan_card",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_front",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_back",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_uploaded_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_phone_no",
+                    "type": "text"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "GetCSV",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "query": "SELECT mu.user_id as RtId, mu.user_fname as RTName, mu.user_mobile as Mobile, mu.user_type, mu.u_status as Status, mu.balance_amt as Balance, mu.aadhar_no as Aadhar, mu.aeps_balance as AEPSBal,\nmu.pan_no as Pan, mu.pin as PIN, mu.state as State, mu.district as District, mu.aeps_merchant_id, mu.kyc_status, mu.created_on::text, mu.blank3 as FirmName, m_scheme_user.scheme_name AS user_scheme, mu_parent.user_id AS ParentId, \nmu_parent.user_fname AS ParentName, mu_parent.user_mobile AS ParentMobile FROM m_users mu\nLEFT JOIN m_scheme AS m_scheme_user ON (m_scheme_user.id = mu.scheme_id) \nLEFT JOIN t_user_kyc AS user_kyc ON (user_kyc.user_id = mu.id) \nLEFT JOIN m_users AS mu_parent ON (mu_parent.id = mu.created_by) WHERE mu.user_type!=0 AND mu.deleted_by is NULL ORDER BY mu.id desc;",
+                    "params": []
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "name": "rtid",
+                    "type": "text"
+                  },
+                  {
+                    "name": "rtname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_type",
+                    "type": "number"
+                  },
+                  {
+                    "name": "status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "balance",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aepsbal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "state",
+                    "type": "text"
+                  },
+                  {
+                    "name": "district",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_merchant_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "created_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "firmname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_scheme",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentid",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentmobile",
+                    "type": "text"
+                  }
+                ],
+                "outputType": "array"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.user_type==0&&$_GET.kyc_status!='All'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "FetchUsers",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "query": "SELECT mu.id, mu.user_id, mu.user_fname, mu.user_lname, mu.user_email, mu.user_mobile, \nmu.user_type, mu.u_status, mu.user_tpin, mu.scheme_id, mu.balance_amt, mu.aadhar_no, mu.aeps_balance,\nmu.pan_no, mu.address, mu.pin, mu.state, mu.district, mu.blank1, \nmu.aeps_merchant_id, mu.kyc_status, mu.created_on::text, mu.blank3, m_scheme_user.scheme_name AS user_scheme, user_kyc.profile_pic, user_kyc.pan_card, \nuser_kyc.aadhar_front, user_kyc.aadhar_back, user_kyc.created_on AS kyc_uploaded_on, mu_parent.user_id AS parent_id, \nmu_parent.user_fname AS parent_name, mu_parent.user_mobile AS parent_phone_no FROM m_users mu\nLEFT JOIN m_scheme AS m_scheme_user ON (m_scheme_user.id = mu.scheme_id) \nLEFT JOIN t_user_kyc AS user_kyc ON (user_kyc.user_id = mu.id) \nLEFT JOIN m_users AS mu_parent ON (mu_parent.id = mu.created_by) WHERE mu.user_type!=0 AND mu.user_type!=4 AND mu.user_type!=5 AND mu.kyc_status=@kyc_status AND mu.deleted_by is NULL ORDER BY mu.id desc;",
+                    "params": [
+                      {
+                        "name": "@kyc_status",
+                        "value": "{{$_GET.kyc_status}}",
+                        "test": "3"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "user_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_fname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_lname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_type",
+                    "type": "number"
+                  },
+                  {
+                    "name": "u_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_tpin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "scheme_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "balance_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_no",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_balance",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan_no",
+                    "type": "text"
+                  },
+                  {
+                    "name": "address",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "state",
+                    "type": "text"
+                  },
+                  {
+                    "name": "district",
+                    "type": "text"
+                  },
+                  {
+                    "name": "blank1",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_merchant_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "created_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "blank3",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_scheme",
+                    "type": "text"
+                  },
+                  {
+                    "name": "profile_pic",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan_card",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_front",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_back",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_uploaded_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_phone_no",
+                    "type": "text"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "GetCSV",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "query": "SELECT mu.user_id as RtId, mu.user_fname as RTName, mu.user_mobile as Mobile, mu.user_type, mu.u_status as Status, mu.balance_amt as Balance, mu.aadhar_no as Aadhar, mu.aeps_balance as AEPSBal,\nmu.pan_no as Pan, mu.pin as PIN, mu.state as State, mu.district as District, mu.aeps_merchant_id, mu.kyc_status, mu.created_on::text, mu.blank3 as FirmName, m_scheme_user.scheme_name AS user_scheme, mu_parent.user_id AS ParentId, \nmu_parent.user_fname AS ParentName, mu_parent.user_mobile AS ParentMobile FROM m_users mu\nLEFT JOIN m_scheme AS m_scheme_user ON (m_scheme_user.id = mu.scheme_id) \nLEFT JOIN t_user_kyc AS user_kyc ON (user_kyc.user_id = mu.id) \nLEFT JOIN m_users AS mu_parent ON (mu_parent.id = mu.created_by) WHERE mu.user_type!=0 AND mu.kyc_status=@kyc_status AND mu.deleted_by is NULL ORDER BY mu.id desc;",
+                    "params": [
+                      {
+                        "name": "@kyc_status",
+                        "value": "{{$_GET.kyc_status}}",
+                        "test": "0"
+                      }
+                    ]
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "name": "rtid",
+                    "type": "text"
+                  },
+                  {
+                    "name": "rtname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_type",
+                    "type": "number"
+                  },
+                  {
+                    "name": "status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "balance",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aepsbal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "state",
+                    "type": "text"
+                  },
+                  {
+                    "name": "district",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_merchant_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "created_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "firmname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_scheme",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentid",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentmobile",
+                    "type": "text"
+                  }
+                ],
+                "outputType": "array"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.user_type!=0&&$_GET.kyc_status=='All'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "FetchUsers",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "query": "SELECT mu.id, mu.user_id, mu.user_fname, mu.user_lname, mu.user_email, mu.user_mobile, \nmu.user_type, mu.u_status, mu.user_tpin, mu.scheme_id, mu.balance_amt, mu.aadhar_no,  mu.aeps_balance,\nmu.pan_no, mu.address, mu.pin, mu.state, mu.district, mu.blank1, \nmu.aeps_merchant_id, mu.kyc_status, mu.created_on::text, mu.blank3, m_scheme_user.scheme_name AS user_scheme, user_kyc.profile_pic, user_kyc.pan_card, \nuser_kyc.aadhar_front, user_kyc.aadhar_back, user_kyc.created_on AS kyc_uploaded_on, mu_parent.user_id AS parent_id, \nmu_parent.user_fname AS parent_name, mu_parent.user_mobile AS parent_phone_no FROM m_users mu\nLEFT JOIN m_scheme AS m_scheme_user ON (m_scheme_user.id = mu.scheme_id) \nLEFT JOIN t_user_kyc AS user_kyc ON (user_kyc.user_id = mu.id) \nLEFT JOIN m_users AS mu_parent ON (mu_parent.id = mu.created_by) WHERE mu.user_type=@user_type AND mu.deleted_by is NULL ORDER BY mu.id desc;",
+                    "params": [
+                      {
+                        "name": "@user_type",
+                        "value": "{{$_GET.user_type}}",
+                        "test": "3"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "user_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_fname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_lname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_type",
+                    "type": "number"
+                  },
+                  {
+                    "name": "u_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_tpin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "scheme_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "balance_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_no",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_balance",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan_no",
+                    "type": "text"
+                  },
+                  {
+                    "name": "address",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "state",
+                    "type": "text"
+                  },
+                  {
+                    "name": "district",
+                    "type": "text"
+                  },
+                  {
+                    "name": "blank1",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_merchant_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "created_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "blank3",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_scheme",
+                    "type": "text"
+                  },
+                  {
+                    "name": "profile_pic",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan_card",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_front",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_back",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_uploaded_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_phone_no",
+                    "type": "text"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "GetCSV",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "query": "SELECT mu.user_id as RtId, mu.user_fname as RTName, mu.user_mobile as Mobile, mu.user_type, mu.u_status as Status, mu.balance_amt as Balance, mu.aadhar_no as Aadhar, mu.aeps_balance as AEPSBal,\nmu.pan_no as Pan, mu.pin as PIN, mu.state as State, mu.district as District, mu.aeps_merchant_id, mu.kyc_status, mu.created_on::text, mu.blank3 as FirmName, m_scheme_user.scheme_name AS user_scheme, mu_parent.user_id AS ParentId, \nmu_parent.user_fname AS ParentName, mu_parent.user_mobile AS ParentMobile FROM m_users mu\nLEFT JOIN m_scheme AS m_scheme_user ON (m_scheme_user.id = mu.scheme_id) \nLEFT JOIN t_user_kyc AS user_kyc ON (user_kyc.user_id = mu.id) \nLEFT JOIN m_users AS mu_parent ON (mu_parent.id = mu.created_by) WHERE mu.user_type=@user_type AND mu.deleted_by is NULL ORDER BY mu.id desc;",
+                    "params": [
+                      {
+                        "name": "@user_type",
+                        "value": "{{$_GET.user_type}}",
+                        "test": "2"
+                      }
+                    ]
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "name": "rtid",
+                    "type": "text"
+                  },
+                  {
+                    "name": "rtname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_type",
+                    "type": "number"
+                  },
+                  {
+                    "name": "status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "balance",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aepsbal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "state",
+                    "type": "text"
+                  },
+                  {
+                    "name": "district",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_merchant_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "created_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "firmname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_scheme",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentid",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentmobile",
+                    "type": "text"
+                  }
+                ],
+                "outputType": "array"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.user_type!=0&&$_GET.kyc_status!='All'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "FetchUsers",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "query": "SELECT mu.id, mu.user_id, mu.user_fname, mu.user_lname, mu.user_email, mu.user_mobile, \nmu.user_type, mu.u_status, mu.user_tpin, mu.scheme_id, mu.balance_amt, mu.aadhar_no,  mu.aeps_balance,\nmu.pan_no, mu.address, mu.pin, mu.state, mu.district, mu.blank1, \nmu.aeps_merchant_id, mu.kyc_status, mu.created_on::text, mu.blank3, m_scheme_user.scheme_name AS user_scheme, user_kyc.profile_pic, user_kyc.pan_card, \nuser_kyc.aadhar_front, user_kyc.aadhar_back, user_kyc.created_on AS kyc_uploaded_on, mu_parent.user_id AS parent_id, \nmu_parent.user_fname AS parent_name, mu_parent.user_mobile AS parent_phone_no FROM m_users mu\nLEFT JOIN m_scheme AS m_scheme_user ON (m_scheme_user.id = mu.scheme_id) \nLEFT JOIN t_user_kyc AS user_kyc ON (user_kyc.user_id = mu.id) \nLEFT JOIN m_users AS mu_parent ON (mu_parent.id = mu.created_by) WHERE mu.user_type=@user_type AND mu.kyc_status=@kyc_status AND mu.deleted_by is NULL ORDER BY mu.id desc;",
+                    "params": [
+                      {
+                        "name": "@user_type",
+                        "value": "{{$_GET.user_type}}",
+                        "test": "3"
+                      },
+                      {
+                        "name": "@kyc_status",
+                        "value": "{{$_GET.kyc_status}}",
+                        "test": "1"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "user_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_fname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_lname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_type",
+                    "type": "number"
+                  },
+                  {
+                    "name": "u_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_tpin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "scheme_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "balance_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_no",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_balance",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan_no",
+                    "type": "text"
+                  },
+                  {
+                    "name": "address",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "state",
+                    "type": "text"
+                  },
+                  {
+                    "name": "district",
+                    "type": "text"
+                  },
+                  {
+                    "name": "blank1",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_merchant_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "created_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "blank3",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_scheme",
+                    "type": "text"
+                  },
+                  {
+                    "name": "profile_pic",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan_card",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_front",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar_back",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_uploaded_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parent_phone_no",
+                    "type": "text"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "GetCSV",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "query": "SELECT mu.user_id as RtId, mu.user_fname as RTName, mu.user_mobile as Mobile, mu.user_type, mu.u_status as Status, mu.balance_amt as Balance, mu.aadhar_no as Aadhar, mu.aeps_balance as AEPSBal,\nmu.pan_no as Pan, mu.pin as PIN, mu.state as State, mu.district as District, mu.aeps_merchant_id, mu.kyc_status, mu.created_on::text, mu.blank3 as FirmName, m_scheme_user.scheme_name AS user_scheme, mu_parent.user_id AS ParentId, \nmu_parent.user_fname AS ParentName, mu_parent.user_mobile AS ParentMobile FROM m_users mu\nLEFT JOIN m_scheme AS m_scheme_user ON (m_scheme_user.id = mu.scheme_id) \nLEFT JOIN t_user_kyc AS user_kyc ON (user_kyc.user_id = mu.id) \nLEFT JOIN m_users AS mu_parent ON (mu_parent.id = mu.created_by) WHERE mu.user_type=@user_type AND mu.kyc_status=@kyc_status AND mu.deleted_by is NULL ORDER BY mu.id desc;",
+                    "params": [
+                      {
+                        "name": "@user_type",
+                        "value": "{{$_GET.user_type}}",
+                        "test": "2"
+                      },
+                      {
+                        "name": "@kyc_status",
+                        "value": "{{$_GET.kyc_status}}",
+                        "test": "1"
+                      }
+                    ]
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "name": "rtid",
+                    "type": "text"
+                  },
+                  {
+                    "name": "rtname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_type",
+                    "type": "number"
+                  },
+                  {
+                    "name": "status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "balance",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aadhar",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aepsbal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pan",
+                    "type": "text"
+                  },
+                  {
+                    "name": "pin",
+                    "type": "text"
+                  },
+                  {
+                    "name": "state",
+                    "type": "text"
+                  },
+                  {
+                    "name": "district",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_merchant_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "kyc_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "created_on",
+                    "type": "text"
+                  },
+                  {
+                    "name": "firmname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_scheme",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentid",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "parentmobile",
+                    "type": "text"
+                  }
+                ],
+                "outputType": "array"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{GetCSV}}",
+          "then": {
+            "steps": {
+              "name": "csvExport",
+              "module": "export",
+              "action": "csv",
+              "options": {
+                "path": "/public/assets/csvFile/ViewUserList.csv",
+                "data": "{{GetCSV}}",
+                "header": true,
+                "overwrite": true
+              },
+              "outputType": "text",
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

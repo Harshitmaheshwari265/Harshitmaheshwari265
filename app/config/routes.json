@@ -1,0 +1,312 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "page": "index",
+      "routeType": "page",
+      "layout": "main",
+      "exec": "/api/PageAccess/IndexAccess"
+    },
+    {
+      "path": "/users",
+      "page": "users",
+      "layout": "main",
+      "exec": "/api/PageAccess/PageAccessViewUsers"
+    },
+    {
+      "path": "/login",
+      "page": "login"
+    },
+    {
+      "path": "/operators",
+      "page": "operators",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/services",
+      "page": "services",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/403-forbidden",
+      "page": "403-forbidden"
+    },
+    {
+      "path": "/api-add-update",
+      "page": "api-add-update",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/scheme",
+      "page": "scheme",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/relation-op-api",
+      "page": "relation-op-api",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/bank-admin",
+      "page": "bank-admin",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/scheme-priority/:id",
+      "page": "scheme-priority",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/scheme-commision-set",
+      "page": "scheme-commision-set",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/wallet-credits",
+      "page": "wallet-credits",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/wallet-debit",
+      "page": "wallet-debit",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/recharge-history",
+      "page": "recharge-history",
+      "layout": "main",
+      "exec": "/api/PageAccess/PageAccessTransHistory"
+    },
+    {
+      "path": "/account-summary-report",
+      "page": "account-summary-report",
+      "layout": "main",
+      "exec": "/api/PageAccess/AdminAndCC"
+    },
+    {
+      "path": "/api-sales-report",
+      "page": "api-sales-report",
+      "layout": "main",
+      "exec": "/api/PageAccess/AdminAndCC"
+    },
+    {
+      "path": "/balance-report",
+      "page": "balance-report",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/my-profile",
+      "page": "my-profile",
+      "layout": "main",
+      "exec": "/api/PageAccess/AdminAndCC"
+    },
+    {
+      "path": "/security-update",
+      "page": "security-update",
+      "layout": "main",
+      "exec": "/api/PageAccess/AdminAndCC"
+    },
+    {
+      "path": "/login-history",
+      "page": "login-history",
+      "layout": "main",
+      "exec": "/api/PageAccess/AdminAndCC"
+    },
+    {
+      "path": "/send-sms",
+      "page": "send-sms",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/dashboard",
+      "page": "dashboard",
+      "layout": "main",
+      "exec": "/api/PageAccess/AdminAndCC"
+    },
+    {
+      "path": "/add-user",
+      "page": "add-user",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/sms-report",
+      "page": "sms-report",
+      "layout": "main",
+      "exec": "/api/PageAccess/AdminAndCC"
+    },
+    {
+      "path": "/add-cc",
+      "page": "add-cc",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/view-cc",
+      "page": "view-cc",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/api-forward",
+      "page": "api-forward",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/op-api-code-update",
+      "page": "op-api-code-update",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/add-api-user",
+      "page": "add-api-user",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/view-api-users",
+      "page": "view-api-users",
+      "layout": "main"
+    },
+    {
+      "path": "/pending-recharge",
+      "page": "pending-recharge",
+      "layout": "main",
+      "exec": "/api/PageAccess/PageAccessPendingTrans"
+    },
+    {
+      "path": "/live-transactions",
+      "page": "live-transactions",
+      "layout": "main",
+      "exec": "/api/PageAccess/PageAccessLiveTrans"
+    },
+    {
+      "path": "/response-request",
+      "page": "response-request",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/complain-browse-tickets",
+      "page": "complain-browse-tickets",
+      "layout": "main",
+      "exec": "/api/PageAccess/PageAccessBrowsTickets"
+    },
+    {
+      "path": "/update-transaction",
+      "page": "update-transaction",
+      "layout": "main",
+      "exec": "/api/PageAccess/PageAccessUpTrans"
+    },
+    {
+      "path": "/random-rooting",
+      "page": "random-rooting",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/android-image",
+      "page": "android-image",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/android-help-desk",
+      "page": "android-help-desk",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/complain-other-tickets",
+      "page": "complain-other-tickets",
+      "layout": "main",
+      "exec": "/api/PageAccess/PageAccessGeneralTickets"
+    },
+    {
+      "path": "/add-bank-list-beta",
+      "page": "add-bank-list-beta",
+      "layout": "main"
+    },
+    {
+      "path": "/AEPS-transaction-history",
+      "page": "AEPS-transaction-history",
+      "layout": "main"
+    },
+    {
+      "path": "/AEPS-live-transaction",
+      "page": "AEPS-live-transaction",
+      "layout": "main"
+    },
+    {
+      "path": "/update-aeps-transaction",
+      "page": "update-aeps-transaction",
+      "layout": "main"
+    },
+    {
+      "path": "/children/:id",
+      "page": "children",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/sales-report-dt",
+      "page": "sales-report-dt",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/recharge-plan",
+      "page": "recharge-plan",
+      "layout": "main",
+      "exec": "/api/PageAccess/UserAccess"
+    },
+    {
+      "path": "/individual-txn",
+      "page": "individual-txn",
+      "layout": "main"
+    },
+    {
+      "path": "/manage-services",
+      "page": "manage-services",
+      "layout": "main"
+    },
+    {
+      "path": "/swpay-enquiry",
+      "page": "swpay-enquiry",
+      "layout": "main"
+    },
+    {
+      "path": "/add-money-request",
+      "page": "add-money-request",
+      "layout": "main"
+    },
+    {
+      "path": "/pending-aeps",
+      "page": "pending-aeps",
+      "layout": "main"
+    },
+    {
+      "path": "/update_nan_balance",
+      "page": "update_nan_balance",
+      "layout": "main"
+    },
+    {
+      "path": "*",
+      "page": "404-not-found"
+    }
+  ]
+}

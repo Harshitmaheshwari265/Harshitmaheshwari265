@@ -1,0 +1,184 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "api_type"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.api_type}}",
+          "then": {
+            "steps": {
+              "name": "GetActiveAPI",
+              "module": "dbconnector",
+              "action": "select",
+              "options": {
+                "sql": {
+                  "type": "SELECT",
+                  "columns": [
+                    {
+                      "table": "m_api",
+                      "column": "id"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_name"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_code"
+                    }
+                  ],
+                  "table": {
+                    "name": "m_api"
+                  },
+                  "joins": [],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "m_api.status",
+                        "field": "m_api.status",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": 1,
+                        "data": {
+                          "table": "m_api",
+                          "column": "status",
+                          "type": "number",
+                          "columnObj": {
+                            "type": "integer",
+                            "primary": false,
+                            "nullable": false,
+                            "unique": false,
+                            "name": "status"
+                          }
+                        },
+                        "operation": "="
+                      },
+                      {
+                        "condition": "OR",
+                        "rules": [
+                          {
+                            "id": "m_api.api_type",
+                            "field": "m_api.api_type",
+                            "type": "string",
+                            "operator": "equal",
+                            "value": "0",
+                            "data": {
+                              "table": "m_api",
+                              "column": "api_type",
+                              "type": "text",
+                              "columnObj": {
+                                "type": "string",
+                                "maxLength": -5,
+                                "primary": false,
+                                "unique": false,
+                                "nullable": true,
+                                "name": "api_type"
+                              }
+                            },
+                            "operation": "="
+                          },
+                          {
+                            "id": "m_api.api_type",
+                            "field": "m_api.api_type",
+                            "type": "string",
+                            "operator": "equal",
+                            "value": "{{$_GET.api_type}}",
+                            "data": {
+                              "table": "m_api",
+                              "column": "api_type",
+                              "type": "text",
+                              "columnObj": {
+                                "type": "string",
+                                "maxLength": -5,
+                                "primary": false,
+                                "unique": false,
+                                "nullable": true,
+                                "name": "api_type"
+                              }
+                            },
+                            "operation": "="
+                          }
+                        ],
+                        "conditional": null
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "orders": [
+                    {
+                      "table": "m_api",
+                      "column": "api_name",
+                      "direction": "ASC",
+                      "recid": 1
+                    }
+                  ],
+                  "query": "SELECT id, api_name, api_code\nFROM m_api\nWHERE status = 1 AND (api_type = '0' OR api_type = :P1 /* {{$_GET.api_type}} */)\nORDER BY api_name ASC",
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_GET.api_type}}"
+                    }
+                  ],
+                  "primary": "id"
+                },
+                "connection": "postgres_gcpServer"
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "api_name"
+                },
+                {
+                  "type": "text",
+                  "name": "api_code"
+                }
+              ],
+              "outputType": "array"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

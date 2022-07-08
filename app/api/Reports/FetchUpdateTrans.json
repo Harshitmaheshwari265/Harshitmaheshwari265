@@ -1,0 +1,182 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "todate"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "GetTrans",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "SELECT trt.id, trt.user_number, trt.details, trt.opening_balance, \ntrt.amount, trt.comm_amt, trt.charge_amt, trt.net_amt, \ntrt.closing_balance, trt.tr_mode, trt.status, trt.tr_id, \ntrt.reason, trt.api_logs, trt.api_ref, trt.ip_address, \ntrt.tr_date::text, trt.updated_on, trt.extra2 AS complain_status, m_users.user_id, m_users.user_fname, \nm_users.user_mobile, m_operator.operator_name, m_service.service_name, trt.updated_on\nFROM tt_recharge_trans AS trt\nLEFT JOIN m_users AS m_users ON (m_users.id = trt.user_id) \nLEFT JOIN m_operator AS m_operator ON (m_operator.id = trt.op_id) \nINNER JOIN m_service AS m_service ON (m_service.id = trt.service_id)\nWHERE trt.tr_date BETWEEN @fromdate AND @todate \nAND m_service.service_name <> 'Wallet' AND trt.status <> 'PENDING' ORDER BY trt.id desc;",
+            "params": [
+              {
+                "name": "@fromdate",
+                "value": "{{$_GET.fromdate}}",
+                "test": "2022-05-25 00:00:00"
+              },
+              {
+                "name": "@todate",
+                "value": "{{$_GET.todate}}",
+                "test": "2022-05-25 23:59:59"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "user_number",
+            "type": "text"
+          },
+          {
+            "name": "details",
+            "type": "text"
+          },
+          {
+            "name": "opening_balance",
+            "type": "text"
+          },
+          {
+            "name": "amount",
+            "type": "text"
+          },
+          {
+            "name": "comm_amt",
+            "type": "text"
+          },
+          {
+            "name": "charge_amt",
+            "type": "text"
+          },
+          {
+            "name": "net_amt",
+            "type": "text"
+          },
+          {
+            "name": "closing_balance",
+            "type": "text"
+          },
+          {
+            "name": "tr_mode",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "tr_id",
+            "type": "text"
+          },
+          {
+            "name": "reason",
+            "type": "text"
+          },
+          {
+            "name": "api_logs",
+            "type": "text"
+          },
+          {
+            "name": "api_ref",
+            "type": "text"
+          },
+          {
+            "name": "ip_address",
+            "type": "text"
+          },
+          {
+            "name": "tr_date",
+            "type": "text"
+          },
+          {
+            "name": "updated_on",
+            "type": "text"
+          },
+          {
+            "name": "complain_status",
+            "type": "text"
+          },
+          {
+            "name": "user_id",
+            "type": "text"
+          },
+          {
+            "name": "user_fname",
+            "type": "text"
+          },
+          {
+            "name": "user_mobile",
+            "type": "text"
+          },
+          {
+            "name": "operator_name",
+            "type": "text"
+          },
+          {
+            "name": "service_name",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

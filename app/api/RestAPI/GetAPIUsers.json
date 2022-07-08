@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "api_apitoken"
+      }
+    ]
+  },
+  "exec": {
+    "steps": {
+      "name": "GetAPIUsers",
+      "module": "dbconnector",
+      "action": "paged",
+      "options": {
+        "sql": {
+          "type": "SELECT",
+          "columns": [
+            {
+              "table": "m_api_users",
+              "column": "id"
+            },
+            {
+              "table": "m_api_users",
+              "column": "apiuser_id"
+            },
+            {
+              "table": "m_api_users",
+              "column": "user_fname"
+            },
+            {
+              "table": "m_api_users",
+              "column": "user_mobile"
+            },
+            {
+              "table": "m_api_users",
+              "column": "user_email"
+            }
+          ],
+          "table": {
+            "name": "m_api_users"
+          },
+          "joins": [],
+          "wheres": {
+            "condition": "AND",
+            "rules": [
+              {
+                "id": "m_api_users.u_status",
+                "field": "m_api_users.u_status",
+                "type": "string",
+                "operator": "equal",
+                "value": "1",
+                "data": {
+                  "table": "m_api_users",
+                  "column": "u_status",
+                  "type": "text"
+                },
+                "operation": "="
+              },
+              {
+                "id": "m_api_users.api_apitoken",
+                "field": "m_api_users.api_apitoken",
+                "type": "string",
+                "operator": "equal",
+                "value": "{{$_GET.api_apitoken}}",
+                "data": {
+                  "table": "m_api_users",
+                  "column": "api_apitoken",
+                  "type": "text"
+                },
+                "operation": "="
+              }
+            ],
+            "conditional": null,
+            "valid": true
+          },
+          "query": "SELECT id, apiuser_id, user_fname, user_mobile, user_email\nFROM m_api_users\nWHERE u_status = '1' AND api_apitoken = :P1 /* {{$_GET.api_apitoken}} */\nORDER BY id DESC",
+          "params": [
+            {
+              "operator": "equal",
+              "type": "expression",
+              "name": ":P1",
+              "value": "{{$_GET.api_apitoken}}"
+            }
+          ],
+          "orders": [
+            {
+              "table": "m_api_users",
+              "column": "id",
+              "direction": "DESC",
+              "recid": 1
+            }
+          ]
+        },
+        "connection": "postgres_gcpServer"
+      },
+      "output": true,
+      "meta": [
+        {
+          "name": "offset",
+          "type": "number"
+        },
+        {
+          "name": "limit",
+          "type": "number"
+        },
+        {
+          "name": "total",
+          "type": "number"
+        },
+        {
+          "name": "page",
+          "type": "object",
+          "sub": [
+            {
+              "name": "offset",
+              "type": "object",
+              "sub": [
+                {
+                  "name": "first",
+                  "type": "number"
+                },
+                {
+                  "name": "prev",
+                  "type": "number"
+                },
+                {
+                  "name": "next",
+                  "type": "number"
+                },
+                {
+                  "name": "last",
+                  "type": "number"
+                }
+              ]
+            },
+            {
+              "name": "current",
+              "type": "number"
+            },
+            {
+              "name": "total",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "name": "data",
+          "type": "array",
+          "sub": [
+            {
+              "type": "number",
+              "name": "id"
+            },
+            {
+              "type": "text",
+              "name": "apiuser_id"
+            },
+            {
+              "type": "text",
+              "name": "user_fname"
+            },
+            {
+              "type": "text",
+              "name": "user_mobile"
+            },
+            {
+              "type": "text",
+              "name": "user_email"
+            }
+          ]
+        }
+      ],
+      "outputType": "object"
+    }
+  }
+}

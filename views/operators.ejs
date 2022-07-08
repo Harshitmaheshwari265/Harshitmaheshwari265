@@ -1,0 +1,164 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="operators" appConnect="local" components="{dmxSwiper:{},dmxFormatter:{},dmxDataTraversal:{},dmxBootstrap5Modal:{},dmxValidator:{}}" -->
+<meta name="ac:route" content="/operators">
+<dmx-serverconnect id="scService" url="api/Services/Services"></dmx-serverconnect>
+<dmx-serverconnect id="scOperator" url="api/operator/OperatorsFetch" dmx-param:limit="1000" dmx-param:service_id="content.inp_Fetch_service.value"></dmx-serverconnect>
+<dmx-data-view id="dvOperator" dmx-bind:data="scOperator.data.OperatorFetch.data" filter="(operator_name.lowercase().contains(formSearchUser.Search.value) || service_name.lowercase().contains(formSearchUser.Search.value) )"></dmx-data-view>
+<dmx-data-detail id="ddOperators" dmx-bind:data="dvOperator.data" key="op_id"></dmx-data-detail>
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-auto me-auto ps-4">
+                <h1 id="Operator" class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">SW Infotech Operators <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scOperator.state.executing"></span></h1>
+            </div>
+            <div class="col-auto order-2 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+                <select type="text" class="form-control form-select" id="inp_Fetch_service" name="service" aria-describedby="inp_service_help" placeholder="Enter Service" dmx-bind:options="scService.data.FetchServices.data" optiontext="service_name" optionvalue="id" required="">
+                    <option value="0">All</option>
+                </select>
+            </div>
+            <div class="col-auto order-2 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+                <button id="btnAdd" class="btn btn-primary" dmx-on:click="modalAddOperators.show(); ddOperators.select(0);">Add Operator</button>
+            </div>
+            <div class="col-auto order-1 order-md-3 d-flex align-items-center justify-content-center">
+                <form id="formSearchUser" class="sd-search-form">
+                    <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                        <input type="text" class="form-control sd-search-input rounded-pill" id="Search" name="Search" placeholder="Search">
+                        <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-sm sw-font-11">
+            <thead>
+                <tr>
+                    <th>Sl. No.</th>
+                    <th>Image</th>
+                    <th>Op. Name</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Allow GST</th>
+                    <th>Allow TDS</th>
+                    <th>Min Amount</th>
+                    <th>Max Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="dvOperator.data" id="tableRepeat1">
+                <tr>
+                    <td>{{$index+1}}</td>
+                    <td><img dmx-bind:src="image" width="30" height="30"></td>
+                    <td dmx-text="operator_name.titlecase()"></td>
+                    <td dmx-text="service_name"></td>
+                    <td dmx-text="status != 1 ?'Inactive' : 'Active'" dmx-class:table-primary="status == 1" dmx-class:table-warning="status != 1"></td>
+                    <td dmx-text="is_gst == 1 ?'True' : 'False'" dmx-class:table-primary="is_gst == 1" dmx-class:table-warning="is_gst != 1"></td>
+                    <td dmx-text="is_tds == 1 ?'True' : 'False'" dmx-class:table-primary="is_tds == 1" dmx-class:table-warning="is_tds != 1"></td>
+                    <td dmx-text="min_amount"></td>
+                    <td dmx-text="max_amount"></td>
+                    <td>
+                        <a class="dropdown-item" href="#" dmx-on:click="ddOperators.select(op_id)" data-bs-toggle="modal" data-bs-target="#modalAddOperators"><i class="fas fa-edit sw-col-ar" title="Edit Operator"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Modal Add Operators -->
+<div class="modal fade" id="modalAddOperators" is="dmx-bs5-modal" tabindex="-1" nocloseonclick="true" nokeyboard="true" nofocus="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ddOperators.data.op_id ? 'Edit Operators' : 'Add Operators'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" dmx-on:click="formAddEditOperator.reset()"></button>
+            </div>
+            <div class="modal-body">
+                <form is="dmx-serverconnect-form" id="formAddEditOperator" method="post" action="api/operator/OperatorsAddEdit" dmx-generator="bootstrap5" dmx-form-type="horizontal" dmx-on:success="formAddEditOperator.data.AddEditOperators ? scNotif.success('New Operator Added') : scNotif.success('Operator Updated'); formAddEditOperator.reset(); scOperator.load()" dmx-on:error="scNotif.warning('An error occurred'); modalAddOperators.hide();formAddEditOperator.reset()" dmx-on:forbidden="scNotif.warning(lastError.response)" dmx-on:unauthorized="scNotif.warning(lastError.response)" dmx-on:invalid="scNotif.warning(lastError.message)">
+                    <!-- modalAddOperators.hide();browserMain.goto('operators') -->
+                    <input type="hidden" name="OperatorId" dmx-bind:value="ddOperators.data.op_id">
+                    <div class="mb-3 row">
+                        <label for="inp_name" class="col-sm-2 col-form-label">Operator Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_Operator_name" name="name" aria-describedby="inp_name_help" placeholder="E.g: AIRTEL/ BSNL" maxlength="100" required="" data-msg-required="Operator Name is required." dmx-bind:value="ddOperators.data.operator_name">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_service" class="col-sm-2 col-form-label">Service</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control form-select" id="inp_Operator_service" name="service" aria-describedby="inp_service_help" placeholder="Enter Service" dmx-bind:options="scService.data.FetchServices.data" optiontext="service_name" optionvalue="id" dmx-bind:value="ddOperators.data.service_id" required="">
+                                <option value="">Select Service</option>
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_min" class="col-sm-2 col-form-label">Minimum Amount</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_min_limit" name="min_amt" aria-describedby="inp_min_amount_help" placeholder="Enter Minimum Limit" maxlength="10" required="" data-msg-required="Minimum Limit is required." dmx-bind:value="ddOperators.data.min_amount" data-msg-number="">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inp_api_max_amt" class="col-sm-2 col-form-label">Max. Amount</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inp_max_amt" name="max_amount" aria-describedby="inp_api_max_amount_help" placeholder="Enter Max. Amount" maxlength="10" dmx-bind:value="ddOperators.data.max_amount">
+                        </div>
+                    </div>
+                    <div class="mb-3 row mx-0">
+                        <div class="mb-3 row col-6 px-0">
+                            <label for="inp_is_gst" class="col-5 col-form-label">Allow GST</label>
+                            <div class="col-7">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="inp_is_gst" dmx-bind:checked="ddOperators.data.is_gst == 1" dmx-bind:value="inp_is_gst.checked ? 1 : 0">
+                                    <input type="hidden" name="is_gst" dmx-bind:value="inp_is_gst.checked">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3 row col-6 px-0">
+                            <label for="inp_is_tds" class="col-5 col-form-label">Allow TDS</label>
+                            <div class="col-7">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="inp_is_tds" dmx-bind:checked="ddOperators.data.is_tds == 1" dmx-bind:value="inp_is_tds.checked ? 1 : 0">
+                                    <input type="hidden" name="is_tds" dmx-bind:value="inp_is_tds.checked">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="mb-3 row mx-0">
+                        <div class="mb-3 col-6 px-0 row">
+                            <label for="inp_status" class="col-5 col-form-label">Status</label>
+                            <div class="col-sm-7">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="SwitchCheckStatus" dmx-bind:checked="ddOperators.data.status == 1" dmx-bind:value="SwitchCheckStatus.checked ? 1 : 0">
+                                    <input type="hidden" name="op_status" dmx-bind:value="SwitchCheckStatus.checked">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3 col-6 px-0 row">
+                            <img id="ImageLogo" width="100" dmx-bind:src="inputLogo.file.dataUrl ? inputLogo.file.dataUrl : ddOperators.data.image" dmx-show="inputLogo.value ? inputLogo.value : ddOperators.data.op_id" height="100">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row mx-0">
+                        <label for="input1" class="form-label">Operator Logo</label>
+                        <input type="file" class="form-control" id="inputLogo" name="filelogo" aria-describedby="input1_help">
+                        <small id="input1_help" class="form-text text-muted">Select here your image for upload.</small>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-2">&nbsp;</div>
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary" dmx-bind:disabled="state.executing">Save<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span></button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" dmx-on:click="formAddEditOperator.reset()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,324 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "GetAPIUsers",
+        "module": "dbconnector",
+        "action": "paged",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_users",
+                "column": "id"
+              },
+              {
+                "table": "m_users",
+                "column": "user_id"
+              },
+              {
+                "table": "m_users",
+                "column": "user_fname"
+              },
+              {
+                "table": "m_users",
+                "column": "user_mobile"
+              },
+              {
+                "table": "m_users",
+                "column": "user_email"
+              },
+              {
+                "table": "m_users",
+                "column": "u_status"
+              },
+              {
+                "table": "m_users",
+                "column": "user_tpin"
+              },
+              {
+                "table": "m_users",
+                "column": "balance_amt"
+              },
+              {
+                "table": "m_users",
+                "column": "blank1"
+              },
+              {
+                "table": "m_users",
+                "column": "aadhar_no"
+              },
+              {
+                "table": "m_users",
+                "column": "pan_no"
+              },
+              {
+                "table": "m_users",
+                "column": "address"
+              },
+              {
+                "table": "m_users",
+                "column": "pin"
+              },
+              {
+                "table": "m_users",
+                "column": "state"
+              },
+              {
+                "table": "m_users",
+                "column": "district"
+              },
+              {
+                "table": "m_scheme",
+                "column": "scheme_name"
+              },
+              {
+                "table": "m_users",
+                "column": "scheme_id"
+              },
+              {
+                "table": "m_users",
+                "column": "user_type"
+              },
+              {
+                "table": "m_users",
+                "column": "blank1"
+              }
+            ],
+            "table": {
+              "name": "m_users"
+            },
+            "joins": [
+              {
+                "table": "m_scheme",
+                "column": "*",
+                "alias": "m_scheme",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "m_scheme",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "m_users",
+                        "column": "scheme_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                }
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_users.user_type",
+                  "field": "m_users.user_type",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": 5,
+                  "data": {
+                    "table": "m_users",
+                    "column": "user_type",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "orders": [
+              {
+                "table": "m_users",
+                "column": "id",
+                "direction": "DESC",
+                "recid": 1
+              }
+            ],
+            "query": "SELECT m_users.id, m_users.user_id, m_users.user_fname, m_users.user_mobile, m_users.user_email, m_users.u_status, m_users.user_tpin, m_users.balance_amt, m_users.blank1, m_users.aadhar_no, m_users.pan_no, m_users.address, m_users.pin, m_users.state, m_users.district, m_scheme.scheme_name, m_users.scheme_id, m_users.user_type, m_users.blank1\nFROM m_users\nLEFT JOIN m_scheme AS m_scheme ON (m_scheme.id = m_users.scheme_id)\nWHERE m_users.user_type = 5\nORDER BY m_users.id DESC",
+            "params": []
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "offset",
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "type": "number"
+          },
+          {
+            "name": "total",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "object",
+            "sub": [
+              {
+                "name": "offset",
+                "type": "object",
+                "sub": [
+                  {
+                    "name": "first",
+                    "type": "number"
+                  },
+                  {
+                    "name": "prev",
+                    "type": "number"
+                  },
+                  {
+                    "name": "next",
+                    "type": "number"
+                  },
+                  {
+                    "name": "last",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "current",
+                "type": "number"
+              },
+              {
+                "name": "total",
+                "type": "number"
+              }
+            ]
+          },
+          {
+            "name": "data",
+            "type": "array",
+            "sub": [
+              {
+                "type": "number",
+                "name": "id"
+              },
+              {
+                "type": "text",
+                "name": "user_id"
+              },
+              {
+                "type": "text",
+                "name": "user_fname"
+              },
+              {
+                "type": "text",
+                "name": "user_mobile"
+              },
+              {
+                "type": "text",
+                "name": "user_email"
+              },
+              {
+                "type": "text",
+                "name": "u_status"
+              },
+              {
+                "type": "text",
+                "name": "user_tpin"
+              },
+              {
+                "type": "text",
+                "name": "balance_amt"
+              },
+              {
+                "type": "text",
+                "name": "blank1"
+              },
+              {
+                "type": "text",
+                "name": "aadhar_no"
+              },
+              {
+                "type": "text",
+                "name": "pan_no"
+              },
+              {
+                "type": "text",
+                "name": "address"
+              },
+              {
+                "type": "text",
+                "name": "pin"
+              },
+              {
+                "type": "text",
+                "name": "state"
+              },
+              {
+                "type": "text",
+                "name": "district"
+              },
+              {
+                "type": "text",
+                "name": "scheme_name"
+              },
+              {
+                "type": "number",
+                "name": "scheme_id"
+              },
+              {
+                "type": "number",
+                "name": "user_type"
+              }
+            ]
+          }
+        ],
+        "outputType": "object"
+      }
+    ]
+  }
+}

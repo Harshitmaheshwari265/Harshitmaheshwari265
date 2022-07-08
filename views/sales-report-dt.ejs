@@ -1,0 +1,131 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="salesreportdt" appConnect="local" components="{dmxDataTraversal:{},dmxDatePicker:{},dmxBootstrap5Modal:{}}" -->
+<meta name="ac:route" content="/sales-report-dt">
+<dmx-value id="varRTId" dmx-bind:value="0"></dmx-value>
+<dmx-serverconnect id="scRTSales" url="api/Reports/RTSalesReport" dmx-param:fromdate="formDatePicker.daterange.start" dmx-param:todate="formDatePicker.daterange.end" noload dmx-param:dt_id="varRTId.value"></dmx-serverconnect>
+<script is="dmx-flow" id="flowFetchRTSales" type="text/dmx-flow">{
+  condition: {
+    if: "{{(varRTId.value && formDatePicker.daterange.start && formDatePicker.daterange.end)}}",
+    then: {
+      steps: {
+        run: {action: "{{scRTSales.load({}); modalResponse.show()}}"}
+      }
+    }
+  }
+}</script>
+<dmx-serverconnect id="scDTSales" url="api/Reports/DTSalesReport" dmx-param:fromdate="formDatePicker.daterange.start" dmx-param:todate="formDatePicker.daterange.end"></dmx-serverconnect>
+<dmx-data-view id="dvDTSales" dmx-bind:data="content.scDTSales.data.DtSales" filter="(dt_userid.contains(formSearchUser.Search.value) || dt_name.lowercase().contains(formSearchUser.Search.value.lowercase()) ||dt_mobile.contains(formSearchUser.Search.value))"></dmx-data-view>
+<!-- <dmx-serverconnect id="scRTSales" url="api/Reports/RTSalesReport" dmx-param:fromdate="formDatePicker.daterange.start" dmx-param:todate="formDatePicker.daterange.end" noload></dmx-serverconnect> -->
+<!-- <dmx-data-detail id="ddRechargeTrans" key="table_id" dmx-bind:data="dvRechTrans.data"></dmx-data-detail> -->
+
+<div class="row align-items-center justify-content-between px-4 mb-3 sd-secondary-header mx-0">
+    <div class="col-12 col-md-auto me-auto ps-4">
+        <h3 class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">
+            DT Sales Report
+            <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scDTSales.state.executing"></span>
+        </h3>
+    </div>
+    <div class="col-auto order-2 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+        <form id="formDatePicker"><label class="sw-datepicker">
+                <span class="btn bg-light"><img src="assets/images/icons/calendar.svg" class="img-fluid" width="20px"></span>
+                <input type="text" is="dmx-date-range-picker" format="DD MMM YY" class="" placeholder="Nov 2021 - Dec 2021" id="daterange" dmx-bind:startdate="dateNow.datetime.addDays(0)" dmx-bind:enddate="dateNow.datetime.formatDate('yyyy-MM-dd 23:59:59')" autoapply="true">
+            </label>
+        </form>
+    </div>
+    <div class="col-auto order-1 order-md-4 d-flex align-items-center justify-content-center">
+        <form id="formSearchUser" class="sd-search-form">
+            <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                <input type="text" class="form-control sd-search-input rounded-pill" id="Search" name="Search" placeholder="Search">
+                <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="container px-4" id="Recharges">
+    <div class="card">
+        <div class="card-header sw-bg-col-primary">
+            <b>Sales Report</b>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover table-sm sw-font-11">
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>DT Id <i class="fas fa-search"></i></th>
+                            <th>DT Name <i class="fas fa-search"></i></th>
+                            <th>DT Mobile<i class="fas fa-search"></i></th>
+                            <th>Success</th>
+                            <th>Failed</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="dvDTSales.data" id="tableRepeat1" key="did">
+                        <tr>
+                            <td>{{$index+1}}</td>
+                            <td dmx-text="dt_userid"></td>
+                            <td dmx-text="dt_name"></td>
+                            <td dmx-text="dt_mobile"></td>
+                            <td dmx-text="success_amt"></td>
+                            <td dmx-text="failed_amt"></td>
+                            <td>
+                                <i class="far fa-eye" dmx-on:click="varRTId.setValue(dt_userid); flowFetchRTSales.run()">
+                                </i>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfooter>
+                        <tr>
+                            <th>No.: {{content.scDTSales.data.DtSales.length}}</th>
+                            <th colspan="3"></th>
+                            <th>Total Success: {{content.scDTSales.data.DtSales.sum(`success_amt`)}} /-</th>
+                            <th>Total Failed: {{content.scDTSales.data.DtSales.sum(`failed_amt`)}}</th>
+                            <th></th>
+                        </tr>
+                    </tfooter>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal modalResponse Show-->
+<div class="modal fade" id="modalResponse" is="dmx-bs5-modal" tabindex="-1" nokeyboard="true" nocloseonclick="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">RT Sales Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h3>Sales Report Under DT: {{varRTId.value}} </h3>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover table-sm sw-font-11">
+                        <thead>
+                            <tr>
+                                <th>Sl. No.</th>
+                                <th>RT Id</th>
+                                <th>RT Name</th>
+                                <th>RT Mobile</th>
+                                <th>Success</th>
+                            </tr>
+                        </thead>
+                        <tbody is="dmx-repeat" dmx-generator="bs5table" id="tableRepeat2" key="user_id" dmx-bind:repeat="scRTSales.data.RtSales">
+                            <tr>
+                                <td>{{$index+1}}</td>
+                                <td dmx-text="user_id"></td>
+                                <td dmx-text="user_fname"></td>
+                                <td dmx-text="user_mobile"></td>
+                                <td dmx-text="success_amt"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

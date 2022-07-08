@@ -1,0 +1,21 @@
+[
+{
+    type: 'xmlToJSON',
+    groupTitle : 'Custom',
+    groupIcon : 'fa fa-lg fa-key',
+    title : 'XML TO JSON',
+    icon : 'fas fa-lg fa-layer-group',
+    state : 'opened',
+    properties : [
+      {
+        variables: [
+        { name: 'key', optionName: 'meta_key', title: 'Meta Key', type: 'text', defaultValue: '', required: true, serverDataBindings: true}
+        ]
+      }
+    ]
+  }
+]
+
+
+
+

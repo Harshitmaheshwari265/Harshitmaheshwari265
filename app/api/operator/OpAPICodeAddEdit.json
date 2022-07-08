@@ -1,0 +1,486 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/op-api-code-update.ejs",
+      "linkedForm": "formAddEditOpAPICode"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "opapicodeid",
+        "name": "opapicodeid"
+      },
+      {
+        "type": "text",
+        "fieldName": "op_id",
+        "name": "op_id"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_code1",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": 7
+            }
+          }
+        },
+        "name": "api_code1"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_code2",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": 7
+            }
+          }
+        },
+        "name": "api_code2"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_code3",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": 7
+            }
+          }
+        },
+        "name": "api_code3"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_code4",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": 7
+            }
+          }
+        },
+        "name": "api_code4"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_code5",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": 7
+            }
+          }
+        },
+        "name": "api_code5"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_code6",
+        "options": {
+          "rules": {
+            "core:maxlength": {
+              "param": 7
+            }
+          }
+        },
+        "name": "api_code6"
+      },
+      {
+        "type": "text",
+        "name": "api_code7"
+      },
+      {
+        "type": "text",
+        "name": "api_code8"
+      },
+      {
+        "type": "text",
+        "name": "api_code9"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.opapicodeid == 'null' || $_POST.opapicodeid}}",
+          "then": {
+            "steps": {
+              "name": "EditOpAPICode",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "op_id",
+                      "type": "number",
+                      "value": "{{$_POST.op_id}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code1",
+                      "type": "text",
+                      "value": "{{$_POST.api_code1}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code2",
+                      "type": "text",
+                      "value": "{{$_POST.api_code2}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code3",
+                      "type": "text",
+                      "value": "{{$_POST.api_code3}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code4",
+                      "type": "text",
+                      "value": "{{$_POST.api_code4}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code5",
+                      "type": "text",
+                      "value": "{{$_POST.api_code5}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code6",
+                      "type": "text",
+                      "value": "{{$_POST.api_code6}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code7",
+                      "type": "text",
+                      "value": "{{$_POST.api_code7}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code8",
+                      "type": "text",
+                      "value": "{{$_POST.api_code8}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code9",
+                      "type": "text",
+                      "value": "{{$_POST.api_code9}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "updated_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "updated_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "t_op_api_rel",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.opapicodeid}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "UPDATE t_op_api_rel\nSET op_id = :P1 /* {{$_POST.op_id}} */, api_code1 = :P2 /* {{$_POST.api_code1}} */, api_code2 = :P3 /* {{$_POST.api_code2}} */, api_code3 = :P4 /* {{$_POST.api_code3}} */, api_code4 = :P5 /* {{$_POST.api_code4}} */, api_code5 = :P6 /* {{$_POST.api_code5}} */, api_code6 = :P7 /* {{$_POST.api_code6}} */, api_code7 = :P8 /* {{$_POST.api_code7}} */, api_code8 = :P9 /* {{$_POST.api_code8}} */, api_code9 = :P10 /* {{$_POST.api_code9}} */, updated_by = :P11 /* {{identity}} */, updated_on = :P12 /* {{NOW}} */\nWHERE id = :P13 /* {{$_POST.opapicodeid}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.op_id}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code1}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code2}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code3}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code4}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code5}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code6}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code7}}"
+                    },
+                    {
+                      "name": ":P9",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code8}}"
+                    },
+                    {
+                      "name": ":P10",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code9}}"
+                    },
+                    {
+                      "name": ":P11",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P12",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P13",
+                      "value": "{{$_POST.opapicodeid}}"
+                    }
+                  ],
+                  "returning": "id"
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "OpAPICode",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "op_id",
+                      "type": "number",
+                      "value": "{{$_POST.op_id}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code1",
+                      "type": "text",
+                      "value": "{{$_POST.api_code1}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code2",
+                      "type": "text",
+                      "value": "{{$_POST.api_code2}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code3",
+                      "type": "text",
+                      "value": "{{$_POST.api_code3}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code4",
+                      "type": "text",
+                      "value": "{{$_POST.api_code4}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code5",
+                      "type": "text",
+                      "value": "{{$_POST.api_code5}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code6",
+                      "type": "text",
+                      "value": "{{$_POST.api_code6}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code7",
+                      "type": "text",
+                      "value": "{{$_POST.api_code7}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code8",
+                      "type": "text",
+                      "value": "{{$_POST.api_code8}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "api_code9",
+                      "type": "text",
+                      "value": "{{$_POST.api_code9}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "created_by",
+                      "type": "number",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "table": "t_op_api_rel",
+                      "column": "created_on",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "t_op_api_rel",
+                  "returning": "id",
+                  "query": "INSERT INTO t_op_api_rel\n(op_id, api_code1, api_code2, api_code3, api_code4, api_code5, api_code6, api_code7, api_code8, api_code9, created_by, created_on) VALUES (:P1 /* {{$_POST.op_id}} */, :P2 /* {{$_POST.api_code1}} */, :P3 /* {{$_POST.api_code2}} */, :P4 /* {{$_POST.api_code3}} */, :P5 /* {{$_POST.api_code4}} */, :P6 /* {{$_POST.api_code5}} */, :P7 /* {{$_POST.api_code6}} */, :P8 /* {{$_POST.api_code7}} */, :P9 /* {{$_POST.api_code8}} */, :P10 /* {{$_POST.api_code9}} */, :P11 /* {{identity}} */, :P12 /* {{NOW}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.op_id}}"
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code1}}"
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code2}}"
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code3}}"
+                    },
+                    {
+                      "name": ":P5",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code4}}"
+                    },
+                    {
+                      "name": ":P6",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code5}}"
+                    },
+                    {
+                      "name": ":P7",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code6}}"
+                    },
+                    {
+                      "name": ":P8",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code7}}"
+                    },
+                    {
+                      "name": ":P9",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code8}}"
+                    },
+                    {
+                      "name": ":P10",
+                      "type": "expression",
+                      "value": "{{$_POST.api_code9}}"
+                    },
+                    {
+                      "name": ":P11",
+                      "type": "expression",
+                      "value": "{{identity}}"
+                    },
+                    {
+                      "name": ":P12",
+                      "type": "expression",
+                      "value": "{{NOW}}"
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,550 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "api_type"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "loginUrl": "../../view/login",
+          "forbiddenUrl": "../../view/403-forbidden",
+          "permissions": [
+            "write"
+          ]
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.api_type!=0}}",
+          "then": {
+            "steps": {
+              "name": "FetchAPI",
+              "module": "dbconnector",
+              "action": "paged",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "SELECT",
+                  "columns": [
+                    {
+                      "table": "m_api",
+                      "column": "id",
+                      "alias": "api_id"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_name"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_code"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "username"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_password"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "status"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "created_on"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "created_by"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "updated_by"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "updated_on"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "blank2"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_type"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_url"
+                    }
+                  ],
+                  "table": {
+                    "name": "m_api"
+                  },
+                  "joins": [],
+                  "orders": [
+                    {
+                      "table": "m_api",
+                      "column": "api_name",
+                      "direction": "ASC"
+                    }
+                  ],
+                  "query": "SELECT id AS api_id, api_name, api_code, username, api_password, status, created_on, created_by, updated_by, updated_on, blank2, api_type, api_url\nFROM m_api\nWHERE api_type = :P1 /* {{$_GET.api_type}} */\nORDER BY api_name ASC",
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_GET.api_type}}"
+                    }
+                  ],
+                  "primary": "id",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "m_api.api_type",
+                        "field": "m_api.api_type",
+                        "type": "string",
+                        "operator": "equal",
+                        "value": "{{$_GET.api_type}}",
+                        "data": {
+                          "table": "m_api",
+                          "column": "api_type",
+                          "type": "text",
+                          "columnObj": {
+                            "type": "string",
+                            "maxLength": -5,
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "api_type"
+                          }
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  }
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "offset",
+                  "type": "number"
+                },
+                {
+                  "name": "limit",
+                  "type": "number"
+                },
+                {
+                  "name": "total",
+                  "type": "number"
+                },
+                {
+                  "name": "page",
+                  "type": "object",
+                  "sub": [
+                    {
+                      "name": "offset",
+                      "type": "object",
+                      "sub": [
+                        {
+                          "name": "first",
+                          "type": "number"
+                        },
+                        {
+                          "name": "prev",
+                          "type": "number"
+                        },
+                        {
+                          "name": "next",
+                          "type": "number"
+                        },
+                        {
+                          "name": "last",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "current",
+                      "type": "number"
+                    },
+                    {
+                      "name": "total",
+                      "type": "number"
+                    }
+                  ]
+                },
+                {
+                  "name": "data",
+                  "type": "array",
+                  "sub": [
+                    {
+                      "type": "number",
+                      "name": "api_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_code"
+                    },
+                    {
+                      "type": "text",
+                      "name": "username"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_password"
+                    },
+                    {
+                      "type": "number",
+                      "name": "status"
+                    },
+                    {
+                      "type": "datetime",
+                      "name": "created_on"
+                    },
+                    {
+                      "type": "number",
+                      "name": "created_by"
+                    },
+                    {
+                      "type": "number",
+                      "name": "updated_by"
+                    },
+                    {
+                      "type": "datetime",
+                      "name": "updated_on"
+                    },
+                    {
+                      "type": "text",
+                      "name": "blank2"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_type"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_url"
+                    }
+                  ]
+                }
+              ],
+              "outputType": "object"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "FetchAPI",
+              "module": "dbconnector",
+              "action": "paged",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "type": "SELECT",
+                  "columns": [
+                    {
+                      "table": "m_api",
+                      "column": "id",
+                      "alias": "api_id"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_name"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_code"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "username"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_password"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "status"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "created_on"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "created_by"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "updated_by"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "updated_on"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "blank2"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_type"
+                    },
+                    {
+                      "table": "m_api",
+                      "column": "api_url"
+                    }
+                  ],
+                  "table": {
+                    "name": "m_api"
+                  },
+                  "joins": [],
+                  "orders": [
+                    {
+                      "table": "m_api",
+                      "column": "api_name",
+                      "direction": "ASC",
+                      "recid": 1
+                    }
+                  ],
+                  "query": "SELECT id AS api_id, api_name, api_code, username, api_password, status, created_on, created_by, updated_by, updated_on, blank2, api_type, api_url\nFROM m_api\nORDER BY api_name ASC",
+                  "params": [],
+                  "primary": "id"
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "offset",
+                  "type": "number"
+                },
+                {
+                  "name": "limit",
+                  "type": "number"
+                },
+                {
+                  "name": "total",
+                  "type": "number"
+                },
+                {
+                  "name": "page",
+                  "type": "object",
+                  "sub": [
+                    {
+                      "name": "offset",
+                      "type": "object",
+                      "sub": [
+                        {
+                          "name": "first",
+                          "type": "number"
+                        },
+                        {
+                          "name": "prev",
+                          "type": "number"
+                        },
+                        {
+                          "name": "next",
+                          "type": "number"
+                        },
+                        {
+                          "name": "last",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "current",
+                      "type": "number"
+                    },
+                    {
+                      "name": "total",
+                      "type": "number"
+                    }
+                  ]
+                },
+                {
+                  "name": "data",
+                  "type": "array",
+                  "sub": [
+                    {
+                      "type": "number",
+                      "name": "api_id"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_code"
+                    },
+                    {
+                      "type": "text",
+                      "name": "username"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_password"
+                    },
+                    {
+                      "type": "number",
+                      "name": "status"
+                    },
+                    {
+                      "type": "datetime",
+                      "name": "created_on"
+                    },
+                    {
+                      "type": "number",
+                      "name": "created_by"
+                    },
+                    {
+                      "type": "number",
+                      "name": "updated_by"
+                    },
+                    {
+                      "type": "datetime",
+                      "name": "updated_on"
+                    },
+                    {
+                      "type": "text",
+                      "name": "blank2"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_type"
+                    },
+                    {
+                      "type": "text",
+                      "name": "api_url"
+                    }
+                  ]
+                }
+              ],
+              "outputType": "object"
+            }
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "api",
+        "module": "api",
+        "action": "send",
+        "options": {
+          "url": "http://corp.moneyart.in/UserWalletBalance",
+          "params": {
+            "token": "{{FetchAPI.data[1].api_password}}"
+          },
+          "method": "POST"
+        },
+        "output": false,
+        "disabled": true
+      },
+      {
+        "name": "apiBalanceMA",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{api.data}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true,
+        "disabled": true
+      },
+      {
+        "name": "apiMRO",
+        "module": "api",
+        "action": "send",
+        "options": {
+          "url": "https://mrobotics.in/api/lapu_balance",
+          "params": {
+            "api_token": "{{FetchAPI.data[2].api_password}}",
+            "lapu_id": "1"
+          },
+          "method": "POST"
+        },
+        "output": true,
+        "disabled": true
+      },
+      {
+        "name": "apiSN",
+        "module": "api",
+        "action": "send",
+        "options": {
+          "url": "http://sonakshiworld.com/apiservice.asmx/GetBalance",
+          "params": {
+            "apiToken": "{{FetchAPI.data[4].api_password}}"
+          }
+        },
+        "output": false,
+        "disabled": true
+      },
+      {
+        "name": "xml",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{apiSN.data.xmlToJSON()}}"
+        },
+        "meta": [],
+        "output": false,
+        "outputType": "text",
+        "disabled": true
+      },
+      {
+        "name": "apiBalanceSN",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{xml.string._}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true,
+        "disabled": true
+      }
+    ]
+  }
+}

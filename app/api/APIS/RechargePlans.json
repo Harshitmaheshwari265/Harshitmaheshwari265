@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "GetPlans",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [],
+            "table": {
+              "name": "m_recharge_plan"
+            },
+            "joins": [],
+            "primary": "id",
+            "orders": [
+              {
+                "table": "m_recharge_plan",
+                "column": "id",
+                "direction": "DESC"
+              }
+            ],
+            "query": "SELECT *\nFROM m_recharge_plan\nORDER BY id DESC",
+            "params": []
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "plan_type"
+          },
+          {
+            "type": "text",
+            "name": "operator_name"
+          },
+          {
+            "type": "text",
+            "name": "mrp_op_code"
+          },
+          {
+            "type": "text",
+            "name": "amount"
+          },
+          {
+            "type": "text",
+            "name": "description"
+          },
+          {
+            "type": "text",
+            "name": "special_tag"
+          },
+          {
+            "type": "text",
+            "name": "status"
+          },
+          {
+            "type": "text",
+            "name": "old_amount"
+          },
+          {
+            "type": "text",
+            "name": "old_description"
+          },
+          {
+            "type": "text",
+            "name": "remarks"
+          },
+          {
+            "type": "number",
+            "name": "created_by"
+          },
+          {
+            "type": "datetime",
+            "name": "created_on"
+          },
+          {
+            "type": "text",
+            "name": "blank"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

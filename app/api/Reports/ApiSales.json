@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "name": "todate"
+      },
+      {
+        "type": "text",
+        "name": "service_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "ApiSalesReport",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "select distinct trt.api_logs, SUM(trt.amount::int) as total from tt_recharge_trans trt \nWHERE trt.tr_date  >= @fromdate AND trt.tr_date  <= @todate and (service_id = @service_id or @service_id = 0)\ngroup by trt.api_logs;",
+            "params": [
+              {
+                "name": "@fromdate",
+                "value": "{{$_GET.fromdate}}",
+                "test": "2021-10-28 00:00:00"
+              },
+              {
+                "name": "@todate",
+                "value": "{{$_GET.todate}}",
+                "test": "2021-10-28 23:59:59.999"
+              },
+              {
+                "name": "@service_id",
+                "value": "{{$_GET.service_id.default(0)}}",
+                "test": "0"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "api_logs",
+            "type": "text"
+          },
+          {
+            "name": "total",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

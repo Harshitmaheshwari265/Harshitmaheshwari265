@@ -1,0 +1,155 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="individualtxn" appConnect="local" components="{dmxDataTraversal:{},dmxDatePicker:{},dmxStateManagement:{}}" -->
+<meta name="ac:route" content="/individual-txn">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<dmx-serverconnect id="scUserType" url="api/Users/UserType"></dmx-serverconnect>
+<script is="dmx-flow" id="flowFetchUser" type="text/dmx-flow">{
+  condition: {
+    if: "{{(UserTypeSelf.value)}}",
+    then: {
+      steps: {
+        run: {action: "{{scUserSchemPrio.load({})}}"}
+      }
+    }
+  }
+}</script>
+<script is="dmx-flow" id="flowIndTxnData" type="text/dmx-flow">{
+  condition: {
+    if: "{{(inp_target_user.value && formDatePicker.daterange.start && formDatePicker.daterange.end)}}",
+    then: {
+      steps: {
+        run: {action: "{{scIndividualTxn.load({})}}"}
+      }
+    }
+  }
+}</script>
+<dmx-serverconnect id="scUserSchemPrio" url="api/Scheme/FetchSchPrioUser" dmx-param:user_type="UserTypeSelf.value" noload></dmx-serverconnect>
+<dmx-data-detail id="ddUserScheme" dmx-bind:data="scUserSchemPrio.data.UserDetails" key="id"></dmx-data-detail>
+<dmx-query-manager id="qm"></dmx-query-manager>
+<dmx-serverconnect id="scIndividualTxn" url="api/Reports/IndividualTxns" dmx-param:sort="qm.data.sort" dmx-param:dir="qm.data.dir" dmx-param:fromdate="formDatePicker.daterange.start" dmx-param:todate="formDatePicker.daterange.end" dmx-param:txnstatus="selectstatus.value" dmx-param:user_id="inp_target_user.value" noload></dmx-serverconnect>
+<dmx-data-view id="dvIndTxn" dmx-bind:data="content.scIndividualTxn.data.GetAllTxn" filter="((parent_mobile.contains(formSearchUser.Search.value) || api_ref.contains(formSearchUser.Search.value) || parent_fname.lowercase().contains(formSearchUser.Search.value.lowercase())) || user_fname.lowercase().contains(formSearchUser.Search.value.lowercase()) || api_name.contains(formSearchUser.Search.value) || user_mobile.contains(formSearchUser.Search.value) || recharge_number.contains(formSearchUser.Search.value) || operator_name.lowercase().contains(formSearchUser.Search.value.lowercase()) || status.lowercase().contains(formSearchUser.Search.value.lowercase()))"></dmx-data-view>
+<dmx-data-detail id="ddIndTxn" key="table_id" dmx-bind:data="content.dvIndTxn.data"></dmx-data-detail>
+
+<div class="row align-items-center justify-content-between px-4 mb-3 sd-secondary-header mx-0">
+    <div class="col-12 col-md-auto">
+        <h6 class="ms-md-1 mt-md-3 text-dark fs-2 sd-fw-800 d-flex align-items-center">
+            Individual Txns.
+            <span class="border-3 ms-2 spinner-border spinner-border-sm" role="status" dmx-show="scIndividualTxn.state.executing"></span>
+        </h6>
+    </div>
+    <div class="col-auto order-1 order-md-1 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+        <select id="UserTypeSelf" name="user_type" class="form-control form-select col-12" dmx-bind:options="scUserType.data.GetUserType" optiontext="user_type" optionvalue="id" dmx-on:changed="flowFetchUser.run()" required="">
+            <option value="">Select Type</option>
+        </select>
+    </div>
+    <div class="col-auto order-2 order-md-2 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+        <select class="form-control form-select" id="inp_target_user" name="target_user_id" aria-describedby="inp_target_user_help" dmx-bind:options="scUserSchemPrio.data.UserDetails" optiontext="user_mobile+' - '+user_id+' - '+user_fname+' :: Current Balance = Rs. '+balance_amt" optionvalue="id" required="" dmx-on:changed="flowIndTxnData.run()" style="min-width:300px;">
+            <option value="">Select User</option>
+        </select>
+    </div>
+    <div class="col-auto order-4 order-md-4 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+        <select class="form-control form-select" id="selectstatus" dmx-on:changed="flowIndTxnData.run()">
+            <option value="">Select</option>
+            <option value="All">All</option>
+            <option value="SUCCESS">SUCCESS</option>
+            <option value="FAILED">FAILED</option>
+            <option value="PENDING">PENDING</option>
+        </select>
+    </div>
+    <div class="col-auto order-3 order-md-3 d-flex align-items-center justify-content-start justify-content-md-center px-0 px-lg-2">
+        <form id="formDatePicker"><label class="sw-datepicker">
+                <span class="btn bg-light"><img src="assets/images/icons/calendar.svg" class="img-fluid" width="20px"></span>
+                <input type="text" is="dmx-date-range-picker" format="DD MMM YY" class="" placeholder="Nov 2021 - Dec 2021" id="daterange" dmx-bind:startdate="dateNow.datetime.addDays(0)" dmx-bind:enddate="dateNow.datetime.formatDate('yyyy-MM-dd 23:59:59')" autoapply="true" dmx-on:changed="flowIndTxnData.run()">
+            </label>
+        </form>
+    </div>
+    <div class="col-auto order-1 order-md-4 d-flex align-items-center justify-content-center">
+        <form id="formSearchUser" class="sd-search-form">
+            <div class="d-flex justify-content-end mb-3 mb-lg-0 mb-md-0">
+                <input type="text" class="form-control sd-search-input rounded-pill" id="Search" name="Search" placeholder="Search">
+                <span class="bg-transparent btn position-absolute px-1 py-1"><i class="fas fa-search mb-1 mb-xl-0"></i></span>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="container px-4" id="Recharges">
+    <div class="card">
+        <div class="card-header sw-bg-col-primary">
+            <b>Ind. Txn. Report</b>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover table-sm sw-font-11">
+                    <thead>
+                        <tr>
+                            <th>Response</th>
+                            <th>Sl. No.</th>
+                            <th>Pay Ref. Id</th>
+                            <th>Api Ref. No. <i class="fas fa-search"></i></th>
+                            <th>Parent <i class="fas fa-search"></i></th>
+                            <th>Number <i class="fas fa-search"></i></th>
+                            <th>Operator & Service <i class="fas fa-search"></i></th>
+                            <th>Status <i class="fas fa-search"></i></th>
+                            <th>Old balance</th>
+                            <th>Amount</th>
+
+                            <th>Comm Amt</th>
+                            <th>Charge Amt</th>
+                            <th>Net Amt</th>
+                            <th>New Balance</th>
+                            <th>Crdr Type</th>
+                            <th>Tr. Date</th>
+                            <th>Api Name</th>
+                            <th>Api Response Time</th>
+                            <th>Tr. Mode & Type</th>
+                            <th>Response MSG</th>
+                            <th>DT Comm Amt</th>
+                            <th>DT Charge Amt</th>
+                            <th>MDT Comm Amt</th>
+                            <th>MDT Charge Amt</th>
+                            <th>Transaction Type</th>
+                        </tr>
+                    </thead>
+                    <tbody is="dmx-repeat" dmx-generator="bs5table" dmx-bind:repeat="dvIndTxn.data" id="tableRepeat1" key="table_id">
+                        <tr>
+                            <td>
+                                <button class="btn btn-info btn-sm" dmx-on:click="ddIndTxn.select(table_id);" data-bs-toggle="modal" data-bs-target="#modalResponse">Check</button>
+                            </td>
+                            <td>{{$index+1}}</td>
+                            <td dmx-text="pay_ref_id"></td>
+                            <td dmx-text="api_ref"></td>
+                            <td dmx-text="parent_mobile+' | '+parent_fname"></td>
+                            <td dmx-text="recharge_number"></td>
+                            <td dmx-text="operator_name+'('+service_name+')'"></td>
+                            <td class="fw-bold" dmx-text="status" dmx-class:text-success="status == 'SUCCESS'" dmx-class:text-warning="status == 'PENDING'" dmx-class:text-danger="status == 'FAILED'" dmx-class:text-primary="status == 'REFUND'"></td>
+                            <td dmx-text="old_balance.toNumber().toFixed(2)"></td>
+                            <td dmx-text="amount.toNumber().toFixed(2)"></td>
+                            <td dmx-text="comm_amt.toNumber().toFixed(2)"></td>
+                            <td dmx-text="charge_amt.toNumber().toFixed(2)"></td>
+                            <td dmx-text="netamt.toNumber().toFixed(2)"></td>
+                            <td dmx-text="new_balance.toNumber().toFixed(2)"></td>
+                            <td dmx-text="crdr_type"></td>
+                            <td dmx-text="tr_date.formatDate('dd-MM-yyyy hh:mm:ss A')"></td>
+                            <td dmx-text="api_name"></td>
+                            <td dmx-text="api_response_id"></td>
+                            <td dmx-text="tr_mode+' | '+tr_type"></td>
+                            <td style="max-width: 200px; overflow: hidden;" dmx-text="operator_ref"></td>
+                            <td dmx-text="dtcommamt.toNumber().toFixed(2)"></td>
+                            <td dmx-text="dtchargeamt.toNumber().toFixed(2)"></td>
+                            <td dmx-text="mdtcommamt.toNumber().toFixed(2)"></td>
+                            <td dmx-text="mdtchargeamt.toNumber().toFixed(2)"></td>
+                            <td dmx-text="transaction_type"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var $disabledResults = $("#inp_target_user");
+    $disabledResults.select2();
+</script>

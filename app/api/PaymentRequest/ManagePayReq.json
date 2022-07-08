@@ -1,0 +1,161 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "fromdate"
+      },
+      {
+        "type": "text",
+        "name": "todate"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "GetPayReq",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "SELECT payment_request.id, payment_request.amount, payment_request.tr_date::text, payment_request.tr_time, payment_request.tr_no, payment_request.bank_name, payment_request.branch_name, payment_request.cheque_no, payment_request.utr_no, payment_request.payment_mode, payment_request.cash_type, payment_request.remarks, payment_request.status, payment_request.request_time::text, payment_request.response_time::text, mu.user_fname AS req_user_name, mu.user_mobile AS req_user_mobile, mu.balance_amt AS req_user_balance\nFROM payment_request\nLEFT JOIN m_users AS mu ON (mu.id = payment_request.req_user_id)\nWHERE payment_request.pay_user_id = @identity AND payment_request.request_time BETWEEN @fromdate AND @todate",
+            "params": [
+              {
+                "name": "@identity",
+                "value": "{{identity}}",
+                "test": "12"
+              },
+              {
+                "name": "@fromdate",
+                "value": "{{$_GET.fromdate}}",
+                "test": "2022-05-21 00:00:00"
+              },
+              {
+                "name": "@todate",
+                "value": "{{$_GET.todate}}",
+                "test": "2022-05-21 23:59:59"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "amount",
+            "type": "text"
+          },
+          {
+            "name": "tr_date",
+            "type": "text"
+          },
+          {
+            "name": "tr_time",
+            "type": "text"
+          },
+          {
+            "name": "tr_no",
+            "type": "text"
+          },
+          {
+            "name": "bank_name",
+            "type": "text"
+          },
+          {
+            "name": "branch_name",
+            "type": "text"
+          },
+          {
+            "name": "cheque_no",
+            "type": "text"
+          },
+          {
+            "name": "utr_no",
+            "type": "text"
+          },
+          {
+            "name": "payment_mode",
+            "type": "text"
+          },
+          {
+            "name": "cash_type",
+            "type": "text"
+          },
+          {
+            "name": "remarks",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "number"
+          },
+          {
+            "name": "request_time",
+            "type": "text"
+          },
+          {
+            "name": "response_time",
+            "type": "text"
+          },
+          {
+            "name": "req_user_name",
+            "type": "text"
+          },
+          {
+            "name": "req_user_mobile",
+            "type": "text"
+          },
+          {
+            "name": "req_user_balance",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

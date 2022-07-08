@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "for_user_type"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "forbiddenUrl": "403-forbidden",
+          "loginUrl": "login",
+          "permissions": [
+            "write"
+          ]
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "user_value",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_GET.for_user_type}}"
+        },
+        "output": true,
+        "disabled": true,
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.for_user_type}}",
+          "then": {
+            "steps": [
+              {
+                "name": "custom",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "query": "select ms.id as scheme_id, ms.scheme_name from m_scheme ms where ms.scheme_type = @for_user_type;\n\n",
+                    "params": [
+                      {
+                        "name": "@for_user_type",
+                        "value": "{{$_GET.for_user_type}}",
+                        "test": "1"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "scheme_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "scheme_name",
+                    "type": "text"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_GET.for_user_type < 3}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "GetRtScheme",
+                        "module": "dbconnector",
+                        "action": "select",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "SELECT",
+                            "columns": [
+                              {
+                                "table": "m_scheme",
+                                "column": "id"
+                              },
+                              {
+                                "table": "m_scheme",
+                                "column": "scheme_name"
+                              }
+                            ],
+                            "table": {
+                              "name": "m_scheme"
+                            },
+                            "joins": [],
+                            "query": "SELECT id, scheme_name\nFROM m_scheme\nWHERE scheme_type = :P1 /* {{3}} */",
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{3}}"
+                              }
+                            ],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "m_scheme.scheme_type",
+                                  "field": "m_scheme.scheme_type",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "{{3}}",
+                                  "data": {
+                                    "table": "m_scheme",
+                                    "column": "scheme_type",
+                                    "type": "text"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            }
+                          }
+                        },
+                        "output": true,
+                        "meta": [
+                          {
+                            "type": "number",
+                            "name": "id"
+                          },
+                          {
+                            "type": "text",
+                            "name": "scheme_name"
+                          }
+                        ],
+                        "outputType": "array"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{$_GET.for_user_type==1}}",
+                          "then": {
+                            "steps": {
+                              "name": "GetDtScheme",
+                              "module": "dbconnector",
+                              "action": "select",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "SELECT",
+                                  "columns": [
+                                    {
+                                      "table": "m_scheme",
+                                      "column": "id"
+                                    },
+                                    {
+                                      "table": "m_scheme",
+                                      "column": "scheme_name"
+                                    }
+                                  ],
+                                  "table": {
+                                    "name": "m_scheme"
+                                  },
+                                  "joins": [],
+                                  "query": "SELECT id, scheme_name\nFROM m_scheme\nWHERE scheme_type = :P1 /* {{2}} */",
+                                  "params": [
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P1",
+                                      "value": "{{2}}"
+                                    }
+                                  ],
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "m_scheme.scheme_type",
+                                        "field": "m_scheme.scheme_type",
+                                        "type": "string",
+                                        "operator": "equal",
+                                        "value": "{{2}}",
+                                        "data": {
+                                          "table": "m_scheme",
+                                          "column": "scheme_type",
+                                          "type": "text"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  }
+                                }
+                              },
+                              "output": true,
+                              "meta": [
+                                {
+                                  "type": "number",
+                                  "name": "id"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "scheme_name"
+                                }
+                              ],
+                              "outputType": "array"
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,4686 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/update-aeps-transaction.ejs",
+      "linkedForm": "UpdateTrForm"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "transid",
+        "name": "transid"
+      },
+      {
+        "type": "text",
+        "fieldName": "api_ref",
+        "name": "api_ref"
+      },
+      {
+        "type": "text",
+        "fieldName": "tr_status",
+        "options": {
+          "rules": {
+            "core:required": {
+              "param": ""
+            }
+          }
+        },
+        "name": "tr_status"
+      },
+      {
+        "type": "text",
+        "fieldName": "response",
+        "name": "response"
+      },
+      {
+        "type": "text",
+        "name": "ec"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "REMOTE_ADDR"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "validate",
+        "module": "validator",
+        "action": "validate",
+        "options": {
+          "data": [
+            {
+              "name": "validate_1",
+              "value": "{{$_POST.tpin}}",
+              "rules": {
+                "db:exists": {
+                  "param": {
+                    "connection": "postgres_gcpServer",
+                    "table": "m_users",
+                    "column": "user_tpin"
+                  },
+                  "message": "T-Pin Mismatched"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "api_ref",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.api_ref}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "apistatus",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.tr_status}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "remark",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.response}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "response",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{'API Ref. '+api_ref+' | Status: '+apistatus+' | Remarks: '+remark}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "GetRechTrans",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "tt_aeps_trans",
+                "column": "id"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "service_id"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "op_id"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "api_id"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "user_id"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "user_rt_id"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "merchant_id"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "amount"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "op_bal"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "comm_per"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "comm_val"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "comm_amt"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "charge_per"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "charge_val"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "charge_amt"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "net_amt"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "closing_bal"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "tr_mode"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "tr_type"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "status"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "tr_id"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "reason"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "api_logs"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "is_processed"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "operator_ref"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "api_ref"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "revert_trans"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "ip_address"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "api_response_time"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "process_mode"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "live"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "tr_date"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "trans_by"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "updated_on"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "updated_by"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "ec"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "raise_compain"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "api_bal"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "dt_comm_per"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "dt_comm_val"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "dt_comm_amt"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "dt_charge_per"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "dt_charge_val"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "dt_charge_amount"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "mdt_comm_per"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "mdt_comm_val"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "mdt_comm_amt"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "mdt_charge_per"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "mdt_charge_val"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "mdt_charge_amt"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "bank_name"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "service_api"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "api_tnx_date"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "bank_acno"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "benef_name"
+              },
+              {
+                "table": "tt_aeps_trans",
+                "column": "benef_id"
+              },
+              {
+                "table": "mu",
+                "column": "user_fname"
+              },
+              {
+                "table": "mu",
+                "column": "user_lname"
+              },
+              {
+                "table": "mu",
+                "column": "user_mobile"
+              },
+              {
+                "table": "mu",
+                "column": "user_email"
+              },
+              {
+                "table": "mu",
+                "column": "user_type"
+              },
+              {
+                "table": "mu",
+                "column": "md_id"
+              },
+              {
+                "table": "mu",
+                "column": "ds_id"
+              },
+              {
+                "table": "mu",
+                "column": "u_status"
+              },
+              {
+                "table": "mu",
+                "column": "scheme_id"
+              },
+              {
+                "table": "mu",
+                "column": "aeps_limit"
+              },
+              {
+                "table": "mu",
+                "column": "aeps_balance"
+              }
+            ],
+            "table": {
+              "name": "tt_aeps_trans"
+            },
+            "primary": "id",
+            "joins": [
+              {
+                "table": "m_users",
+                "column": "*",
+                "alias": "mu",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "mu",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "tt_aeps_trans",
+                        "column": "user_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "query": "SELECT tt_aeps_trans.id, tt_aeps_trans.service_id, tt_aeps_trans.op_id, tt_aeps_trans.api_id, tt_aeps_trans.user_id, tt_aeps_trans.user_rt_id, tt_aeps_trans.merchant_id, tt_aeps_trans.amount, tt_aeps_trans.op_bal, tt_aeps_trans.comm_per, tt_aeps_trans.comm_val, tt_aeps_trans.comm_amt, tt_aeps_trans.charge_per, tt_aeps_trans.charge_val, tt_aeps_trans.charge_amt, tt_aeps_trans.net_amt, tt_aeps_trans.closing_bal, tt_aeps_trans.tr_mode, tt_aeps_trans.tr_type, tt_aeps_trans.status, tt_aeps_trans.tr_id, tt_aeps_trans.reason, tt_aeps_trans.api_logs, tt_aeps_trans.is_processed, tt_aeps_trans.operator_ref, tt_aeps_trans.api_ref, tt_aeps_trans.revert_trans, tt_aeps_trans.ip_address, tt_aeps_trans.api_response_time, tt_aeps_trans.process_mode, tt_aeps_trans.live, tt_aeps_trans.tr_date, tt_aeps_trans.trans_by, tt_aeps_trans.updated_on, tt_aeps_trans.updated_by, tt_aeps_trans.ec, tt_aeps_trans.raise_compain, tt_aeps_trans.api_bal, tt_aeps_trans.dt_comm_per, tt_aeps_trans.dt_comm_val, tt_aeps_trans.dt_comm_amt, tt_aeps_trans.dt_charge_per, tt_aeps_trans.dt_charge_val, tt_aeps_trans.dt_charge_amount, tt_aeps_trans.mdt_comm_per, tt_aeps_trans.mdt_comm_val, tt_aeps_trans.mdt_comm_amt, tt_aeps_trans.mdt_charge_per, tt_aeps_trans.mdt_charge_val, tt_aeps_trans.mdt_charge_amt, tt_aeps_trans.bank_name, tt_aeps_trans.service_api, tt_aeps_trans.api_tnx_date, tt_aeps_trans.bank_acno, tt_aeps_trans.benef_name, tt_aeps_trans.benef_id, mu.user_fname, mu.user_lname, mu.user_mobile, mu.user_email, mu.user_type, mu.md_id, mu.ds_id, mu.u_status, mu.scheme_id, mu.aeps_limit, mu.aeps_balance\nFROM tt_aeps_trans\nINNER JOIN m_users AS mu ON (mu.id = tt_aeps_trans.user_id)\nWHERE tt_aeps_trans.id = :P1 /* {{$_POST.transid}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.transid}}"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "tt_aeps_trans.id",
+                  "field": "tt_aeps_trans.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.transid}}",
+                  "data": {
+                    "table": "tt_aeps_trans",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            }
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "number",
+            "name": "service_id"
+          },
+          {
+            "type": "number",
+            "name": "op_id"
+          },
+          {
+            "type": "number",
+            "name": "api_id"
+          },
+          {
+            "type": "number",
+            "name": "user_id"
+          },
+          {
+            "type": "text",
+            "name": "user_rt_id"
+          },
+          {
+            "type": "text",
+            "name": "merchant_id"
+          },
+          {
+            "type": "text",
+            "name": "amount"
+          },
+          {
+            "type": "text",
+            "name": "op_bal"
+          },
+          {
+            "type": "text",
+            "name": "comm_per"
+          },
+          {
+            "type": "text",
+            "name": "comm_val"
+          },
+          {
+            "type": "text",
+            "name": "comm_amt"
+          },
+          {
+            "type": "text",
+            "name": "charge_per"
+          },
+          {
+            "type": "text",
+            "name": "charge_val"
+          },
+          {
+            "type": "text",
+            "name": "charge_amt"
+          },
+          {
+            "type": "text",
+            "name": "net_amt"
+          },
+          {
+            "type": "text",
+            "name": "closing_bal"
+          },
+          {
+            "type": "text",
+            "name": "tr_mode"
+          },
+          {
+            "type": "text",
+            "name": "tr_type"
+          },
+          {
+            "type": "text",
+            "name": "status"
+          },
+          {
+            "type": "text",
+            "name": "tr_id"
+          },
+          {
+            "type": "text",
+            "name": "reason"
+          },
+          {
+            "type": "text",
+            "name": "api_logs"
+          },
+          {
+            "type": "text",
+            "name": "is_processed"
+          },
+          {
+            "type": "text",
+            "name": "operator_ref"
+          },
+          {
+            "type": "text",
+            "name": "api_ref"
+          },
+          {
+            "type": "text",
+            "name": "revert_trans"
+          },
+          {
+            "type": "text",
+            "name": "ip_address"
+          },
+          {
+            "type": "text",
+            "name": "api_response_time"
+          },
+          {
+            "type": "text",
+            "name": "process_mode"
+          },
+          {
+            "type": "text",
+            "name": "live"
+          },
+          {
+            "type": "datetime",
+            "name": "tr_date"
+          },
+          {
+            "type": "text",
+            "name": "trans_by"
+          },
+          {
+            "type": "datetime",
+            "name": "updated_on"
+          },
+          {
+            "type": "text",
+            "name": "updated_by"
+          },
+          {
+            "type": "text",
+            "name": "ec"
+          },
+          {
+            "type": "text",
+            "name": "raise_compain"
+          },
+          {
+            "type": "text",
+            "name": "api_bal"
+          },
+          {
+            "type": "text",
+            "name": "dt_comm_per"
+          },
+          {
+            "type": "text",
+            "name": "dt_comm_val"
+          },
+          {
+            "type": "text",
+            "name": "dt_comm_amt"
+          },
+          {
+            "type": "text",
+            "name": "dt_charge_per"
+          },
+          {
+            "type": "text",
+            "name": "dt_charge_val"
+          },
+          {
+            "type": "text",
+            "name": "dt_charge_amount"
+          },
+          {
+            "type": "text",
+            "name": "mdt_comm_per"
+          },
+          {
+            "type": "text",
+            "name": "mdt_comm_val"
+          },
+          {
+            "type": "text",
+            "name": "mdt_comm_amt"
+          },
+          {
+            "type": "text",
+            "name": "mdt_charge_per"
+          },
+          {
+            "type": "text",
+            "name": "mdt_charge_val"
+          },
+          {
+            "type": "text",
+            "name": "mdt_charge_amt"
+          },
+          {
+            "type": "text",
+            "name": "bank_name"
+          },
+          {
+            "type": "text",
+            "name": "service_api"
+          },
+          {
+            "type": "text",
+            "name": "api_tnx_date"
+          },
+          {
+            "type": "text",
+            "name": "bank_acno"
+          },
+          {
+            "type": "text",
+            "name": "benef_name"
+          },
+          {
+            "type": "text",
+            "name": "benef_id"
+          },
+          {
+            "type": "text",
+            "name": "user_fname"
+          },
+          {
+            "type": "text",
+            "name": "user_lname"
+          },
+          {
+            "type": "text",
+            "name": "user_mobile"
+          },
+          {
+            "type": "text",
+            "name": "user_email"
+          },
+          {
+            "type": "number",
+            "name": "user_type"
+          },
+          {
+            "type": "text",
+            "name": "md_id"
+          },
+          {
+            "type": "text",
+            "name": "ds_id"
+          },
+          {
+            "type": "text",
+            "name": "u_status"
+          },
+          {
+            "type": "number",
+            "name": "scheme_id"
+          },
+          {
+            "type": "text",
+            "name": "aeps_limit"
+          },
+          {
+            "type": "text",
+            "name": "aeps_balance"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{apistatus=='SUCCESS'&&GetRechTrans.status=='PENDING'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "RechTransUP",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{apistatus}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "operator_ref",
+                        "type": "text",
+                        "value": "{{'Txn Successful'}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "api_ref",
+                        "type": "text",
+                        "value": "{{api_ref}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "live",
+                        "type": "text",
+                        "value": "{{'Push'}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "updated_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "blank1",
+                        "type": "text",
+                        "value": "{{response}}"
+                      }
+                    ],
+                    "table": "tt_aeps_trans",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{GetRechTrans.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "UPDATE tt_aeps_trans\nSET status = :P1 /* {{apistatus}} */, operator_ref = :P2 /* {{'Txn Successful'}} */, api_ref = :P3 /* {{api_ref}} */, live = :P4 /* {{'Push'}} */, updated_on = :P5 /* {{NOW}} */, blank1 = :P6 /* {{response}} */\nWHERE id = :P7 /* {{GetRechTrans.id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{apistatus}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{'Txn Successful'}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{api_ref}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{'Push'}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{response}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P7",
+                        "value": "{{GetRechTrans.id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "ttBalUP",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{apistatus}}"
+                      }
+                    ],
+                    "table": "tt_aeps_balance",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "pay_ref_id",
+                          "field": "pay_ref_id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{GetRechTrans.id}}",
+                          "data": {
+                            "column": "pay_ref_id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "UPDATE tt_aeps_balance\nSET status = :P1 /* {{apistatus}} */\nWHERE pay_ref_id = :P2 /* {{GetRechTrans.id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{apistatus}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{GetRechTrans.id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{(apistatus=='FAILED'||apistatus=='REFUND')&&(GetRechTrans.status=='SUCCESS'||GetRechTrans.status=='PENDING')}}",
+          "then": {
+            "steps": [
+              {
+                "name": "RTClosingBalOld",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{GetRechTrans.opening_balance.toNumber()}}"
+                },
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "service_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "op_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "api_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "user_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "user_rt_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "merchant_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "amount",
+                    "type": "text"
+                  },
+                  {
+                    "name": "op_bal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "comm_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "comm_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "comm_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "charge_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "charge_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "charge_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "net_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "closing_bal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "tr_mode",
+                    "type": "text"
+                  },
+                  {
+                    "name": "tr_type",
+                    "type": "text"
+                  },
+                  {
+                    "name": "status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "tr_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "reason",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_logs",
+                    "type": "text"
+                  },
+                  {
+                    "name": "is_processed",
+                    "type": "text"
+                  },
+                  {
+                    "name": "operator_ref",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_ref",
+                    "type": "text"
+                  },
+                  {
+                    "name": "revert_trans",
+                    "type": "text"
+                  },
+                  {
+                    "name": "ip_address",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_response_time",
+                    "type": "text"
+                  },
+                  {
+                    "name": "process_mode",
+                    "type": "text"
+                  },
+                  {
+                    "name": "live",
+                    "type": "text"
+                  },
+                  {
+                    "name": "tr_date",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "trans_by",
+                    "type": "text"
+                  },
+                  {
+                    "name": "updated_on",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "updated_by",
+                    "type": "text"
+                  },
+                  {
+                    "name": "ec",
+                    "type": "text"
+                  },
+                  {
+                    "name": "raise_compain",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_bal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_comm_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_comm_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_comm_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_charge_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_charge_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_charge_amount",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_comm_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_comm_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_comm_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_charge_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_charge_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_charge_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "bank_name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "service_api",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_tnx_date",
+                    "type": "text"
+                  },
+                  {
+                    "name": "bank_acno",
+                    "type": "text"
+                  },
+                  {
+                    "name": "benef_name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "benef_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_fname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_lname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_type",
+                    "type": "number"
+                  },
+                  {
+                    "name": "md_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "ds_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "u_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "scheme_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "aeps_limit",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_balance",
+                    "type": "text"
+                  }
+                ],
+                "output": false,
+                "outputType": "text"
+              },
+              {
+                "name": "RTClosingBal",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{GetRechTrans.aeps_balance.toNumber()+GetRechTrans.net_amt.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": false
+              },
+              {
+                "name": "UpRTBal",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "m_users",
+                        "column": "aeps_balance",
+                        "type": "text",
+                        "value": "{{RTClosingBal}}"
+                      }
+                    ],
+                    "table": "m_users",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{GetRechTrans.user_id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "UPDATE m_users\nSET aeps_balance = :P1 /* {{RTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.user_id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{RTClosingBal}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{GetRechTrans.user_id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": false
+              },
+              {
+                "name": "RechTransUP",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "closing_bal",
+                        "type": "text",
+                        "value": "{{RTClosingBalOld}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'FAILED'}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "operator_ref",
+                        "type": "text",
+                        "value": "{{'Txn Failed'}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "api_ref",
+                        "type": "text",
+                        "value": "{{api_ref}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "live",
+                        "type": "text",
+                        "value": "{{'Push'}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "updated_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "blank1",
+                        "type": "text",
+                        "value": "{{response}}"
+                      }
+                    ],
+                    "table": "tt_aeps_trans",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{GetRechTrans.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "UPDATE tt_aeps_trans\nSET closing_bal = :P1 /* {{RTClosingBalOld}} */, status = :P2 /* {{'FAILED'}} */, operator_ref = :P3 /* {{'Txn Failed'}} */, api_ref = :P4 /* {{api_ref}} */, live = :P5 /* {{'Push'}} */, updated_on = :P6 /* {{NOW}} */, blank1 = :P7 /* {{response}} */\nWHERE id = :P8 /* {{GetRechTrans.id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{RTClosingBalOld}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{'FAILED'}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{'Txn Failed'}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{api_ref}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{'Push'}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{response}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P8",
+                        "value": "{{GetRechTrans.id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": false
+              },
+              {
+                "name": "ttBalUP",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'FAILED'}}"
+                      }
+                    ],
+                    "table": "tt_aeps_balance",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "pay_ref_id",
+                          "field": "pay_ref_id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{GetRechTrans.id}}",
+                          "data": {
+                            "column": "pay_ref_id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "UPDATE tt_aeps_balance\nSET status = :P1 /* {{'FAILED'}} */\nWHERE pay_ref_id = :P2 /* {{GetRechTrans.id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{'FAILED'}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{GetRechTrans.id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "ttBalRefund",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "user_id",
+                        "type": "number",
+                        "value": "{{GetRechTrans.user_id}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "pay_ref_id",
+                        "type": "number",
+                        "value": "{{GetRechTrans.id}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "crdr_type",
+                        "type": "text",
+                        "value": "{{'Credit'}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "old_bal",
+                        "type": "text",
+                        "value": "{{GetRechTrans.aeps_balance}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "amount",
+                        "type": "text",
+                        "value": "{{GetRechTrans.amount}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "net_amt",
+                        "type": "text",
+                        "value": "{{GetRechTrans.net_amt}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "new_bal",
+                        "type": "text",
+                        "value": "{{RTClosingBal}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'REFUND'}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "tr_type",
+                        "type": "text",
+                        "value": "{{'AEPS Refund'}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "tr_date",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "ip_address",
+                        "type": "text",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "remarks",
+                        "type": "text",
+                        "value": "{{'Refund of Amount '+GetRechTrans.net_amt+' | '+response}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "created_by",
+                        "type": "number",
+                        "value": "{{identity}}"
+                      }
+                    ],
+                    "table": "tt_aeps_balance",
+                    "returning": "id",
+                    "query": "INSERT INTO tt_aeps_balance\n(user_id, pay_ref_id, crdr_type, old_bal, amount, net_amt, new_bal, status, tr_type, tr_date, ip_address, remarks, created_by) VALUES (:P1 /* {{GetRechTrans.user_id}} */, :P2 /* {{GetRechTrans.id}} */, :P3 /* {{'Credit'}} */, :P4 /* {{GetRechTrans.aeps_balance}} */, :P5 /* {{GetRechTrans.amount}} */, :P6 /* {{GetRechTrans.net_amt}} */, :P7 /* {{RTClosingBal}} */, :P8 /* {{'REFUND'}} */, :P9 /* {{'AEPS Refund'}} */, :P10 /* {{NOW}} */, :P11 /* {{$_SERVER.REMOTE_ADDR}} */, :P12 /* {{'Refund of Amount '+GetRechTrans.net_amt+' | '+response}} */, :P13 /* {{identity}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.user_id}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.id}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{'Credit'}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.aeps_balance}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.amount}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.net_amt}}"
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{RTClosingBal}}"
+                      },
+                      {
+                        "name": ":P8",
+                        "type": "expression",
+                        "value": "{{'REFUND'}}"
+                      },
+                      {
+                        "name": ":P9",
+                        "type": "expression",
+                        "value": "{{'AEPS Refund'}}"
+                      },
+                      {
+                        "name": ":P10",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P11",
+                        "type": "expression",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "name": ":P12",
+                        "type": "expression",
+                        "value": "{{'Refund of Amount '+GetRechTrans.net_amt+' | '+response}}"
+                      },
+                      {
+                        "name": ":P13",
+                        "type": "expression",
+                        "value": "{{identity}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{GetRechTrans.ds_id>0}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "GetDT",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "SELECT",
+                            "columns": [
+                              {
+                                "table": "m_users",
+                                "column": "aeps_balance",
+                                "alias": "dt_aeps_balance"
+                              }
+                            ],
+                            "table": {
+                              "name": "m_users",
+                              "alias": "m_users"
+                            },
+                            "primary": "id",
+                            "joins": [],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "m_users.id",
+                                  "field": "m_users.id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetRechTrans.ds_id}}",
+                                  "data": {
+                                    "table": "m_users",
+                                    "column": "id",
+                                    "type": "number",
+                                    "columnObj": {
+                                      "type": "increments",
+                                      "default": "",
+                                      "primary": true,
+                                      "nullable": false,
+                                      "name": "id"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "SELECT aeps_balance AS dt_aeps_balance\nFROM m_users AS m_users\nWHERE id = :P1 /* {{GetRechTrans.ds_id}} */",
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{GetRechTrans.ds_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "output": false,
+                        "meta": [
+                          {
+                            "type": "text",
+                            "name": "dt_aeps_balance"
+                          }
+                        ],
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "DTNetAmt",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{GetRechTrans.dtcommamt.toNumber()-GetRechTrans.dtchargeamt.toNumber()}}"
+                        },
+                        "meta": [
+                          {
+                            "name": "id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "service_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "op_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "api_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "user_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "user_rt_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "merchant_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "amount",
+                            "type": "text"
+                          },
+                          {
+                            "name": "op_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "net_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "closing_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_mode",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_type",
+                            "type": "text"
+                          },
+                          {
+                            "name": "status",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "reason",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_logs",
+                            "type": "text"
+                          },
+                          {
+                            "name": "is_processed",
+                            "type": "text"
+                          },
+                          {
+                            "name": "operator_ref",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_ref",
+                            "type": "text"
+                          },
+                          {
+                            "name": "revert_trans",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ip_address",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_response_time",
+                            "type": "text"
+                          },
+                          {
+                            "name": "process_mode",
+                            "type": "text"
+                          },
+                          {
+                            "name": "live",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_date",
+                            "type": "datetime"
+                          },
+                          {
+                            "name": "trans_by",
+                            "type": "text"
+                          },
+                          {
+                            "name": "updated_on",
+                            "type": "datetime"
+                          },
+                          {
+                            "name": "updated_by",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ec",
+                            "type": "text"
+                          },
+                          {
+                            "name": "raise_compain",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_amount",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "bank_name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "service_api",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_tnx_date",
+                            "type": "text"
+                          },
+                          {
+                            "name": "bank_acno",
+                            "type": "text"
+                          },
+                          {
+                            "name": "benef_name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "benef_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_fname",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_lname",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_mobile",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_email",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_type",
+                            "type": "number"
+                          },
+                          {
+                            "name": "md_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ds_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "u_status",
+                            "type": "text"
+                          },
+                          {
+                            "name": "scheme_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "aeps_limit",
+                            "type": "text"
+                          },
+                          {
+                            "name": "aeps_balance",
+                            "type": "text"
+                          }
+                        ],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "DTClosingBal",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{GetDT.dt_aeps_balance.toNumber()-GetRechTrans.dtcommamt.toNumber()+GetRechTrans.dtchargeamt.toNumber()}}"
+                        },
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "UpDTBal",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "m_users",
+                                "column": "balance_amt",
+                                "type": "text",
+                                "value": "{{DTClosingBal}}"
+                              }
+                            ],
+                            "table": "m_users",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "field": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetRechTrans.ds_id}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "returning": "id",
+                            "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{DTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.ds_id}} */",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{DTClosingBal}}"
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{GetRechTrans.ds_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "AddT_ChargeDT",
+                        "module": "dbupdater",
+                        "action": "insert",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "insert",
+                            "values": [
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "user_id",
+                                "type": "number",
+                                "value": "{{GetRechTrans.ds_id}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "pay_ref_id",
+                                "type": "number",
+                                "value": "{{GetRechTrans.id}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "crdr_type",
+                                "type": "text",
+                                "value": "{{'Debit'}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "old_bal",
+                                "type": "text",
+                                "value": "{{GetDT.dt_aeps_balance}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "amount",
+                                "type": "text",
+                                "value": "{{GetRechTrans.amount}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "net_amt",
+                                "type": "text",
+                                "value": "{{DTNetAmt}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "new_bal",
+                                "type": "text",
+                                "value": "{{DTClosingBal}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "tr_type",
+                                "type": "text",
+                                "value": "{{'AEPS Comm Reversal'}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "tr_date",
+                                "type": "datetime",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "ip_address",
+                                "type": "text",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "remarks",
+                                "type": "text",
+                                "value": "{{'Recharge Comm Reversal | Net Amount '+DTNetAmt}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "created_by",
+                                "type": "number",
+                                "value": "{{GetRechTrans.user_id}}"
+                              }
+                            ],
+                            "table": "t_charge_aeps_cal",
+                            "returning": "id",
+                            "query": "INSERT INTO t_charge_aeps_cal\n(user_id, pay_ref_id, crdr_type, old_bal, amount, net_amt, new_bal, tr_type, tr_date, ip_address, remarks, created_by) VALUES (:P1 /* {{GetRechTrans.ds_id}} */, :P2 /* {{GetRechTrans.id}} */, :P3 /* {{'Debit'}} */, :P4 /* {{GetDT.dt_aeps_balance}} */, :P5 /* {{GetRechTrans.amount}} */, :P6 /* {{DTNetAmt}} */, :P7 /* {{DTClosingBal}} */, :P8 /* {{'AEPS Comm Reversal'}} */, :P9 /* {{NOW}} */, :P10 /* {{$_SERVER.REMOTE_ADDR}} */, :P11 /* {{'Recharge Comm Reversal | Net Amount '+DTNetAmt}} */, :P12 /* {{GetRechTrans.user_id}} */)",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.ds_id}}"
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.id}}"
+                              },
+                              {
+                                "name": ":P3",
+                                "type": "expression",
+                                "value": "{{'Debit'}}"
+                              },
+                              {
+                                "name": ":P4",
+                                "type": "expression",
+                                "value": "{{GetDT.dt_aeps_balance}}"
+                              },
+                              {
+                                "name": ":P5",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.amount}}"
+                              },
+                              {
+                                "name": ":P6",
+                                "type": "expression",
+                                "value": "{{DTNetAmt}}"
+                              },
+                              {
+                                "name": ":P7",
+                                "type": "expression",
+                                "value": "{{DTClosingBal}}"
+                              },
+                              {
+                                "name": ":P8",
+                                "type": "expression",
+                                "value": "{{'AEPS Comm Reversal'}}"
+                              },
+                              {
+                                "name": ":P9",
+                                "type": "expression",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "name": ":P10",
+                                "type": "expression",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "name": ":P11",
+                                "type": "expression",
+                                "value": "{{'Recharge Comm Reversal | Net Amount '+DTNetAmt}}"
+                              },
+                              {
+                                "name": ":P12",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.user_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "identity",
+                            "type": "text"
+                          },
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{GetRechTrans.md_id>0}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "GetMDT",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "SELECT",
+                            "columns": [
+                              {
+                                "table": "m_users",
+                                "column": "aeps_balance",
+                                "alias": "mdt_aeps_balance"
+                              }
+                            ],
+                            "table": {
+                              "name": "m_users",
+                              "alias": "m_users"
+                            },
+                            "primary": "id",
+                            "joins": [],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "m_users.id",
+                                  "field": "m_users.id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetRechTrans.md_id}}",
+                                  "data": {
+                                    "table": "m_users",
+                                    "column": "id",
+                                    "type": "number",
+                                    "columnObj": {
+                                      "type": "increments",
+                                      "default": "",
+                                      "primary": true,
+                                      "nullable": false,
+                                      "name": "id"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "SELECT aeps_balance AS mdt_aeps_balance\nFROM m_users AS m_users\nWHERE id = :P1 /* {{GetRechTrans.md_id}} */",
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{GetRechTrans.md_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "output": false,
+                        "meta": [
+                          {
+                            "type": "text",
+                            "name": "mdt_aeps_balance"
+                          }
+                        ],
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "MDTNetAmt",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{GetRechTrans.mdtcommamt.toNumber()-GetRechTrans.mdtchargeamt.toNumber()}}"
+                        },
+                        "meta": [
+                          {
+                            "name": "id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "service_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "op_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "api_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "user_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "user_rt_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "merchant_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "amount",
+                            "type": "text"
+                          },
+                          {
+                            "name": "op_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "net_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "closing_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_mode",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_type",
+                            "type": "text"
+                          },
+                          {
+                            "name": "status",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "reason",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_logs",
+                            "type": "text"
+                          },
+                          {
+                            "name": "is_processed",
+                            "type": "text"
+                          },
+                          {
+                            "name": "operator_ref",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_ref",
+                            "type": "text"
+                          },
+                          {
+                            "name": "revert_trans",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ip_address",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_response_time",
+                            "type": "text"
+                          },
+                          {
+                            "name": "process_mode",
+                            "type": "text"
+                          },
+                          {
+                            "name": "live",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_date",
+                            "type": "datetime"
+                          },
+                          {
+                            "name": "trans_by",
+                            "type": "text"
+                          },
+                          {
+                            "name": "updated_on",
+                            "type": "datetime"
+                          },
+                          {
+                            "name": "updated_by",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ec",
+                            "type": "text"
+                          },
+                          {
+                            "name": "raise_compain",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_amount",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "bank_name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "service_api",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_tnx_date",
+                            "type": "text"
+                          },
+                          {
+                            "name": "bank_acno",
+                            "type": "text"
+                          },
+                          {
+                            "name": "benef_name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "benef_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_fname",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_lname",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_mobile",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_email",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_type",
+                            "type": "number"
+                          },
+                          {
+                            "name": "md_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ds_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "u_status",
+                            "type": "text"
+                          },
+                          {
+                            "name": "scheme_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "aeps_limit",
+                            "type": "text"
+                          },
+                          {
+                            "name": "aeps_balance",
+                            "type": "text"
+                          }
+                        ],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "MDTClosingBal",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{GetMDT.mdt_aeps_balance.toNumber()-GetRechTrans.mdtcommamt.toNumber()+GetRechTrans.mdtchargeamt.toNumber()}}"
+                        },
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "UpMDTBal",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "m_users",
+                                "column": "aeps_balance",
+                                "type": "text",
+                                "value": "{{MDTClosingBal}}"
+                              }
+                            ],
+                            "table": "m_users",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "field": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetRechTrans.md_id}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "returning": "id",
+                            "query": "UPDATE m_users\nSET aeps_balance = :P1 /* {{MDTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.md_id}} */",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{MDTClosingBal}}"
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{GetRechTrans.md_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "AddT_ChargeMDT",
+                        "module": "dbupdater",
+                        "action": "insert",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "insert",
+                            "values": [
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "user_id",
+                                "type": "number",
+                                "value": "{{GetRechTrans.md_id}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "pay_ref_id",
+                                "type": "number",
+                                "value": "{{GetRechTrans.id}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "crdr_type",
+                                "type": "text",
+                                "value": "{{'Debit'}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "old_bal",
+                                "type": "text",
+                                "value": "{{GetMDT.mdt_aeps_balance}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "amount",
+                                "type": "text",
+                                "value": "{{GetRechTrans.amount}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "net_amt",
+                                "type": "text",
+                                "value": "{{MDTNetAmt}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "new_bal",
+                                "type": "text",
+                                "value": "{{MDTClosingBal}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "tr_type",
+                                "type": "text",
+                                "value": "{{'AEPS Comm Refund'}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "tr_date",
+                                "type": "datetime",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "ip_address",
+                                "type": "text",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "remarks",
+                                "type": "text",
+                                "value": "{{'AEPS Comm Reversal | Net Amount '+MDTNetAmt}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "created_by",
+                                "type": "number",
+                                "value": "{{GetRechTrans.user_id}}"
+                              }
+                            ],
+                            "table": "t_charge_aeps_cal",
+                            "returning": "id",
+                            "query": "INSERT INTO t_charge_aeps_cal\n(user_id, pay_ref_id, crdr_type, old_bal, amount, net_amt, new_bal, tr_type, tr_date, ip_address, remarks, created_by) VALUES (:P1 /* {{GetRechTrans.md_id}} */, :P2 /* {{GetRechTrans.id}} */, :P3 /* {{'Debit'}} */, :P4 /* {{GetMDT.mdt_aeps_balance}} */, :P5 /* {{GetRechTrans.amount}} */, :P6 /* {{MDTNetAmt}} */, :P7 /* {{MDTClosingBal}} */, :P8 /* {{'AEPS Comm Refund'}} */, :P9 /* {{NOW}} */, :P10 /* {{$_SERVER.REMOTE_ADDR}} */, :P11 /* {{'AEPS Comm Reversal | Net Amount '+MDTNetAmt}} */, :P12 /* {{GetRechTrans.user_id}} */)",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.md_id}}"
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.id}}"
+                              },
+                              {
+                                "name": ":P3",
+                                "type": "expression",
+                                "value": "{{'Debit'}}"
+                              },
+                              {
+                                "name": ":P4",
+                                "type": "expression",
+                                "value": "{{GetMDT.mdt_aeps_balance}}"
+                              },
+                              {
+                                "name": ":P5",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.amount}}"
+                              },
+                              {
+                                "name": ":P6",
+                                "type": "expression",
+                                "value": "{{MDTNetAmt}}"
+                              },
+                              {
+                                "name": ":P7",
+                                "type": "expression",
+                                "value": "{{MDTClosingBal}}"
+                              },
+                              {
+                                "name": ":P8",
+                                "type": "expression",
+                                "value": "{{'AEPS Comm Refund'}}"
+                              },
+                              {
+                                "name": ":P9",
+                                "type": "expression",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "name": ":P10",
+                                "type": "expression",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "name": ":P11",
+                                "type": "expression",
+                                "value": "{{'AEPS Comm Reversal | Net Amount '+MDTNetAmt}}"
+                              },
+                              {
+                                "name": ":P12",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.user_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "identity",
+                            "type": "text"
+                          },
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{apistatus=='SUCCESS'&&GetRechTrans.status=='FAILED'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "RTClosingBalOld",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{GetRechTrans.opening_balance.toNumber()-GetRechTrans.net_amt.toNumber()}}"
+                },
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "service_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "op_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "api_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "user_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "user_rt_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "merchant_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "amount",
+                    "type": "text"
+                  },
+                  {
+                    "name": "op_bal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "comm_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "comm_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "comm_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "charge_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "charge_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "charge_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "net_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "closing_bal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "tr_mode",
+                    "type": "text"
+                  },
+                  {
+                    "name": "tr_type",
+                    "type": "text"
+                  },
+                  {
+                    "name": "status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "tr_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "reason",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_logs",
+                    "type": "text"
+                  },
+                  {
+                    "name": "is_processed",
+                    "type": "text"
+                  },
+                  {
+                    "name": "operator_ref",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_ref",
+                    "type": "text"
+                  },
+                  {
+                    "name": "revert_trans",
+                    "type": "text"
+                  },
+                  {
+                    "name": "ip_address",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_response_time",
+                    "type": "text"
+                  },
+                  {
+                    "name": "process_mode",
+                    "type": "text"
+                  },
+                  {
+                    "name": "live",
+                    "type": "text"
+                  },
+                  {
+                    "name": "tr_date",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "trans_by",
+                    "type": "text"
+                  },
+                  {
+                    "name": "updated_on",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "updated_by",
+                    "type": "text"
+                  },
+                  {
+                    "name": "ec",
+                    "type": "text"
+                  },
+                  {
+                    "name": "raise_compain",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_bal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_comm_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_comm_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_comm_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_charge_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_charge_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "dt_charge_amount",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_comm_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_comm_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_comm_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_charge_per",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_charge_val",
+                    "type": "text"
+                  },
+                  {
+                    "name": "mdt_charge_amt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "bank_name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "service_api",
+                    "type": "text"
+                  },
+                  {
+                    "name": "api_tnx_date",
+                    "type": "text"
+                  },
+                  {
+                    "name": "bank_acno",
+                    "type": "text"
+                  },
+                  {
+                    "name": "benef_name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "benef_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_fname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_lname",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_mobile",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "user_type",
+                    "type": "number"
+                  },
+                  {
+                    "name": "md_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "ds_id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "u_status",
+                    "type": "text"
+                  },
+                  {
+                    "name": "scheme_id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "aeps_limit",
+                    "type": "text"
+                  },
+                  {
+                    "name": "aeps_balance",
+                    "type": "text"
+                  }
+                ],
+                "output": true,
+                "outputType": "text"
+              },
+              {
+                "name": "RTClosingBal",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{GetRechTrans.aeps_balance.toNumber()-GetRechTrans.net_amt.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "RechTransUP",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "closing_bal",
+                        "type": "text",
+                        "value": "{{RTClosingBalOld}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'SUCCESS'}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "operator_ref",
+                        "type": "text",
+                        "value": "{{'Txn Successful'}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "api_ref",
+                        "type": "text",
+                        "value": "{{api_ref}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "live",
+                        "type": "text",
+                        "value": "{{'Push'}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "updated_on",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "tt_aeps_trans",
+                        "column": "blank1",
+                        "type": "text",
+                        "value": "{{response}}"
+                      }
+                    ],
+                    "table": "tt_aeps_trans",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{GetRechTrans.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "UPDATE tt_aeps_trans\nSET closing_bal = :P1 /* {{RTClosingBalOld}} */, status = :P2 /* {{'SUCCESS'}} */, operator_ref = :P3 /* {{'Txn Successful'}} */, api_ref = :P4 /* {{api_ref}} */, live = :P5 /* {{'Push'}} */, updated_on = :P6 /* {{NOW}} */, blank1 = :P7 /* {{response}} */\nWHERE id = :P8 /* {{GetRechTrans.id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{RTClosingBalOld}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{'SUCCESS'}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{'Txn Successful'}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{api_ref}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{'Push'}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{response}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P8",
+                        "value": "{{GetRechTrans.id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "ttBalRefund",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "user_id",
+                        "type": "number",
+                        "value": "{{GetRechTrans.user_id}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "pay_ref_id",
+                        "type": "number",
+                        "value": "{{GetRechTrans.id}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "crdr_type",
+                        "type": "text",
+                        "value": "{{'Debit'}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "old_bal",
+                        "type": "text",
+                        "value": "{{GetRechTrans.aeps_balance}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "amount",
+                        "type": "text",
+                        "value": "{{GetRechTrans.amount}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "net_amt",
+                        "type": "text",
+                        "value": "{{GetRechTrans.net_amt}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "new_bal",
+                        "type": "text",
+                        "value": "{{RTClosingBal}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'SUCCESS'}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "tr_type",
+                        "type": "text",
+                        "value": "{{'AEPS Transfer Success'}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "tr_date",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "ip_address",
+                        "type": "text",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "remarks",
+                        "type": "text",
+                        "value": "{{remark}}"
+                      },
+                      {
+                        "table": "tt_aeps_balance",
+                        "column": "created_by",
+                        "type": "number",
+                        "value": "{{GetRechTrans.user_id}}"
+                      }
+                    ],
+                    "table": "tt_aeps_balance",
+                    "returning": "id",
+                    "query": "INSERT INTO tt_aeps_balance\n(user_id, pay_ref_id, crdr_type, old_bal, amount, net_amt, new_bal, status, tr_type, tr_date, ip_address, remarks, created_by) VALUES (:P1 /* {{GetRechTrans.user_id}} */, :P2 /* {{GetRechTrans.id}} */, :P3 /* {{'Debit'}} */, :P4 /* {{GetRechTrans.aeps_balance}} */, :P5 /* {{GetRechTrans.amount}} */, :P6 /* {{GetRechTrans.net_amt}} */, :P7 /* {{RTClosingBal}} */, :P8 /* {{'SUCCESS'}} */, :P9 /* {{'AEPS Transfer Success'}} */, :P10 /* {{NOW}} */, :P11 /* {{$_SERVER.REMOTE_ADDR}} */, :P12 /* {{remark}} */, :P13 /* {{GetRechTrans.user_id}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.user_id}}"
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.id}}"
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{'Debit'}}"
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.aeps_balance}}"
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.amount}}"
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.net_amt}}"
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{RTClosingBal}}"
+                      },
+                      {
+                        "name": ":P8",
+                        "type": "expression",
+                        "value": "{{'SUCCESS'}}"
+                      },
+                      {
+                        "name": ":P9",
+                        "type": "expression",
+                        "value": "{{'AEPS Transfer Success'}}"
+                      },
+                      {
+                        "name": ":P10",
+                        "type": "expression",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "name": ":P11",
+                        "type": "expression",
+                        "value": "{{$_SERVER.REMOTE_ADDR}}"
+                      },
+                      {
+                        "name": ":P12",
+                        "type": "expression",
+                        "value": "{{remark}}"
+                      },
+                      {
+                        "name": ":P13",
+                        "type": "expression",
+                        "value": "{{GetRechTrans.user_id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "UpRTBal",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "postgres_gcpServer",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "m_users",
+                        "column": "aeps_balance",
+                        "type": "text",
+                        "value": "{{RTClosingBal}}"
+                      }
+                    ],
+                    "table": "m_users",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{GetRechTrans.user_id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "UPDATE m_users\nSET aeps_balance = :P1 /* {{RTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.user_id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{RTClosingBal}}"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{GetRechTrans.user_id}}"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{GetRechTrans.ds_id>0}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "GetDT",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "SELECT",
+                            "columns": [
+                              {
+                                "table": "m_users",
+                                "column": "aeps_balance",
+                                "alias": "dt_aeps_balance"
+                              }
+                            ],
+                            "table": {
+                              "name": "m_users",
+                              "alias": "m_users"
+                            },
+                            "primary": "id",
+                            "joins": [],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "m_users.id",
+                                  "field": "m_users.id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetRechTrans.ds_id}}",
+                                  "data": {
+                                    "table": "m_users",
+                                    "column": "id",
+                                    "type": "number",
+                                    "columnObj": {
+                                      "type": "increments",
+                                      "default": "",
+                                      "primary": true,
+                                      "nullable": false,
+                                      "name": "id"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "SELECT aeps_balance AS dt_aeps_balance\nFROM m_users AS m_users\nWHERE id = :P1 /* {{GetRechTrans.ds_id}} */",
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{GetRechTrans.ds_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "output": false,
+                        "meta": [
+                          {
+                            "type": "text",
+                            "name": "dt_aeps_balance"
+                          }
+                        ],
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "DTNetAmt",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{GetRechTrans.dtcommamt.toNumber()-GetRechTrans.dtchargeamt.toNumber()}}"
+                        },
+                        "meta": [
+                          {
+                            "name": "id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "service_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "op_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "api_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "user_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "user_rt_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "merchant_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "amount",
+                            "type": "text"
+                          },
+                          {
+                            "name": "op_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "net_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "closing_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_mode",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_type",
+                            "type": "text"
+                          },
+                          {
+                            "name": "status",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "reason",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_logs",
+                            "type": "text"
+                          },
+                          {
+                            "name": "is_processed",
+                            "type": "text"
+                          },
+                          {
+                            "name": "operator_ref",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_ref",
+                            "type": "text"
+                          },
+                          {
+                            "name": "revert_trans",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ip_address",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_response_time",
+                            "type": "text"
+                          },
+                          {
+                            "name": "process_mode",
+                            "type": "text"
+                          },
+                          {
+                            "name": "live",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_date",
+                            "type": "datetime"
+                          },
+                          {
+                            "name": "trans_by",
+                            "type": "text"
+                          },
+                          {
+                            "name": "updated_on",
+                            "type": "datetime"
+                          },
+                          {
+                            "name": "updated_by",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ec",
+                            "type": "text"
+                          },
+                          {
+                            "name": "raise_compain",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_amount",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "bank_name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "service_api",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_tnx_date",
+                            "type": "text"
+                          },
+                          {
+                            "name": "bank_acno",
+                            "type": "text"
+                          },
+                          {
+                            "name": "benef_name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "benef_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_fname",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_lname",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_mobile",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_email",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_type",
+                            "type": "number"
+                          },
+                          {
+                            "name": "md_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ds_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "u_status",
+                            "type": "text"
+                          },
+                          {
+                            "name": "scheme_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "aeps_limit",
+                            "type": "text"
+                          },
+                          {
+                            "name": "aeps_balance",
+                            "type": "text"
+                          }
+                        ],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "DTClosingBal",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{GetDT.dt_aeps_balance.toNumber()+GetRechTrans.dtcommamt.toNumber()-GetRechTrans.dtchargeamt.toNumber()}}"
+                        },
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "AddT_ChargeDT",
+                        "module": "dbupdater",
+                        "action": "insert",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "insert",
+                            "values": [
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "user_id",
+                                "type": "number",
+                                "value": "{{GetRechTrans.ds_id}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "pay_ref_id",
+                                "type": "number",
+                                "value": "{{GetRechTrans.id}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "crdr_type",
+                                "type": "text",
+                                "value": "{{'Credit'}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "old_bal",
+                                "type": "text",
+                                "value": "{{GetDT.dt_aeps_balance}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "amount",
+                                "type": "text",
+                                "value": "{{GetRechTrans.amount}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "net_amt",
+                                "type": "text",
+                                "value": "{{DTNetAmt}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "new_bal",
+                                "type": "text",
+                                "value": "{{DTClosingBal}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "tr_type",
+                                "type": "text",
+                                "value": "{{'AEPS Comm'}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "tr_date",
+                                "type": "datetime",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "ip_address",
+                                "type": "text",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "remarks",
+                                "type": "text",
+                                "value": "{{'Recharge Comm | Net Amount '+DTNetAmt}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "created_by",
+                                "type": "number",
+                                "value": "{{GetRechTrans.user_id}}"
+                              }
+                            ],
+                            "table": "t_charge_aeps_cal",
+                            "returning": "id",
+                            "query": "INSERT INTO t_charge_aeps_cal\n(user_id, pay_ref_id, crdr_type, old_bal, amount, net_amt, new_bal, tr_type, tr_date, ip_address, remarks, created_by) VALUES (:P1 /* {{GetRechTrans.ds_id}} */, :P2 /* {{GetRechTrans.id}} */, :P3 /* {{'Credit'}} */, :P4 /* {{GetDT.dt_aeps_balance}} */, :P5 /* {{GetRechTrans.amount}} */, :P6 /* {{DTNetAmt}} */, :P7 /* {{DTClosingBal}} */, :P8 /* {{'AEPS Comm'}} */, :P9 /* {{NOW}} */, :P10 /* {{$_SERVER.REMOTE_ADDR}} */, :P11 /* {{'Recharge Comm | Net Amount '+DTNetAmt}} */, :P12 /* {{GetRechTrans.user_id}} */)",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.ds_id}}"
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.id}}"
+                              },
+                              {
+                                "name": ":P3",
+                                "type": "expression",
+                                "value": "{{'Credit'}}"
+                              },
+                              {
+                                "name": ":P4",
+                                "type": "expression",
+                                "value": "{{GetDT.dt_aeps_balance}}"
+                              },
+                              {
+                                "name": ":P5",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.amount}}"
+                              },
+                              {
+                                "name": ":P6",
+                                "type": "expression",
+                                "value": "{{DTNetAmt}}"
+                              },
+                              {
+                                "name": ":P7",
+                                "type": "expression",
+                                "value": "{{DTClosingBal}}"
+                              },
+                              {
+                                "name": ":P8",
+                                "type": "expression",
+                                "value": "{{'AEPS Comm'}}"
+                              },
+                              {
+                                "name": ":P9",
+                                "type": "expression",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "name": ":P10",
+                                "type": "expression",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "name": ":P11",
+                                "type": "expression",
+                                "value": "{{'Recharge Comm | Net Amount '+DTNetAmt}}"
+                              },
+                              {
+                                "name": ":P12",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.user_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "identity",
+                            "type": "text"
+                          },
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "UpDTBal",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "m_users",
+                                "column": "aeps_balance",
+                                "type": "text",
+                                "value": "{{DTClosingBal}}"
+                              }
+                            ],
+                            "table": "m_users",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "field": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetRechTrans.ds_id}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "returning": "id",
+                            "query": "UPDATE m_users\nSET aeps_balance = :P1 /* {{DTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.ds_id}} */",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{DTClosingBal}}"
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{GetRechTrans.ds_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{GetRechTrans.md_id>0}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "GetMDT",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "SELECT",
+                            "columns": [
+                              {
+                                "table": "m_users",
+                                "column": "aeps_balance",
+                                "alias": "mdt_aeps_balance"
+                              }
+                            ],
+                            "table": {
+                              "name": "m_users",
+                              "alias": "m_users"
+                            },
+                            "primary": "id",
+                            "joins": [],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "m_users.id",
+                                  "field": "m_users.id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetRechTrans.md_id}}",
+                                  "data": {
+                                    "table": "m_users",
+                                    "column": "id",
+                                    "type": "number",
+                                    "columnObj": {
+                                      "type": "increments",
+                                      "default": "",
+                                      "primary": true,
+                                      "nullable": false,
+                                      "name": "id"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "SELECT aeps_balance AS mdt_aeps_balance\nFROM m_users AS m_users\nWHERE id = :P1 /* {{GetRechTrans.md_id}} */",
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{GetRechTrans.md_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "output": false,
+                        "meta": [
+                          {
+                            "type": "text",
+                            "name": "mdt_aeps_balance"
+                          }
+                        ],
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "MDTNetAmt",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{GetRechTrans.mdtcommamt.toNumber()-GetRechTrans.mdtchargeamt.toNumber()}}"
+                        },
+                        "meta": [
+                          {
+                            "name": "id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "service_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "op_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "api_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "user_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "user_rt_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "merchant_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "amount",
+                            "type": "text"
+                          },
+                          {
+                            "name": "op_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "charge_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "net_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "closing_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_mode",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_type",
+                            "type": "text"
+                          },
+                          {
+                            "name": "status",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "reason",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_logs",
+                            "type": "text"
+                          },
+                          {
+                            "name": "is_processed",
+                            "type": "text"
+                          },
+                          {
+                            "name": "operator_ref",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_ref",
+                            "type": "text"
+                          },
+                          {
+                            "name": "revert_trans",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ip_address",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_response_time",
+                            "type": "text"
+                          },
+                          {
+                            "name": "process_mode",
+                            "type": "text"
+                          },
+                          {
+                            "name": "live",
+                            "type": "text"
+                          },
+                          {
+                            "name": "tr_date",
+                            "type": "datetime"
+                          },
+                          {
+                            "name": "trans_by",
+                            "type": "text"
+                          },
+                          {
+                            "name": "updated_on",
+                            "type": "datetime"
+                          },
+                          {
+                            "name": "updated_by",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ec",
+                            "type": "text"
+                          },
+                          {
+                            "name": "raise_compain",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_bal",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "dt_charge_amount",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_comm_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_per",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_val",
+                            "type": "text"
+                          },
+                          {
+                            "name": "mdt_charge_amt",
+                            "type": "text"
+                          },
+                          {
+                            "name": "bank_name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "service_api",
+                            "type": "text"
+                          },
+                          {
+                            "name": "api_tnx_date",
+                            "type": "text"
+                          },
+                          {
+                            "name": "bank_acno",
+                            "type": "text"
+                          },
+                          {
+                            "name": "benef_name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "benef_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_fname",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_lname",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_mobile",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_email",
+                            "type": "text"
+                          },
+                          {
+                            "name": "user_type",
+                            "type": "number"
+                          },
+                          {
+                            "name": "md_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "ds_id",
+                            "type": "text"
+                          },
+                          {
+                            "name": "u_status",
+                            "type": "text"
+                          },
+                          {
+                            "name": "scheme_id",
+                            "type": "number"
+                          },
+                          {
+                            "name": "aeps_limit",
+                            "type": "text"
+                          },
+                          {
+                            "name": "aeps_balance",
+                            "type": "text"
+                          }
+                        ],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "MDTClosingBal",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{GetMDT.mdt_aeps_balance.toNumber()+GetRechTrans.mdtcommamt.toNumber()-GetRechTrans.mdtchargeamt.toNumber()}}"
+                        },
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "AddT_ChargeMDT",
+                        "module": "dbupdater",
+                        "action": "insert",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "insert",
+                            "values": [
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "user_id",
+                                "type": "number",
+                                "value": "{{GetRechTrans.md_id}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "pay_ref_id",
+                                "type": "number",
+                                "value": "{{GetRechTrans.id}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "crdr_type",
+                                "type": "text",
+                                "value": "{{'Credit'}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "old_bal",
+                                "type": "text",
+                                "value": "{{GetMDT.mdt_aeps_balance}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "amount",
+                                "type": "text",
+                                "value": "{{GetRechTrans.amount}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "net_amt",
+                                "type": "text",
+                                "value": "{{MDTNetAmt}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "new_bal",
+                                "type": "text",
+                                "value": "{{MDTClosingBal}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "tr_type",
+                                "type": "text",
+                                "value": "{{'AEPS Comm'}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "tr_date",
+                                "type": "datetime",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "ip_address",
+                                "type": "text",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "remarks",
+                                "type": "text",
+                                "value": "{{'AEPS Comm | Net Amount '+MDTNetAmt}}"
+                              },
+                              {
+                                "table": "t_charge_aeps_cal",
+                                "column": "created_by",
+                                "type": "number",
+                                "value": "{{GetRechTrans.user_id}}"
+                              }
+                            ],
+                            "table": "t_charge_aeps_cal",
+                            "returning": "id",
+                            "query": "INSERT INTO t_charge_aeps_cal\n(user_id, pay_ref_id, crdr_type, old_bal, amount, net_amt, new_bal, tr_type, tr_date, ip_address, remarks, created_by) VALUES (:P1 /* {{GetRechTrans.md_id}} */, :P2 /* {{GetRechTrans.id}} */, :P3 /* {{'Credit'}} */, :P4 /* {{GetMDT.mdt_aeps_balance}} */, :P5 /* {{GetRechTrans.amount}} */, :P6 /* {{MDTNetAmt}} */, :P7 /* {{MDTClosingBal}} */, :P8 /* {{'AEPS Comm'}} */, :P9 /* {{NOW}} */, :P10 /* {{$_SERVER.REMOTE_ADDR}} */, :P11 /* {{'AEPS Comm | Net Amount '+MDTNetAmt}} */, :P12 /* {{GetRechTrans.user_id}} */)",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.md_id}}"
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.id}}"
+                              },
+                              {
+                                "name": ":P3",
+                                "type": "expression",
+                                "value": "{{'Credit'}}"
+                              },
+                              {
+                                "name": ":P4",
+                                "type": "expression",
+                                "value": "{{GetMDT.mdt_aeps_balance}}"
+                              },
+                              {
+                                "name": ":P5",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.amount}}"
+                              },
+                              {
+                                "name": ":P6",
+                                "type": "expression",
+                                "value": "{{MDTNetAmt}}"
+                              },
+                              {
+                                "name": ":P7",
+                                "type": "expression",
+                                "value": "{{MDTClosingBal}}"
+                              },
+                              {
+                                "name": ":P8",
+                                "type": "expression",
+                                "value": "{{'AEPS Comm'}}"
+                              },
+                              {
+                                "name": ":P9",
+                                "type": "expression",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "name": ":P10",
+                                "type": "expression",
+                                "value": "{{$_SERVER.REMOTE_ADDR}}"
+                              },
+                              {
+                                "name": ":P11",
+                                "type": "expression",
+                                "value": "{{'AEPS Comm | Net Amount '+MDTNetAmt}}"
+                              },
+                              {
+                                "name": ":P12",
+                                "type": "expression",
+                                "value": "{{GetRechTrans.user_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "identity",
+                            "type": "text"
+                          },
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "UpMDTBal",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "postgres_gcpServer",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "m_users",
+                                "column": "aeps_balance",
+                                "type": "text",
+                                "value": "{{MDTClosingBal}}"
+                              }
+                            ],
+                            "table": "m_users",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "field": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{GetRechTrans.md_id}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "returning": "id",
+                            "query": "UPDATE m_users\nSET aeps_balance = :P1 /* {{MDTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.md_id}} */",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{MDTClosingBal}}"
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{GetRechTrans.md_id}}"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "apiLive",
+        "module": "api",
+        "action": "send",
+        "options": {
+          "url": "https://portal.swpay.in/api/RefreshTrans"
+        },
+        "output": false
+      }
+    ]
+  }
+}

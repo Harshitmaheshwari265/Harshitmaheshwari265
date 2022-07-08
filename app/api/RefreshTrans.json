@@ -1,0 +1,9 @@
+{
+  "name": "refresh",
+  "module": "sockets",
+  "action": "refresh",
+  "options": {
+    "action": "Reports/LiveTransactions"
+  },
+  "output": true
+}

@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "service_type"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "GetActiveOp",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_operator",
+                "column": "id"
+              },
+              {
+                "table": "m_operator",
+                "column": "operator_name"
+              }
+            ],
+            "table": {
+              "name": "m_operator"
+            },
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_operator.service_id",
+                  "field": "m_operator.service_id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_GET.service_type}}",
+                  "data": {
+                    "table": "m_operator",
+                    "column": "service_id",
+                    "type": "number"
+                  },
+                  "operation": "="
+                },
+                {
+                  "id": "m_operator.status",
+                  "field": "m_operator.status",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": 1,
+                  "data": {
+                    "table": "m_operator",
+                    "column": "status",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "orders": [
+              {
+                "table": "m_operator",
+                "column": "operator_name",
+                "direction": "ASC"
+              }
+            ],
+            "query": "SELECT id, operator_name\nFROM m_operator\nWHERE service_id = :P1 /* {{$_GET.service_type}} */ AND status = 1\nORDER BY operator_name ASC",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.service_type}}"
+              }
+            ]
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "operator_name"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

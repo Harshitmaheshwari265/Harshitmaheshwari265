@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "year"
+      },
+      {
+        "type": "text",
+        "name": "month"
+      },
+      {
+        "type": "text",
+        "name": "service_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "AcSummaryDaily",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "SELECT to_char(tr_date, 'yyyy-MM-dd') as transaction_date ,COUNT(*) as id_nos, SUM(amount::int) as total FROM tt_recharge_trans where to_char(tr_date, 'yyyy') = @year and to_char(tr_date, 'MM') = @month and (service_id = @service_id or @service_id = 0) GROUP BY transaction_date;",
+            "params": [
+              {
+                "name": "@year",
+                "value": "{{$_GET.year}}",
+                "test": "2021"
+              },
+              {
+                "name": "@month",
+                "value": "{{$_GET.month}}",
+                "test": "10"
+              },
+              {
+                "name": "@service_id",
+                "value": "{{$_GET.service_id.default(0)}}",
+                "test": "0"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "transaction_date",
+            "type": "text"
+          },
+          {
+            "name": "id_nos",
+            "type": "text"
+          },
+          {
+            "name": "total",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

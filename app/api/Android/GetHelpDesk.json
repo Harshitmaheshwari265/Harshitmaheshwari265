@@ -1,0 +1,205 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "GetHelp",
+        "module": "dbconnector",
+        "action": "paged",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "android_contact",
+                "column": "id"
+              },
+              {
+                "table": "android_contact",
+                "column": "user_type"
+              },
+              {
+                "table": "android_contact",
+                "column": "support_email1"
+              },
+              {
+                "table": "android_contact",
+                "column": "sales_email2"
+              },
+              {
+                "table": "android_contact",
+                "column": "support_mobile"
+              },
+              {
+                "table": "android_contact",
+                "column": "support_mobile2"
+              },
+              {
+                "table": "android_contact",
+                "column": "sales_mobile1"
+              },
+              {
+                "table": "android_contact",
+                "column": "sales_mobile2"
+              },
+              {
+                "table": "android_contact",
+                "column": "status"
+              },
+              {
+                "table": "android_contact",
+                "column": "created_by"
+              },
+              {
+                "table": "android_contact",
+                "column": "created_on"
+              }
+            ],
+            "table": {
+              "name": "android_contact"
+            },
+            "primary": "id",
+            "joins": [],
+            "query": "SELECT id, user_type, support_email1, sales_email2, support_mobile, support_mobile2, sales_mobile1, sales_mobile2, status, created_by, created_on\nFROM android_contact",
+            "params": []
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "offset",
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "type": "number"
+          },
+          {
+            "name": "total",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "object",
+            "sub": [
+              {
+                "name": "offset",
+                "type": "object",
+                "sub": [
+                  {
+                    "name": "first",
+                    "type": "number"
+                  },
+                  {
+                    "name": "prev",
+                    "type": "number"
+                  },
+                  {
+                    "name": "next",
+                    "type": "number"
+                  },
+                  {
+                    "name": "last",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "current",
+                "type": "number"
+              },
+              {
+                "name": "total",
+                "type": "number"
+              }
+            ]
+          },
+          {
+            "name": "data",
+            "type": "array",
+            "sub": [
+              {
+                "type": "number",
+                "name": "id"
+              },
+              {
+                "type": "number",
+                "name": "user_type"
+              },
+              {
+                "type": "text",
+                "name": "support_email1"
+              },
+              {
+                "type": "text",
+                "name": "sales_email2"
+              },
+              {
+                "type": "text",
+                "name": "support_mobile"
+              },
+              {
+                "type": "text",
+                "name": "support_mobile2"
+              },
+              {
+                "type": "text",
+                "name": "sales_mobile1"
+              },
+              {
+                "type": "text",
+                "name": "sales_mobile2"
+              },
+              {
+                "type": "text",
+                "name": "status"
+              },
+              {
+                "type": "number",
+                "name": "created_by"
+              },
+              {
+                "type": "datetime",
+                "name": "created_on"
+              }
+            ]
+          }
+        ],
+        "outputType": "object"
+      }
+    ]
+  }
+}

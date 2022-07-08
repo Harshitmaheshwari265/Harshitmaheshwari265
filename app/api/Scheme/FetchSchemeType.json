@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "for_user_type"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "forbiddenUrl": "403-forbidden",
+          "loginUrl": "login",
+          "permissions": [
+            "write"
+          ]
+        }
+      },
+      {
+        "name": "GetSchemes",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_scheme",
+                "column": "id"
+              },
+              {
+                "table": "m_scheme",
+                "column": "scheme_name"
+              }
+            ],
+            "table": {
+              "name": "m_scheme"
+            },
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_scheme.scheme_type",
+                  "field": "m_scheme.scheme_type",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "{{$_GET.for_user_type}}",
+                  "data": {
+                    "table": "m_scheme",
+                    "column": "scheme_type",
+                    "type": "text"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "orders": [
+              {
+                "table": "m_scheme",
+                "column": "scheme_name",
+                "direction": "ASC",
+                "recid": 1
+              }
+            ],
+            "query": "SELECT id, scheme_name\nFROM m_scheme\nWHERE scheme_type = :P1 /* {{$_GET.for_user_type}} */\nORDER BY scheme_name ASC",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.for_user_type}}"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "scheme_name"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

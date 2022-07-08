@@ -1,0 +1,397 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/404-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "GetCCUsers",
+        "module": "dbconnector",
+        "action": "paged",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_users",
+                "column": "id"
+              },
+              {
+                "table": "m_users",
+                "column": "user_id"
+              },
+              {
+                "table": "m_users",
+                "column": "user_fname"
+              },
+              {
+                "table": "m_users",
+                "column": "user_mobile"
+              },
+              {
+                "table": "m_users",
+                "column": "user_email"
+              },
+              {
+                "table": "m_users",
+                "column": "u_status"
+              },
+              {
+                "table": "m_users",
+                "column": "user_tpin"
+              },
+              {
+                "table": "m_users",
+                "column": "balance_amt"
+              },
+              {
+                "table": "m_users",
+                "column": "created_by"
+              },
+              {
+                "table": "m_users",
+                "column": "created_on"
+              },
+              {
+                "table": "m_users",
+                "column": "aadhar_no"
+              },
+              {
+                "table": "m_users",
+                "column": "pan_no"
+              },
+              {
+                "table": "m_users",
+                "column": "address"
+              },
+              {
+                "table": "m_users",
+                "column": "pin"
+              },
+              {
+                "table": "m_users",
+                "column": "state"
+              },
+              {
+                "table": "m_users",
+                "column": "district"
+              },
+              {
+                "table": "page_access",
+                "column": "access_page1"
+              },
+              {
+                "table": "page_access",
+                "column": "access_page2"
+              },
+              {
+                "table": "page_access",
+                "column": "access_page3"
+              },
+              {
+                "table": "page_access",
+                "column": "access_page4"
+              },
+              {
+                "table": "page_access",
+                "column": "access_page5"
+              },
+              {
+                "table": "page_access",
+                "column": "access_page6"
+              },
+              {
+                "table": "page_access",
+                "column": "access_page7"
+              },
+              {
+                "table": "page_access",
+                "column": "access_page8"
+              },
+              {
+                "table": "m_users",
+                "column": "user_type"
+              },
+              {
+                "table": "m_users",
+                "column": "scheme_id"
+              },
+              {
+                "table": "m_users",
+                "column": "user_type"
+              },
+              {
+                "table": "m_users",
+                "column": "blank1"
+              }
+            ],
+            "table": {
+              "name": "m_users"
+            },
+            "joins": [
+              {
+                "table": "cc_pageaccess",
+                "column": "*",
+                "alias": "page_access",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "page_access",
+                      "column": "ccuser_id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "m_users",
+                        "column": "id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                }
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_users.user_type",
+                  "field": "m_users.user_type",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": 4,
+                  "data": {
+                    "table": "m_users",
+                    "column": "user_type",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT m_users.id, m_users.user_id, m_users.user_fname, m_users.user_mobile, m_users.user_email, m_users.u_status, m_users.user_tpin, m_users.balance_amt, m_users.created_by, m_users.created_on, m_users.aadhar_no, m_users.pan_no, m_users.address, m_users.pin, m_users.state, m_users.district, page_access.access_page1, page_access.access_page2, page_access.access_page3, page_access.access_page4, page_access.access_page5, page_access.access_page6, page_access.access_page7, page_access.access_page8, m_users.user_type, m_users.scheme_id, m_users.user_type, m_users.blank1\nFROM m_users\nINNER JOIN cc_pageaccess AS page_access ON (page_access.ccuser_id = m_users.id)\nWHERE m_users.user_type = 4\nORDER BY m_users.id DESC",
+            "params": [],
+            "orders": [
+              {
+                "table": "m_users",
+                "column": "id",
+                "direction": "DESC",
+                "recid": 1
+              }
+            ],
+            "primary": "id"
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "offset",
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "type": "number"
+          },
+          {
+            "name": "total",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "object",
+            "sub": [
+              {
+                "name": "offset",
+                "type": "object",
+                "sub": [
+                  {
+                    "name": "first",
+                    "type": "number"
+                  },
+                  {
+                    "name": "prev",
+                    "type": "number"
+                  },
+                  {
+                    "name": "next",
+                    "type": "number"
+                  },
+                  {
+                    "name": "last",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "current",
+                "type": "number"
+              },
+              {
+                "name": "total",
+                "type": "number"
+              }
+            ]
+          },
+          {
+            "name": "data",
+            "type": "array",
+            "sub": [
+              {
+                "type": "number",
+                "name": "id"
+              },
+              {
+                "type": "text",
+                "name": "user_id"
+              },
+              {
+                "type": "text",
+                "name": "user_fname"
+              },
+              {
+                "type": "text",
+                "name": "user_mobile"
+              },
+              {
+                "type": "text",
+                "name": "user_email"
+              },
+              {
+                "type": "text",
+                "name": "u_status"
+              },
+              {
+                "type": "text",
+                "name": "user_tpin"
+              },
+              {
+                "type": "text",
+                "name": "balance_amt"
+              },
+              {
+                "type": "number",
+                "name": "created_by"
+              },
+              {
+                "type": "datetime",
+                "name": "created_on"
+              },
+              {
+                "type": "text",
+                "name": "aadhar_no"
+              },
+              {
+                "type": "text",
+                "name": "pan_no"
+              },
+              {
+                "type": "text",
+                "name": "address"
+              },
+              {
+                "type": "text",
+                "name": "pin"
+              },
+              {
+                "type": "text",
+                "name": "state"
+              },
+              {
+                "type": "text",
+                "name": "district"
+              },
+              {
+                "type": "number",
+                "name": "access_page1"
+              },
+              {
+                "type": "number",
+                "name": "access_page2"
+              },
+              {
+                "type": "number",
+                "name": "access_page3"
+              },
+              {
+                "type": "number",
+                "name": "access_page4"
+              },
+              {
+                "type": "number",
+                "name": "access_page5"
+              },
+              {
+                "type": "number",
+                "name": "access_page6"
+              },
+              {
+                "type": "number",
+                "name": "access_page7"
+              },
+              {
+                "type": "number",
+                "name": "access_page8"
+              },
+              {
+                "type": "number",
+                "name": "user_type"
+              },
+              {
+                "type": "number",
+                "name": "scheme_id"
+              },
+              {
+                "type": "text",
+                "name": "blank1"
+              }
+            ]
+          }
+        ],
+        "outputType": "object"
+      }
+    ]
+  }
+}

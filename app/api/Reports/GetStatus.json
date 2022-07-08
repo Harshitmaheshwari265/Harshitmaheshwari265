@@ -1,0 +1,42 @@
+[
+  {
+    "name": "",
+    "module": "auth",
+    "action": "restrict",
+    "options": {
+      "provider": "securityLogin",
+      "permissions": [
+        "write"
+      ],
+      "loginUrl": "/login",
+      "forbiddenUrl": "/403-forbidden"
+    }
+  },
+  {
+    "name": "api1",
+    "module": "api",
+    "action": "send",
+    "options": {
+      "params": {
+        "apiToken": "{{'a88ccb6aa2a14eaf8eaa1f112c3ff690'}}",
+        "reqid": "{{'a3e928368'}}"
+      },
+      "url": "http://sonakshiworld.com/apiservice.asmx/GetRechargeStatus"
+    },
+    "output": true
+  },
+  {
+    "name": "api1_complain",
+    "module": "api",
+    "action": "send",
+    "options": {
+      "params": {
+        "apiToken": "{{'a88ccb6aa2a14eaf8eaa1f112c3ff690'}}",
+        "reqid": "{{'a3e928368'}}"
+      },
+      "url": "https://sonakshiworld.com/apiservice.asmx/RegisterComplaint"
+    },
+    "output": true,
+    "disabled": true
+  }
+]

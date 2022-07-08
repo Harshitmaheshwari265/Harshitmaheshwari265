@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "service_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "GetForwardData",
+        "module": "dbconnector",
+        "action": "select",
+        "options": {
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_api_forward",
+                "column": "id",
+                "alias": "forward_id"
+              },
+              {
+                "table": "m_api_forward",
+                "column": "created_by"
+              },
+              {
+                "table": "m_api_forward",
+                "column": "created_on"
+              },
+              {
+                "table": "m_api_forward",
+                "column": "updated_by"
+              },
+              {
+                "table": "m_api_forward",
+                "column": "updated_on"
+              },
+              {
+                "table": "m_api",
+                "column": "api_name"
+              },
+              {
+                "table": "m_api",
+                "column": "api_code"
+              },
+              {
+                "table": "m_op",
+                "column": "operator_name"
+              },
+              {
+                "table": "m_service",
+                "column": "service_name"
+              }
+            ],
+            "table": {
+              "name": "m_api_forward"
+            },
+            "joins": [
+              {
+                "table": "m_api",
+                "column": "*",
+                "alias": "m_api",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "m_api",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "m_api_forward",
+                        "column": "api_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                },
+                "primary": "id"
+              },
+              {
+                "table": "m_operator",
+                "column": "*",
+                "alias": "m_op",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "m_op",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "m_api_forward",
+                        "column": "operator_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                },
+                "primary": "id"
+              },
+              {
+                "table": "m_service",
+                "column": "*",
+                "alias": "m_service",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "m_service",
+                      "column": "id",
+                      "operator": "equal",
+                      "value": {
+                        "table": "m_api_forward",
+                        "column": "service_id"
+                      },
+                      "operation": "="
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "query": "SELECT m_api_forward.id AS forward_id, m_api_forward.created_by, m_api_forward.created_on, m_api_forward.updated_by, m_api_forward.updated_on, m_api.api_name, m_api.api_code, m_op.operator_name, m_service.service_name\nFROM m_api_forward\nINNER JOIN m_api AS m_api ON (m_api.id = m_api_forward.api_id) INNER JOIN m_operator AS m_op ON (m_op.id = m_api_forward.operator_id) INNER JOIN m_service AS m_service ON (m_service.id = m_api_forward.service_id)\nWHERE m_api_forward.service_id = :P1 /* {{$_GET.service_id}} */\nORDER BY m_service.service_name ASC",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.service_id}}"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_api_forward.service_id",
+                  "field": "m_api_forward.service_id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_GET.service_id}}",
+                  "data": {
+                    "table": "m_api_forward",
+                    "column": "service_id",
+                    "type": "number"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "orders": [
+              {
+                "table": "m_service",
+                "column": "service_name",
+                "direction": "ASC",
+                "recid": 1
+              }
+            ]
+          },
+          "connection": "postgres_gcpServer"
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "forward_id"
+          },
+          {
+            "type": "text",
+            "name": "created_by"
+          },
+          {
+            "type": "datetime",
+            "name": "created_on"
+          },
+          {
+            "type": "text",
+            "name": "updated_by"
+          },
+          {
+            "type": "datetime",
+            "name": "updated_on"
+          },
+          {
+            "type": "text",
+            "name": "api_name"
+          },
+          {
+            "type": "text",
+            "name": "api_code"
+          },
+          {
+            "type": "text",
+            "name": "operator_name"
+          },
+          {
+            "type": "text",
+            "name": "service_name"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

@@ -1,0 +1,234 @@
+{
+  "users.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "mobile-recharge.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "login.ejs": {
+    "layoutPage": "",
+    "description": ""
+  },
+  "operators.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "services.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "403-forbidden.ejs": {
+    "layoutPage": "",
+    "description": ""
+  },
+  "api-add-update.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "scheme.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "relation-op-api.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "bank-admin.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "scheme-priority.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "scheme-commision-set.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "wallet-credits.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "wallet-debit.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "recharge-history.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "patients.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "pagination.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "account-summary-report.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "api-sales-report.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "balance-report.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "my-profile.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "security-update.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "login-history.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "send-sms.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "dashboard.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "add-user.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "sms-report.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "index.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "404-not-found.ejs": {
+    "layoutPage": "",
+    "description": ""
+  },
+  "add-cc.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "view-cc.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "api-forward.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "op-api-code-update.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "add-api-user.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "view-api-users.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "pending-recharge.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "live-transactions.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "response-request.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "complain-browse-tickets.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "update-transaction.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "random-rooting.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "android-image.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "android-help-desk.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "complain-other-tickets.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "add-bank-list-beta.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "AEPS-transaction-history.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "AEPS-live-transaction.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "update-aeps-transaction.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "children.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "ClientPanel.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "sales-report-dt.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "recharge-plan.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "individual-txn.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "manage-services.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "swpay-enquiry.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "add-money-request.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "pending-aeps.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "update_nan_balance.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  }
+}

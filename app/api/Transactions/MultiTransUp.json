@@ -1,0 +1,3168 @@
+{
+  "meta": {
+    "options": {
+      "linkedFile": "/views/update-transaction.ejs",
+      "linkedForm": "UpdateMultiForm"
+    },
+    "$_POST": [
+      {
+        "type": "text",
+        "fieldName": "tr_status",
+        "name": "tr_status"
+      },
+      {
+        "type": "text",
+        "fieldName": "tpin",
+        "name": "tpin"
+      },
+      {
+        "type": "text",
+        "fieldName": "MultiTrans[]",
+        "multiple": true,
+        "name": "MultiTrans"
+      },
+      {
+        "type": "text",
+        "name": "api_ref"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "REMOTE_ADDR"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "securityLogin"
+        },
+        "output": false,
+        "meta": []
+      },
+      {
+        "name": "GetAdmin",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "m_users",
+                "column": "user_tpin"
+              }
+            ],
+            "table": {
+              "name": "m_users",
+              "alias": "m_users"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "m_users.id",
+                  "field": "m_users.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{identity}}",
+                  "data": {
+                    "table": "m_users",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT user_tpin\nFROM m_users AS m_users\nWHERE id = :P1 /* {{identity}} */",
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{identity}}"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "text",
+            "name": "user_tpin"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{GetAdmin.user_tpin.toNumber()==$_POST.tpin.toNumber()}}",
+          "then": {
+            "steps": {
+              "name": "repeat",
+              "module": "core",
+              "action": "repeat",
+              "options": {
+                "repeat": "{{$_POST.MultiTrans}}",
+                "outputFields": [],
+                "exec": {
+                  "steps": [
+                    {
+                      "name": "tr_id",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "{{$value}}"
+                      },
+                      "meta": [],
+                      "outputType": "text",
+                      "output": false
+                    },
+                    {
+                      "name": "GetRechTrans",
+                      "module": "dbconnector",
+                      "action": "single",
+                      "options": {
+                        "connection": "postgres_gcpServer",
+                        "sql": {
+                          "type": "SELECT",
+                          "columns": [
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "id"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "op_id"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "service_id"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "api_id"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "user_id"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "user_number"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "details"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "opening_balance"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "amount"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "comm_per"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "comm_val"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "comm_amt"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "other_charge"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "charge_per"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "charge_amt"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "net_amt"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "closing_balance"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "tr_mode"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "tr_type"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "status"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "tr_id"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "reason"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "api_logs"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "is_processed"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "operator_ref"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "api_ref"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "revert_trans"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "ip_address"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "api_response_id"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "process_mode"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "live"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "tr_date"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "updated_on"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "transaction_by"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "extra1"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "extra2"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "extra3"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "dtcommper"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "dtcommval"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "dtcommamt"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "dtchargeper"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "dtchargeval"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "dtchargeamt"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "mdtcommper"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "mdtcommval"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "mdtcommamt"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "mdtchargeper"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "mdtchargeval"
+                            },
+                            {
+                              "table": "tt_recharge_trans",
+                              "column": "mdtchargeamt"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "user_fname"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "user_lname"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "user_mobile"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "user_email"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "user_type"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "md_id"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "ds_id"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "u_status"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "scheme_id"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "balance_amt"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "cap_amt"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "balance_outstanding"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "aeps_limit"
+                            },
+                            {
+                              "table": "mu",
+                              "column": "aeps_balance"
+                            }
+                          ],
+                          "table": {
+                            "name": "tt_recharge_trans",
+                            "alias": "tt_recharge_trans"
+                          },
+                          "primary": "id",
+                          "joins": [
+                            {
+                              "table": "m_users",
+                              "column": "*",
+                              "alias": "mu",
+                              "type": "INNER",
+                              "clauses": {
+                                "condition": "AND",
+                                "rules": [
+                                  {
+                                    "table": "mu",
+                                    "column": "id",
+                                    "operator": "equal",
+                                    "value": {
+                                      "table": "tt_recharge_trans",
+                                      "column": "user_id"
+                                    },
+                                    "operation": "="
+                                  }
+                                ]
+                              },
+                              "primary": "id"
+                            }
+                          ],
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "tt_recharge_trans.id",
+                                "field": "tt_recharge_trans.id",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{tr_id}}",
+                                "data": {
+                                  "table": "tt_recharge_trans",
+                                  "column": "id",
+                                  "type": "number",
+                                  "columnObj": {
+                                    "type": "increments",
+                                    "default": "",
+                                    "primary": true,
+                                    "nullable": false,
+                                    "name": "id"
+                                  }
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "query": "SELECT tt_recharge_trans.id, tt_recharge_trans.op_id, tt_recharge_trans.service_id, tt_recharge_trans.api_id, tt_recharge_trans.user_id, tt_recharge_trans.user_number, tt_recharge_trans.details, tt_recharge_trans.opening_balance, tt_recharge_trans.amount, tt_recharge_trans.comm_per, tt_recharge_trans.comm_val, tt_recharge_trans.comm_amt, tt_recharge_trans.other_charge, tt_recharge_trans.charge_per, tt_recharge_trans.charge_amt, tt_recharge_trans.net_amt, tt_recharge_trans.closing_balance, tt_recharge_trans.tr_mode, tt_recharge_trans.tr_type, tt_recharge_trans.status, tt_recharge_trans.tr_id, tt_recharge_trans.reason, tt_recharge_trans.api_logs, tt_recharge_trans.is_processed, tt_recharge_trans.operator_ref, tt_recharge_trans.api_ref, tt_recharge_trans.revert_trans, tt_recharge_trans.ip_address, tt_recharge_trans.api_response_id, tt_recharge_trans.process_mode, tt_recharge_trans.live, tt_recharge_trans.tr_date, tt_recharge_trans.updated_on, tt_recharge_trans.transaction_by, tt_recharge_trans.extra1, tt_recharge_trans.extra2, tt_recharge_trans.extra3, tt_recharge_trans.dtcommper, tt_recharge_trans.dtcommval, tt_recharge_trans.dtcommamt, tt_recharge_trans.dtchargeper, tt_recharge_trans.dtchargeval, tt_recharge_trans.dtchargeamt, tt_recharge_trans.mdtcommper, tt_recharge_trans.mdtcommval, tt_recharge_trans.mdtcommamt, tt_recharge_trans.mdtchargeper, tt_recharge_trans.mdtchargeval, tt_recharge_trans.mdtchargeamt, mu.user_fname, mu.user_lname, mu.user_mobile, mu.user_email, mu.user_type, mu.md_id, mu.ds_id, mu.u_status, mu.scheme_id, mu.balance_amt, mu.cap_amt, mu.balance_outstanding, mu.aeps_limit, mu.aeps_balance\nFROM tt_recharge_trans AS tt_recharge_trans\nINNER JOIN m_users AS mu ON (mu.id = tt_recharge_trans.user_id)\nWHERE tt_recharge_trans.id = :P1 /* {{tr_id}} */",
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{tr_id}}"
+                            }
+                          ],
+                          "orders": []
+                        }
+                      },
+                      "output": false,
+                      "meta": [
+                        {
+                          "type": "number",
+                          "name": "id"
+                        },
+                        {
+                          "type": "number",
+                          "name": "op_id"
+                        },
+                        {
+                          "type": "number",
+                          "name": "service_id"
+                        },
+                        {
+                          "type": "number",
+                          "name": "api_id"
+                        },
+                        {
+                          "type": "number",
+                          "name": "user_id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "user_number"
+                        },
+                        {
+                          "type": "text",
+                          "name": "details"
+                        },
+                        {
+                          "type": "text",
+                          "name": "opening_balance"
+                        },
+                        {
+                          "type": "text",
+                          "name": "amount"
+                        },
+                        {
+                          "type": "text",
+                          "name": "comm_per"
+                        },
+                        {
+                          "type": "text",
+                          "name": "comm_val"
+                        },
+                        {
+                          "type": "text",
+                          "name": "comm_amt"
+                        },
+                        {
+                          "type": "text",
+                          "name": "other_charge"
+                        },
+                        {
+                          "type": "text",
+                          "name": "charge_per"
+                        },
+                        {
+                          "type": "text",
+                          "name": "charge_amt"
+                        },
+                        {
+                          "type": "text",
+                          "name": "net_amt"
+                        },
+                        {
+                          "type": "text",
+                          "name": "closing_balance"
+                        },
+                        {
+                          "type": "text",
+                          "name": "tr_mode"
+                        },
+                        {
+                          "type": "text",
+                          "name": "tr_type"
+                        },
+                        {
+                          "type": "text",
+                          "name": "status"
+                        },
+                        {
+                          "type": "text",
+                          "name": "tr_id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "reason"
+                        },
+                        {
+                          "type": "text",
+                          "name": "api_logs"
+                        },
+                        {
+                          "type": "text",
+                          "name": "is_processed"
+                        },
+                        {
+                          "type": "text",
+                          "name": "operator_ref"
+                        },
+                        {
+                          "type": "text",
+                          "name": "api_ref"
+                        },
+                        {
+                          "type": "text",
+                          "name": "revert_trans"
+                        },
+                        {
+                          "type": "text",
+                          "name": "ip_address"
+                        },
+                        {
+                          "type": "number",
+                          "name": "api_response_id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "process_mode"
+                        },
+                        {
+                          "type": "text",
+                          "name": "live"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "tr_date"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "updated_on"
+                        },
+                        {
+                          "type": "number",
+                          "name": "transaction_by"
+                        },
+                        {
+                          "type": "text",
+                          "name": "extra1"
+                        },
+                        {
+                          "type": "text",
+                          "name": "extra2"
+                        },
+                        {
+                          "type": "text",
+                          "name": "extra3"
+                        },
+                        {
+                          "type": "text",
+                          "name": "dtcommper"
+                        },
+                        {
+                          "type": "text",
+                          "name": "dtcommval"
+                        },
+                        {
+                          "type": "text",
+                          "name": "dtcommamt"
+                        },
+                        {
+                          "type": "text",
+                          "name": "dtchargeper"
+                        },
+                        {
+                          "type": "text",
+                          "name": "dtchargeval"
+                        },
+                        {
+                          "type": "text",
+                          "name": "dtchargeamt"
+                        },
+                        {
+                          "type": "text",
+                          "name": "mdtcommper"
+                        },
+                        {
+                          "type": "text",
+                          "name": "mdtcommval"
+                        },
+                        {
+                          "type": "text",
+                          "name": "mdtcommamt"
+                        },
+                        {
+                          "type": "text",
+                          "name": "mdtchargeper"
+                        },
+                        {
+                          "type": "text",
+                          "name": "mdtchargeval"
+                        },
+                        {
+                          "type": "text",
+                          "name": "mdtchargeamt"
+                        },
+                        {
+                          "type": "text",
+                          "name": "user_fname"
+                        },
+                        {
+                          "type": "text",
+                          "name": "user_lname"
+                        },
+                        {
+                          "type": "text",
+                          "name": "user_mobile"
+                        },
+                        {
+                          "type": "text",
+                          "name": "user_email"
+                        },
+                        {
+                          "type": "number",
+                          "name": "user_type"
+                        },
+                        {
+                          "type": "text",
+                          "name": "md_id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "ds_id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "u_status"
+                        },
+                        {
+                          "type": "number",
+                          "name": "scheme_id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "balance_amt"
+                        },
+                        {
+                          "type": "number",
+                          "name": "cap_amt"
+                        },
+                        {
+                          "type": "text",
+                          "name": "balance_outstanding"
+                        },
+                        {
+                          "type": "text",
+                          "name": "aeps_limit"
+                        },
+                        {
+                          "type": "text",
+                          "name": "aeps_balance"
+                        }
+                      ],
+                      "outputType": "object"
+                    },
+                    {
+                      "name": "",
+                      "module": "core",
+                      "action": "condition",
+                      "options": {
+                        "if": "{{$_POST.tr_status=='SUCCESS'&&GetRechTrans.status=='PENDING'}}",
+                        "then": {
+                          "steps": [
+                            {
+                              "name": "RechTransUP",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "status",
+                                      "type": "text",
+                                      "value": "{{$_POST.tr_status}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "live",
+                                      "type": "text",
+                                      "value": "{{'Push'}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "updated_on",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "operator_ref",
+                                      "type": "text",
+                                      "value": "{{'Transaction Successful'}}"
+                                    }
+                                  ],
+                                  "table": "tt_recharge_trans",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "id",
+                                        "field": "id",
+                                        "type": "double",
+                                        "operator": "equal",
+                                        "value": "{{GetRechTrans.id}}",
+                                        "data": {
+                                          "column": "id"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "UPDATE tt_recharge_trans\nSET status = :P1 /* {{$_POST.tr_status}} */, live = :P2 /* {{'Push'}} */, updated_on = :P3 /* {{NOW}} */, operator_ref = :P4 /* {{'Transaction Successful'}} */\nWHERE id = :P5 /* {{GetRechTrans.id}} */",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{$_POST.tr_status}}"
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{'Push'}}"
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "name": ":P4",
+                                      "type": "expression",
+                                      "value": "{{'Transaction Successful'}}"
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P5",
+                                      "value": "{{GetRechTrans.id}}"
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "ttBalUP",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "updated_on",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "status",
+                                      "type": "text",
+                                      "value": "{{$_POST.tr_status}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "deleted_by",
+                                      "type": "number",
+                                      "value": "{{identity}}"
+                                    }
+                                  ],
+                                  "table": "tt_balance",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "pay_ref_id",
+                                        "field": "pay_ref_id",
+                                        "type": "double",
+                                        "operator": "equal",
+                                        "value": "{{GetRechTrans.id}}",
+                                        "data": {
+                                          "column": "pay_ref_id"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "UPDATE tt_balance\nSET updated_on = :P1 /* {{NOW}} */, status = :P2 /* {{$_POST.tr_status}} */, deleted_by = :P3 /* {{identity}} */\nWHERE pay_ref_id = :P4 /* {{GetRechTrans.id}} */",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{$_POST.tr_status}}"
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{identity}}"
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P4",
+                                      "value": "{{GetRechTrans.id}}"
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "outputType": "boolean",
+                      "output": false
+                    },
+                    {
+                      "name": "",
+                      "module": "core",
+                      "action": "condition",
+                      "options": {
+                        "if": "{{($_POST.tr_status=='FAILED'||$_POST.tr_status=='REFUND')&&(GetRechTrans.status=='SUCCESS'||GetRechTrans.status=='PENDING')}}",
+                        "then": {
+                          "steps": [
+                            {
+                              "name": "RTClosingBalOld",
+                              "module": "core",
+                              "action": "setvalue",
+                              "options": {
+                                "value": "{{GetRechTrans.opening_balance.toNumber()}}"
+                              },
+                              "meta": [],
+                              "output": false,
+                              "outputType": "text"
+                            },
+                            {
+                              "name": "RTClosingBal",
+                              "module": "core",
+                              "action": "setvalue",
+                              "options": {
+                                "value": "{{GetRechTrans.balance_amt.toNumber()+GetRechTrans.net_amt.toNumber()}}"
+                              },
+                              "meta": [],
+                              "outputType": "text",
+                              "output": false
+                            },
+                            {
+                              "name": "RechTransUP",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "closing_balance",
+                                      "type": "text",
+                                      "value": "{{RTClosingBalOld}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "status",
+                                      "type": "text",
+                                      "value": "{{'FAILED'}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "live",
+                                      "type": "text",
+                                      "value": "{{'Push'}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "updated_on",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "operator_ref",
+                                      "type": "text",
+                                      "value": "{{'Transaction Failed'}}"
+                                    }
+                                  ],
+                                  "table": "tt_recharge_trans",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "id",
+                                        "field": "id",
+                                        "type": "double",
+                                        "operator": "equal",
+                                        "value": "{{GetRechTrans.id}}",
+                                        "data": {
+                                          "column": "id"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "UPDATE tt_recharge_trans\nSET closing_balance = :P1 /* {{RTClosingBalOld}} */, status = :P2 /* {{'FAILED'}} */, live = :P3 /* {{'Push'}} */, updated_on = :P4 /* {{NOW}} */, operator_ref = :P5 /* {{'Transaction Failed'}} */\nWHERE id = :P6 /* {{GetRechTrans.id}} */",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{RTClosingBalOld}}"
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{'FAILED'}}"
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{'Push'}}"
+                                    },
+                                    {
+                                      "name": ":P4",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "name": ":P5",
+                                      "type": "expression",
+                                      "value": "{{'Transaction Failed'}}"
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P6",
+                                      "value": "{{GetRechTrans.id}}"
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "ttBalUP",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "updated_on",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "status",
+                                      "type": "text",
+                                      "value": "{{'FAILED'}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "updated_by",
+                                      "type": "number",
+                                      "value": "{{identity}}"
+                                    }
+                                  ],
+                                  "table": "tt_balance",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "pay_ref_id",
+                                        "field": "pay_ref_id",
+                                        "type": "double",
+                                        "operator": "equal",
+                                        "value": "{{GetRechTrans.id}}",
+                                        "data": {
+                                          "column": "pay_ref_id"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "UPDATE tt_balance\nSET updated_on = :P1 /* {{NOW}} */, status = :P2 /* {{'FAILED'}} */, updated_by = :P3 /* {{identity}} */\nWHERE pay_ref_id = :P4 /* {{GetRechTrans.id}} */",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{'FAILED'}}"
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{identity}}"
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P4",
+                                      "value": "{{GetRechTrans.id}}"
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "ttBalRefund",
+                              "module": "dbupdater",
+                              "action": "insert",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "insert",
+                                  "values": [
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "user_id",
+                                      "type": "number",
+                                      "value": "{{GetRechTrans.user_id}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "old_balance",
+                                      "type": "text",
+                                      "value": "{{GetRechTrans.balance_amt}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "amount",
+                                      "type": "text",
+                                      "value": "{{GetRechTrans.amount}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "new_balance",
+                                      "type": "text",
+                                      "value": "{{RTClosingBal}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "transaction_type",
+                                      "type": "text",
+                                      "value": "{{'Recharge Refund'}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "tr_date",
+                                      "type": "text",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "ip_address",
+                                      "type": "text",
+                                      "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "crdr_type",
+                                      "type": "text",
+                                      "value": "{{'Credit'}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "pay_ref_id",
+                                      "type": "number",
+                                      "value": "{{GetRechTrans.id}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "remarks",
+                                      "type": "text",
+                                      "value": "{{'Number: '+GetRechTrans.user_number+' | Amount: '+GetRechTrans.amount+' | Recharge Refund | Ref. Id: '+GetRechTrans.id+' | Order Id: '+GetRechTrans.tr_id+' | Comm Per: '+GetRechTrans.comm_per+' | Comm Val: '+GetRechTrans.comm_val+' | Charge Per: '+GetRechTrans.charge_per+' | Charge Val:  '+GetRechTrans.other_charge+' | GST: 00.00 | TDS: 00.00 | Net Amt. '+GetRechTrans.net_amt}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "created_by",
+                                      "type": "number",
+                                      "value": "{{identity}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "created_on",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "netamt",
+                                      "type": "text",
+                                      "value": "{{GetRechTrans.net_amt}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "status",
+                                      "type": "text",
+                                      "value": "{{'REFUND'}}"
+                                    }
+                                  ],
+                                  "table": "tt_balance",
+                                  "returning": "id",
+                                  "query": "INSERT INTO tt_balance\n(user_id, old_balance, amount, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on, netamt, status) VALUES (:P1 /* {{GetRechTrans.user_id}} */, :P2 /* {{GetRechTrans.balance_amt}} */, :P3 /* {{GetRechTrans.amount}} */, :P4 /* {{RTClosingBal}} */, :P5 /* {{'Recharge Refund'}} */, :P6 /* {{NOW}} */, :P7 /* {{$_SERVER.REMOTE_ADDR}} */, :P8 /* {{'Credit'}} */, :P9 /* {{GetRechTrans.id}} */, :P10 /* {{'Number: '+GetRechTrans.user_number+' | Amount: '+GetRechTrans.amount+' | Recharge Refund | Ref. Id: '+GetRechTrans.id+' | Order Id: '+GetRechTrans.tr_id+' | Comm Per: '+GetRechTrans.comm_per+' | Comm Val: '+GetRechTrans.comm_val+' | Charge Per: '+GetRechTrans.charge_per+' | Charge Val:  '+GetRechTrans.other_charge+' | GST: 00.00 | TDS: 00.00 | Net Amt. '+GetRechTrans.net_amt}} */, :P11 /* {{identity}} */, :P12 /* {{NOW}} */, :P13 /* {{GetRechTrans.net_amt}} */, :P14 /* {{'REFUND'}} */)",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{GetRechTrans.user_id}}"
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{GetRechTrans.balance_amt}}"
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{GetRechTrans.amount}}"
+                                    },
+                                    {
+                                      "name": ":P4",
+                                      "type": "expression",
+                                      "value": "{{RTClosingBal}}"
+                                    },
+                                    {
+                                      "name": ":P5",
+                                      "type": "expression",
+                                      "value": "{{'Recharge Refund'}}"
+                                    },
+                                    {
+                                      "name": ":P6",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "name": ":P7",
+                                      "type": "expression",
+                                      "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                    },
+                                    {
+                                      "name": ":P8",
+                                      "type": "expression",
+                                      "value": "{{'Credit'}}"
+                                    },
+                                    {
+                                      "name": ":P9",
+                                      "type": "expression",
+                                      "value": "{{GetRechTrans.id}}"
+                                    },
+                                    {
+                                      "name": ":P10",
+                                      "type": "expression",
+                                      "value": "{{'Number: '+GetRechTrans.user_number+' | Amount: '+GetRechTrans.amount+' | Recharge Refund | Ref. Id: '+GetRechTrans.id+' | Order Id: '+GetRechTrans.tr_id+' | Comm Per: '+GetRechTrans.comm_per+' | Comm Val: '+GetRechTrans.comm_val+' | Charge Per: '+GetRechTrans.charge_per+' | Charge Val:  '+GetRechTrans.other_charge+' | GST: 00.00 | TDS: 00.00 | Net Amt. '+GetRechTrans.net_amt}}"
+                                    },
+                                    {
+                                      "name": ":P11",
+                                      "type": "expression",
+                                      "value": "{{identity}}"
+                                    },
+                                    {
+                                      "name": ":P12",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "name": ":P13",
+                                      "type": "expression",
+                                      "value": "{{GetRechTrans.net_amt}}"
+                                    },
+                                    {
+                                      "name": ":P14",
+                                      "type": "expression",
+                                      "value": "{{'REFUND'}}"
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "identity",
+                                  "type": "text"
+                                },
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "UpRTBal",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "m_users",
+                                      "column": "balance_amt",
+                                      "type": "text",
+                                      "value": "{{RTClosingBal}}"
+                                    }
+                                  ],
+                                  "table": "m_users",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "id",
+                                        "field": "id",
+                                        "type": "double",
+                                        "operator": "equal",
+                                        "value": "{{GetRechTrans.user_id}}",
+                                        "data": {
+                                          "column": "id"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{RTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.user_id}} */",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{RTClosingBal}}"
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P2",
+                                      "value": "{{GetRechTrans.user_id}}"
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "",
+                              "module": "core",
+                              "action": "condition",
+                              "options": {
+                                "if": "{{GetRechTrans.ds_id>0}}",
+                                "then": {
+                                  "steps": [
+                                    {
+                                      "name": "GetDT",
+                                      "module": "dbconnector",
+                                      "action": "single",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "SELECT",
+                                          "columns": [
+                                            {
+                                              "table": "m_users",
+                                              "column": "balance_amt",
+                                              "alias": "dt_balance"
+                                            }
+                                          ],
+                                          "table": {
+                                            "name": "m_users",
+                                            "alias": "m_users"
+                                          },
+                                          "primary": "id",
+                                          "joins": [],
+                                          "wheres": {
+                                            "condition": "AND",
+                                            "rules": [
+                                              {
+                                                "id": "m_users.id",
+                                                "field": "m_users.id",
+                                                "type": "double",
+                                                "operator": "equal",
+                                                "value": "{{GetRechTrans.ds_id}}",
+                                                "data": {
+                                                  "table": "m_users",
+                                                  "column": "id",
+                                                  "type": "number",
+                                                  "columnObj": {
+                                                    "type": "increments",
+                                                    "default": "",
+                                                    "primary": true,
+                                                    "nullable": false,
+                                                    "name": "id"
+                                                  }
+                                                },
+                                                "operation": "="
+                                              }
+                                            ],
+                                            "conditional": null,
+                                            "valid": true
+                                          },
+                                          "query": "SELECT balance_amt AS dt_balance\nFROM m_users AS m_users\nWHERE id = :P1 /* {{GetRechTrans.ds_id}} */",
+                                          "params": [
+                                            {
+                                              "operator": "equal",
+                                              "type": "expression",
+                                              "name": ":P1",
+                                              "value": "{{GetRechTrans.ds_id}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "output": false,
+                                      "meta": [
+                                        {
+                                          "type": "text",
+                                          "name": "dt_balance"
+                                        }
+                                      ],
+                                      "outputType": "object"
+                                    },
+                                    {
+                                      "name": "DTNetAmt",
+                                      "module": "core",
+                                      "action": "setvalue",
+                                      "options": {
+                                        "value": "{{GetRechTrans.dtcommamt.toNumber()-GetRechTrans.dtchargeamt.toNumber()}}"
+                                      },
+                                      "meta": [],
+                                      "outputType": "text"
+                                    },
+                                    {
+                                      "name": "DTClosingBal",
+                                      "module": "core",
+                                      "action": "setvalue",
+                                      "options": {
+                                        "value": "{{GetDT.dt_balance.toNumber()-GetRechTrans.dtcommamt.toNumber()+GetRechTrans.dtchargeamt.toNumber()}}"
+                                      },
+                                      "meta": [],
+                                      "outputType": "text"
+                                    },
+                                    {
+                                      "name": "AddT_ChargeDT",
+                                      "module": "dbupdater",
+                                      "action": "insert",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "insert",
+                                          "values": [
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "user_id",
+                                              "type": "number",
+                                              "value": "{{GetRechTrans.ds_id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "old_balance",
+                                              "type": "text",
+                                              "value": "{{GetDT.dt_balance}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "amount",
+                                              "type": "text",
+                                              "value": "{{GetRechTrans.amount}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "netamt",
+                                              "type": "text",
+                                              "value": "{{DTNetAmt}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "new_balance",
+                                              "type": "text",
+                                              "value": "{{DTClosingBal}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "transaction_type",
+                                              "type": "text",
+                                              "value": "{{'Recharge Comm Reversal'}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "tr_date",
+                                              "type": "text",
+                                              "value": "{{NOW}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "ip_address",
+                                              "type": "text",
+                                              "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "crdr_type",
+                                              "type": "text",
+                                              "value": "{{'Debit'}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "pay_ref_id",
+                                              "type": "number",
+                                              "value": "{{GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "remarks",
+                                              "type": "text",
+                                              "value": "{{'Recharge Comm Reversal | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+DTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "created_by",
+                                              "type": "number",
+                                              "value": "{{identity}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "created_on",
+                                              "type": "datetime",
+                                              "value": "{{NOW}}"
+                                            }
+                                          ],
+                                          "table": "t_charge_cal",
+                                          "returning": "id",
+                                          "query": "INSERT INTO t_charge_cal\n(user_id, old_balance, amount, netamt, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on) VALUES (:P1 /* {{GetRechTrans.ds_id}} */, :P2 /* {{GetDT.dt_balance}} */, :P3 /* {{GetRechTrans.amount}} */, :P4 /* {{DTNetAmt}} */, :P5 /* {{DTClosingBal}} */, :P6 /* {{'Recharge Comm Reversal'}} */, :P7 /* {{NOW}} */, :P8 /* {{$_SERVER.REMOTE_ADDR}} */, :P9 /* {{'Debit'}} */, :P10 /* {{GetRechTrans.id}} */, :P11 /* {{'Recharge Comm Reversal | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+DTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}} */, :P12 /* {{identity}} */, :P13 /* {{NOW}} */)",
+                                          "params": [
+                                            {
+                                              "name": ":P1",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.ds_id}}"
+                                            },
+                                            {
+                                              "name": ":P2",
+                                              "type": "expression",
+                                              "value": "{{GetDT.dt_balance}}"
+                                            },
+                                            {
+                                              "name": ":P3",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.amount}}"
+                                            },
+                                            {
+                                              "name": ":P4",
+                                              "type": "expression",
+                                              "value": "{{DTNetAmt}}"
+                                            },
+                                            {
+                                              "name": ":P5",
+                                              "type": "expression",
+                                              "value": "{{DTClosingBal}}"
+                                            },
+                                            {
+                                              "name": ":P6",
+                                              "type": "expression",
+                                              "value": "{{'Recharge Comm Reversal'}}"
+                                            },
+                                            {
+                                              "name": ":P7",
+                                              "type": "expression",
+                                              "value": "{{NOW}}"
+                                            },
+                                            {
+                                              "name": ":P8",
+                                              "type": "expression",
+                                              "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                            },
+                                            {
+                                              "name": ":P9",
+                                              "type": "expression",
+                                              "value": "{{'Debit'}}"
+                                            },
+                                            {
+                                              "name": ":P10",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "name": ":P11",
+                                              "type": "expression",
+                                              "value": "{{'Recharge Comm Reversal | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+DTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "name": ":P12",
+                                              "type": "expression",
+                                              "value": "{{identity}}"
+                                            },
+                                            {
+                                              "name": ":P13",
+                                              "type": "expression",
+                                              "value": "{{NOW}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "meta": [
+                                        {
+                                          "name": "identity",
+                                          "type": "text"
+                                        },
+                                        {
+                                          "name": "affected",
+                                          "type": "number"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "UpDTBal",
+                                      "module": "dbupdater",
+                                      "action": "update",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "update",
+                                          "values": [
+                                            {
+                                              "table": "m_users",
+                                              "column": "balance_amt",
+                                              "type": "text",
+                                              "value": "{{DTClosingBal}}"
+                                            }
+                                          ],
+                                          "table": "m_users",
+                                          "wheres": {
+                                            "condition": "AND",
+                                            "rules": [
+                                              {
+                                                "id": "id",
+                                                "field": "id",
+                                                "type": "double",
+                                                "operator": "equal",
+                                                "value": "{{GetRechTrans.ds_id}}",
+                                                "data": {
+                                                  "column": "id"
+                                                },
+                                                "operation": "="
+                                              }
+                                            ],
+                                            "conditional": null,
+                                            "valid": true
+                                          },
+                                          "returning": "id",
+                                          "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{DTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.ds_id}} */",
+                                          "params": [
+                                            {
+                                              "name": ":P1",
+                                              "type": "expression",
+                                              "value": "{{DTClosingBal}}"
+                                            },
+                                            {
+                                              "operator": "equal",
+                                              "type": "expression",
+                                              "name": ":P2",
+                                              "value": "{{GetRechTrans.ds_id}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "meta": [
+                                        {
+                                          "name": "affected",
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "outputType": "boolean"
+                            },
+                            {
+                              "name": "",
+                              "module": "core",
+                              "action": "condition",
+                              "options": {
+                                "if": "{{GetRechTrans.md_id>0}}",
+                                "then": {
+                                  "steps": [
+                                    {
+                                      "name": "GetMDT",
+                                      "module": "dbconnector",
+                                      "action": "single",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "SELECT",
+                                          "columns": [
+                                            {
+                                              "table": "m_users",
+                                              "column": "balance_amt",
+                                              "alias": "mdt_balance"
+                                            }
+                                          ],
+                                          "table": {
+                                            "name": "m_users",
+                                            "alias": "m_users"
+                                          },
+                                          "primary": "id",
+                                          "joins": [],
+                                          "wheres": {
+                                            "condition": "AND",
+                                            "rules": [
+                                              {
+                                                "id": "m_users.id",
+                                                "field": "m_users.id",
+                                                "type": "double",
+                                                "operator": "equal",
+                                                "value": "{{GetRechTrans.md_id}}",
+                                                "data": {
+                                                  "table": "m_users",
+                                                  "column": "id",
+                                                  "type": "number",
+                                                  "columnObj": {
+                                                    "type": "increments",
+                                                    "default": "",
+                                                    "primary": true,
+                                                    "nullable": false,
+                                                    "name": "id"
+                                                  }
+                                                },
+                                                "operation": "="
+                                              }
+                                            ],
+                                            "conditional": null,
+                                            "valid": true
+                                          },
+                                          "query": "SELECT balance_amt AS mdt_balance\nFROM m_users AS m_users\nWHERE id = :P1 /* {{GetRechTrans.md_id}} */",
+                                          "params": [
+                                            {
+                                              "operator": "equal",
+                                              "type": "expression",
+                                              "name": ":P1",
+                                              "value": "{{GetRechTrans.md_id}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "output": false,
+                                      "meta": [
+                                        {
+                                          "type": "text",
+                                          "name": "mdt_balance"
+                                        }
+                                      ],
+                                      "outputType": "object"
+                                    },
+                                    {
+                                      "name": "MDTNetAmt",
+                                      "module": "core",
+                                      "action": "setvalue",
+                                      "options": {
+                                        "value": "{{GetRechTrans.mdtcommamt.toNumber()-GetRechTrans.mdtchargeamt.toNumber()}}"
+                                      },
+                                      "meta": [],
+                                      "outputType": "text"
+                                    },
+                                    {
+                                      "name": "MDTClosingBal",
+                                      "module": "core",
+                                      "action": "setvalue",
+                                      "options": {
+                                        "value": "{{GetMDT.mdt_balance.toNumber()-GetRechTrans.mdtcommamt.toNumber()+GetRechTrans.mdtchargeamt.toNumber()}}"
+                                      },
+                                      "meta": [],
+                                      "outputType": "text"
+                                    },
+                                    {
+                                      "name": "AddT_ChargeMDT",
+                                      "module": "dbupdater",
+                                      "action": "insert",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "insert",
+                                          "values": [
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "user_id",
+                                              "type": "number",
+                                              "value": "{{GetRechTrans.md_id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "old_balance",
+                                              "type": "text",
+                                              "value": "{{GetMDT.mdt_balance}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "amount",
+                                              "type": "text",
+                                              "value": "{{GetRechTrans.amount}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "netamt",
+                                              "type": "text",
+                                              "value": "{{MDTNetAmt}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "new_balance",
+                                              "type": "text",
+                                              "value": "{{MDTClosingBal}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "transaction_type",
+                                              "type": "text",
+                                              "value": "{{'Recharge Comm Reversal'}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "tr_date",
+                                              "type": "text",
+                                              "value": "{{NOW}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "ip_address",
+                                              "type": "text",
+                                              "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "crdr_type",
+                                              "type": "text",
+                                              "value": "{{'Debit'}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "pay_ref_id",
+                                              "type": "number",
+                                              "value": "{{GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "remarks",
+                                              "type": "text",
+                                              "value": "{{'Recharge Comm Reversal | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+MDTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "created_by",
+                                              "type": "number",
+                                              "value": "{{identity}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "created_on",
+                                              "type": "datetime",
+                                              "value": "{{NOW}}"
+                                            }
+                                          ],
+                                          "table": "t_charge_cal",
+                                          "returning": "id",
+                                          "query": "INSERT INTO t_charge_cal\n(user_id, old_balance, amount, netamt, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on) VALUES (:P1 /* {{GetRechTrans.md_id}} */, :P2 /* {{GetMDT.mdt_balance}} */, :P3 /* {{GetRechTrans.amount}} */, :P4 /* {{MDTNetAmt}} */, :P5 /* {{MDTClosingBal}} */, :P6 /* {{'Recharge Comm Reversal'}} */, :P7 /* {{NOW}} */, :P8 /* {{$_SERVER.REMOTE_ADDR}} */, :P9 /* {{'Debit'}} */, :P10 /* {{GetRechTrans.id}} */, :P11 /* {{'Recharge Comm Reversal | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+MDTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}} */, :P12 /* {{identity}} */, :P13 /* {{NOW}} */)",
+                                          "params": [
+                                            {
+                                              "name": ":P1",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.md_id}}"
+                                            },
+                                            {
+                                              "name": ":P2",
+                                              "type": "expression",
+                                              "value": "{{GetMDT.mdt_balance}}"
+                                            },
+                                            {
+                                              "name": ":P3",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.amount}}"
+                                            },
+                                            {
+                                              "name": ":P4",
+                                              "type": "expression",
+                                              "value": "{{MDTNetAmt}}"
+                                            },
+                                            {
+                                              "name": ":P5",
+                                              "type": "expression",
+                                              "value": "{{MDTClosingBal}}"
+                                            },
+                                            {
+                                              "name": ":P6",
+                                              "type": "expression",
+                                              "value": "{{'Recharge Comm Reversal'}}"
+                                            },
+                                            {
+                                              "name": ":P7",
+                                              "type": "expression",
+                                              "value": "{{NOW}}"
+                                            },
+                                            {
+                                              "name": ":P8",
+                                              "type": "expression",
+                                              "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                            },
+                                            {
+                                              "name": ":P9",
+                                              "type": "expression",
+                                              "value": "{{'Debit'}}"
+                                            },
+                                            {
+                                              "name": ":P10",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "name": ":P11",
+                                              "type": "expression",
+                                              "value": "{{'Recharge Comm Reversal | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+MDTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "name": ":P12",
+                                              "type": "expression",
+                                              "value": "{{identity}}"
+                                            },
+                                            {
+                                              "name": ":P13",
+                                              "type": "expression",
+                                              "value": "{{NOW}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "meta": [
+                                        {
+                                          "name": "identity",
+                                          "type": "text"
+                                        },
+                                        {
+                                          "name": "affected",
+                                          "type": "number"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "UpMDTBal",
+                                      "module": "dbupdater",
+                                      "action": "update",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "update",
+                                          "values": [
+                                            {
+                                              "table": "m_users",
+                                              "column": "balance_amt",
+                                              "type": "text",
+                                              "value": "{{MDTClosingBal}}"
+                                            }
+                                          ],
+                                          "table": "m_users",
+                                          "wheres": {
+                                            "condition": "AND",
+                                            "rules": [
+                                              {
+                                                "id": "id",
+                                                "field": "id",
+                                                "type": "double",
+                                                "operator": "equal",
+                                                "value": "{{GetRechTrans.md_id}}",
+                                                "data": {
+                                                  "column": "id"
+                                                },
+                                                "operation": "="
+                                              }
+                                            ],
+                                            "conditional": null,
+                                            "valid": true
+                                          },
+                                          "returning": "id",
+                                          "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{MDTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.md_id}} */",
+                                          "params": [
+                                            {
+                                              "name": ":P1",
+                                              "type": "expression",
+                                              "value": "{{MDTClosingBal}}"
+                                            },
+                                            {
+                                              "operator": "equal",
+                                              "type": "expression",
+                                              "name": ":P2",
+                                              "value": "{{GetRechTrans.md_id}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "meta": [
+                                        {
+                                          "name": "affected",
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "outputType": "boolean"
+                            }
+                          ]
+                        }
+                      },
+                      "outputType": "boolean"
+                    },
+                    {
+                      "name": "",
+                      "module": "core",
+                      "action": "condition",
+                      "options": {
+                        "if": "{{$_POST.tr_status=='SUCCESS'&&GetRechTrans.status=='FAILED'}}",
+                        "then": {
+                          "steps": [
+                            {
+                              "name": "RTClosingBalOld",
+                              "module": "core",
+                              "action": "setvalue",
+                              "options": {
+                                "value": "{{GetRechTrans.opening_balance.toNumber()-GetRechTrans.net_amt.toNumber()}}"
+                              },
+                              "meta": [],
+                              "output": true,
+                              "outputType": "text"
+                            },
+                            {
+                              "name": "RTClosingBal",
+                              "module": "core",
+                              "action": "setvalue",
+                              "options": {
+                                "value": "{{GetRechTrans.balance_amt.toNumber()-GetRechTrans.net_amt.toNumber()}}"
+                              },
+                              "meta": [],
+                              "outputType": "text",
+                              "output": true
+                            },
+                            {
+                              "name": "RechTransUP",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "closing_balance",
+                                      "type": "text",
+                                      "value": "{{RTClosingBalOld}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "status",
+                                      "type": "text",
+                                      "value": "{{'SUCCESS'}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "api_ref",
+                                      "type": "text",
+                                      "value": "{{$_POST.api_ref}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "live",
+                                      "type": "text",
+                                      "value": "{{'Push'}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "updated_on",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "tt_recharge_trans",
+                                      "column": "operator_ref",
+                                      "type": "text",
+                                      "value": "{{'Transaction Successful'}}"
+                                    }
+                                  ],
+                                  "table": "tt_recharge_trans",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "id",
+                                        "field": "id",
+                                        "type": "double",
+                                        "operator": "equal",
+                                        "value": "{{GetRechTrans.id}}",
+                                        "data": {
+                                          "column": "id"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "UPDATE tt_recharge_trans\nSET closing_balance = :P1 /* {{RTClosingBalOld}} */, status = :P2 /* {{'SUCCESS'}} */, api_ref = :P3 /* {{$_POST.api_ref}} */, live = :P4 /* {{'Push'}} */, updated_on = :P5 /* {{NOW}} */, operator_ref = :P6 /* {{'Transaction Successful'}} */\nWHERE id = :P7 /* {{GetRechTrans.id}} */",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{RTClosingBalOld}}"
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{'SUCCESS'}}"
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{$_POST.api_ref}}"
+                                    },
+                                    {
+                                      "name": ":P4",
+                                      "type": "expression",
+                                      "value": "{{'Push'}}"
+                                    },
+                                    {
+                                      "name": ":P5",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "name": ":P6",
+                                      "type": "expression",
+                                      "value": "{{'Transaction Successful'}}"
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P7",
+                                      "value": "{{GetRechTrans.id}}"
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "ttBalRefund",
+                              "module": "dbupdater",
+                              "action": "insert",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "insert",
+                                  "values": [
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "user_id",
+                                      "type": "number",
+                                      "value": "{{GetRechTrans.user_id}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "old_balance",
+                                      "type": "text",
+                                      "value": "{{GetRechTrans.balance_amt}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "amount",
+                                      "type": "text",
+                                      "value": "{{GetRechTrans.amount}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "new_balance",
+                                      "type": "text",
+                                      "value": "{{RTClosingBal}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "transaction_type",
+                                      "type": "text",
+                                      "value": "{{'Recharge'}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "tr_date",
+                                      "type": "text",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "ip_address",
+                                      "type": "text",
+                                      "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "crdr_type",
+                                      "type": "text",
+                                      "value": "{{'Debit'}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "pay_ref_id",
+                                      "type": "number",
+                                      "value": "{{GetRechTrans.id}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "remarks",
+                                      "type": "text",
+                                      "value": "{{'Number: '+GetRechTrans.user_number+' | Amount: '+GetRechTrans.amount+' | Recharge Refund | Ref. Id: '+GetRechTrans.id+' | Order Id: '+GetRechTrans.tr_id+' | Comm Per: '+GetRechTrans.comm_per+' | Comm Val: '+GetRechTrans.comm_val+' | Charge Per: '+GetRechTrans.charge_per+' | Charge Val:  '+GetRechTrans.other_charge+' | GST: 00.00 | TDS: 00.00 | Net Amt. '+GetRechTrans.net_amt}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "created_by",
+                                      "type": "number",
+                                      "value": "{{identity}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "created_on",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "netamt",
+                                      "type": "text",
+                                      "value": "{{GetRechTrans.net_amt}}"
+                                    },
+                                    {
+                                      "table": "tt_balance",
+                                      "column": "status",
+                                      "type": "text",
+                                      "value": "{{'SUCCESS'}}"
+                                    }
+                                  ],
+                                  "table": "tt_balance",
+                                  "returning": "id",
+                                  "query": "INSERT INTO tt_balance\n(user_id, old_balance, amount, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on, netamt, status) VALUES (:P1 /* {{GetRechTrans.user_id}} */, :P2 /* {{GetRechTrans.balance_amt}} */, :P3 /* {{GetRechTrans.amount}} */, :P4 /* {{RTClosingBal}} */, :P5 /* {{'Recharge'}} */, :P6 /* {{NOW}} */, :P7 /* {{$_SERVER.REMOTE_ADDR}} */, :P8 /* {{'Debit'}} */, :P9 /* {{GetRechTrans.id}} */, :P10 /* {{'Number: '+GetRechTrans.user_number+' | Amount: '+GetRechTrans.amount+' | Recharge Refund | Ref. Id: '+GetRechTrans.id+' | Order Id: '+GetRechTrans.tr_id+' | Comm Per: '+GetRechTrans.comm_per+' | Comm Val: '+GetRechTrans.comm_val+' | Charge Per: '+GetRechTrans.charge_per+' | Charge Val:  '+GetRechTrans.other_charge+' | GST: 00.00 | TDS: 00.00 | Net Amt. '+GetRechTrans.net_amt}} */, :P11 /* {{identity}} */, :P12 /* {{NOW}} */, :P13 /* {{GetRechTrans.net_amt}} */, :P14 /* {{'SUCCESS'}} */)",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{GetRechTrans.user_id}}"
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{GetRechTrans.balance_amt}}"
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{GetRechTrans.amount}}"
+                                    },
+                                    {
+                                      "name": ":P4",
+                                      "type": "expression",
+                                      "value": "{{RTClosingBal}}"
+                                    },
+                                    {
+                                      "name": ":P5",
+                                      "type": "expression",
+                                      "value": "{{'Recharge'}}"
+                                    },
+                                    {
+                                      "name": ":P6",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "name": ":P7",
+                                      "type": "expression",
+                                      "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                    },
+                                    {
+                                      "name": ":P8",
+                                      "type": "expression",
+                                      "value": "{{'Debit'}}"
+                                    },
+                                    {
+                                      "name": ":P9",
+                                      "type": "expression",
+                                      "value": "{{GetRechTrans.id}}"
+                                    },
+                                    {
+                                      "name": ":P10",
+                                      "type": "expression",
+                                      "value": "{{'Number: '+GetRechTrans.user_number+' | Amount: '+GetRechTrans.amount+' | Recharge Refund | Ref. Id: '+GetRechTrans.id+' | Order Id: '+GetRechTrans.tr_id+' | Comm Per: '+GetRechTrans.comm_per+' | Comm Val: '+GetRechTrans.comm_val+' | Charge Per: '+GetRechTrans.charge_per+' | Charge Val:  '+GetRechTrans.other_charge+' | GST: 00.00 | TDS: 00.00 | Net Amt. '+GetRechTrans.net_amt}}"
+                                    },
+                                    {
+                                      "name": ":P11",
+                                      "type": "expression",
+                                      "value": "{{identity}}"
+                                    },
+                                    {
+                                      "name": ":P12",
+                                      "type": "expression",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "name": ":P13",
+                                      "type": "expression",
+                                      "value": "{{GetRechTrans.net_amt}}"
+                                    },
+                                    {
+                                      "name": ":P14",
+                                      "type": "expression",
+                                      "value": "{{'SUCCESS'}}"
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "identity",
+                                  "type": "text"
+                                },
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "UpRTBal",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "postgres_gcpServer",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "m_users",
+                                      "column": "balance_amt",
+                                      "type": "text",
+                                      "value": "{{RTClosingBal}}"
+                                    }
+                                  ],
+                                  "table": "m_users",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "id",
+                                        "field": "id",
+                                        "type": "double",
+                                        "operator": "equal",
+                                        "value": "{{GetRechTrans.user_id}}",
+                                        "data": {
+                                          "column": "id"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{RTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.user_id}} */",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{RTClosingBal}}"
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P2",
+                                      "value": "{{GetRechTrans.user_id}}"
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            },
+                            {
+                              "name": "",
+                              "module": "core",
+                              "action": "condition",
+                              "options": {
+                                "if": "{{GetRechTrans.ds_id>0}}",
+                                "then": {
+                                  "steps": [
+                                    {
+                                      "name": "GetDT",
+                                      "module": "dbconnector",
+                                      "action": "single",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "SELECT",
+                                          "columns": [
+                                            {
+                                              "table": "m_users",
+                                              "column": "balance_amt",
+                                              "alias": "dt_balance"
+                                            }
+                                          ],
+                                          "table": {
+                                            "name": "m_users",
+                                            "alias": "m_users"
+                                          },
+                                          "primary": "id",
+                                          "joins": [],
+                                          "wheres": {
+                                            "condition": "AND",
+                                            "rules": [
+                                              {
+                                                "id": "m_users.id",
+                                                "field": "m_users.id",
+                                                "type": "double",
+                                                "operator": "equal",
+                                                "value": "{{GetRechTrans.ds_id}}",
+                                                "data": {
+                                                  "table": "m_users",
+                                                  "column": "id",
+                                                  "type": "number",
+                                                  "columnObj": {
+                                                    "type": "increments",
+                                                    "default": "",
+                                                    "primary": true,
+                                                    "nullable": false,
+                                                    "name": "id"
+                                                  }
+                                                },
+                                                "operation": "="
+                                              }
+                                            ],
+                                            "conditional": null,
+                                            "valid": true
+                                          },
+                                          "query": "SELECT balance_amt AS dt_balance\nFROM m_users AS m_users\nWHERE id = :P1 /* {{GetRechTrans.ds_id}} */",
+                                          "params": [
+                                            {
+                                              "operator": "equal",
+                                              "type": "expression",
+                                              "name": ":P1",
+                                              "value": "{{GetRechTrans.ds_id}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "output": false,
+                                      "meta": [
+                                        {
+                                          "type": "text",
+                                          "name": "dt_balance"
+                                        }
+                                      ],
+                                      "outputType": "object"
+                                    },
+                                    {
+                                      "name": "DTNetAmt",
+                                      "module": "core",
+                                      "action": "setvalue",
+                                      "options": {
+                                        "value": "{{GetRechTrans.dtcommamt.toNumber()-GetRechTrans.dtchargeamt.toNumber()}}"
+                                      },
+                                      "meta": [],
+                                      "outputType": "text"
+                                    },
+                                    {
+                                      "name": "DTClosingBal",
+                                      "module": "core",
+                                      "action": "setvalue",
+                                      "options": {
+                                        "value": "{{GetDT.dt_balance.toNumber()+GetRechTrans.dtcommamt.toNumber()-GetRechTrans.dtchargeamt.toNumber()}}"
+                                      },
+                                      "meta": [],
+                                      "outputType": "text"
+                                    },
+                                    {
+                                      "name": "AddT_ChargeDT",
+                                      "module": "dbupdater",
+                                      "action": "insert",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "insert",
+                                          "values": [
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "user_id",
+                                              "type": "number",
+                                              "value": "{{GetRechTrans.ds_id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "old_balance",
+                                              "type": "text",
+                                              "value": "{{GetDT.dt_balance}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "amount",
+                                              "type": "text",
+                                              "value": "{{GetRechTrans.amount}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "netamt",
+                                              "type": "text",
+                                              "value": "{{DTNetAmt}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "new_balance",
+                                              "type": "text",
+                                              "value": "{{DTClosingBal}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "transaction_type",
+                                              "type": "text",
+                                              "value": "{{'Recharge Comm'}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "tr_date",
+                                              "type": "text",
+                                              "value": "{{NOW}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "ip_address",
+                                              "type": "text",
+                                              "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "crdr_type",
+                                              "type": "text",
+                                              "value": "{{'Credit'}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "pay_ref_id",
+                                              "type": "number",
+                                              "value": "{{GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "remarks",
+                                              "type": "text",
+                                              "value": "{{'Recharge Comm | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+DTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "created_by",
+                                              "type": "number",
+                                              "value": "{{identity}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "created_on",
+                                              "type": "datetime",
+                                              "value": "{{NOW}}"
+                                            }
+                                          ],
+                                          "table": "t_charge_cal",
+                                          "returning": "id",
+                                          "query": "INSERT INTO t_charge_cal\n(user_id, old_balance, amount, netamt, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on) VALUES (:P1 /* {{GetRechTrans.ds_id}} */, :P2 /* {{GetDT.dt_balance}} */, :P3 /* {{GetRechTrans.amount}} */, :P4 /* {{DTNetAmt}} */, :P5 /* {{DTClosingBal}} */, :P6 /* {{'Recharge Comm'}} */, :P7 /* {{NOW}} */, :P8 /* {{$_SERVER.REMOTE_ADDR}} */, :P9 /* {{'Credit'}} */, :P10 /* {{GetRechTrans.id}} */, :P11 /* {{'Recharge Comm | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+DTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}} */, :P12 /* {{identity}} */, :P13 /* {{NOW}} */)",
+                                          "params": [
+                                            {
+                                              "name": ":P1",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.ds_id}}"
+                                            },
+                                            {
+                                              "name": ":P2",
+                                              "type": "expression",
+                                              "value": "{{GetDT.dt_balance}}"
+                                            },
+                                            {
+                                              "name": ":P3",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.amount}}"
+                                            },
+                                            {
+                                              "name": ":P4",
+                                              "type": "expression",
+                                              "value": "{{DTNetAmt}}"
+                                            },
+                                            {
+                                              "name": ":P5",
+                                              "type": "expression",
+                                              "value": "{{DTClosingBal}}"
+                                            },
+                                            {
+                                              "name": ":P6",
+                                              "type": "expression",
+                                              "value": "{{'Recharge Comm'}}"
+                                            },
+                                            {
+                                              "name": ":P7",
+                                              "type": "expression",
+                                              "value": "{{NOW}}"
+                                            },
+                                            {
+                                              "name": ":P8",
+                                              "type": "expression",
+                                              "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                            },
+                                            {
+                                              "name": ":P9",
+                                              "type": "expression",
+                                              "value": "{{'Credit'}}"
+                                            },
+                                            {
+                                              "name": ":P10",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "name": ":P11",
+                                              "type": "expression",
+                                              "value": "{{'Recharge Comm | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+DTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "name": ":P12",
+                                              "type": "expression",
+                                              "value": "{{identity}}"
+                                            },
+                                            {
+                                              "name": ":P13",
+                                              "type": "expression",
+                                              "value": "{{NOW}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "meta": [
+                                        {
+                                          "name": "identity",
+                                          "type": "text"
+                                        },
+                                        {
+                                          "name": "affected",
+                                          "type": "number"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "UpDTBal",
+                                      "module": "dbupdater",
+                                      "action": "update",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "update",
+                                          "values": [
+                                            {
+                                              "table": "m_users",
+                                              "column": "balance_amt",
+                                              "type": "text",
+                                              "value": "{{DTClosingBal}}"
+                                            }
+                                          ],
+                                          "table": "m_users",
+                                          "wheres": {
+                                            "condition": "AND",
+                                            "rules": [
+                                              {
+                                                "id": "id",
+                                                "field": "id",
+                                                "type": "double",
+                                                "operator": "equal",
+                                                "value": "{{GetRechTrans.ds_id}}",
+                                                "data": {
+                                                  "column": "id"
+                                                },
+                                                "operation": "="
+                                              }
+                                            ],
+                                            "conditional": null,
+                                            "valid": true
+                                          },
+                                          "returning": "id",
+                                          "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{DTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.ds_id}} */",
+                                          "params": [
+                                            {
+                                              "name": ":P1",
+                                              "type": "expression",
+                                              "value": "{{DTClosingBal}}"
+                                            },
+                                            {
+                                              "operator": "equal",
+                                              "type": "expression",
+                                              "name": ":P2",
+                                              "value": "{{GetRechTrans.ds_id}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "meta": [
+                                        {
+                                          "name": "affected",
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "outputType": "boolean"
+                            },
+                            {
+                              "name": "",
+                              "module": "core",
+                              "action": "condition",
+                              "options": {
+                                "if": "{{GetRechTrans.md_id>0}}",
+                                "then": {
+                                  "steps": [
+                                    {
+                                      "name": "GetMDT",
+                                      "module": "dbconnector",
+                                      "action": "single",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "SELECT",
+                                          "columns": [
+                                            {
+                                              "table": "m_users",
+                                              "column": "balance_amt",
+                                              "alias": "mdt_balance"
+                                            }
+                                          ],
+                                          "table": {
+                                            "name": "m_users",
+                                            "alias": "m_users"
+                                          },
+                                          "primary": "id",
+                                          "joins": [],
+                                          "wheres": {
+                                            "condition": "AND",
+                                            "rules": [
+                                              {
+                                                "id": "m_users.id",
+                                                "field": "m_users.id",
+                                                "type": "double",
+                                                "operator": "equal",
+                                                "value": "{{GetRechTrans.md_id}}",
+                                                "data": {
+                                                  "table": "m_users",
+                                                  "column": "id",
+                                                  "type": "number",
+                                                  "columnObj": {
+                                                    "type": "increments",
+                                                    "default": "",
+                                                    "primary": true,
+                                                    "nullable": false,
+                                                    "name": "id"
+                                                  }
+                                                },
+                                                "operation": "="
+                                              }
+                                            ],
+                                            "conditional": null,
+                                            "valid": true
+                                          },
+                                          "query": "SELECT balance_amt AS mdt_balance\nFROM m_users AS m_users\nWHERE id = :P1 /* {{GetRechTrans.md_id}} */",
+                                          "params": [
+                                            {
+                                              "operator": "equal",
+                                              "type": "expression",
+                                              "name": ":P1",
+                                              "value": "{{GetRechTrans.md_id}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "output": false,
+                                      "meta": [
+                                        {
+                                          "type": "text",
+                                          "name": "mdt_balance"
+                                        }
+                                      ],
+                                      "outputType": "object"
+                                    },
+                                    {
+                                      "name": "MDTNetAmt",
+                                      "module": "core",
+                                      "action": "setvalue",
+                                      "options": {
+                                        "value": "{{GetRechTrans.mdtcommamt.toNumber()-GetRechTrans.mdtchargeamt.toNumber()}}"
+                                      },
+                                      "meta": [],
+                                      "outputType": "text"
+                                    },
+                                    {
+                                      "name": "MDTClosingBal",
+                                      "module": "core",
+                                      "action": "setvalue",
+                                      "options": {
+                                        "value": "{{GetMDT.mdt_balance.toNumber()+GetRechTrans.mdtcommamt.toNumber()-GetRechTrans.mdtchargeamt.toNumber()}}"
+                                      },
+                                      "meta": [],
+                                      "outputType": "text"
+                                    },
+                                    {
+                                      "name": "AddT_ChargeMDT",
+                                      "module": "dbupdater",
+                                      "action": "insert",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "insert",
+                                          "values": [
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "user_id",
+                                              "type": "number",
+                                              "value": "{{GetRechTrans.md_id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "old_balance",
+                                              "type": "text",
+                                              "value": "{{GetMDT.mdt_balance}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "amount",
+                                              "type": "text",
+                                              "value": "{{GetRechTrans.amount}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "netamt",
+                                              "type": "text",
+                                              "value": "{{MDTNetAmt}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "new_balance",
+                                              "type": "text",
+                                              "value": "{{MDTClosingBal}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "transaction_type",
+                                              "type": "text",
+                                              "value": "{{'Recharge Comm'}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "tr_date",
+                                              "type": "text",
+                                              "value": "{{NOW}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "ip_address",
+                                              "type": "text",
+                                              "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "crdr_type",
+                                              "type": "text",
+                                              "value": "{{'Credit'}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "pay_ref_id",
+                                              "type": "number",
+                                              "value": "{{GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "remarks",
+                                              "type": "text",
+                                              "value": "{{'Recharge Comm | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+MDTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "created_by",
+                                              "type": "number",
+                                              "value": "{{identity}}"
+                                            },
+                                            {
+                                              "table": "t_charge_cal",
+                                              "column": "created_on",
+                                              "type": "datetime",
+                                              "value": "{{NOW}}"
+                                            }
+                                          ],
+                                          "table": "t_charge_cal",
+                                          "returning": "id",
+                                          "query": "INSERT INTO t_charge_cal\n(user_id, old_balance, amount, netamt, new_balance, transaction_type, tr_date, ip_address, crdr_type, pay_ref_id, remarks, created_by, created_on) VALUES (:P1 /* {{GetRechTrans.md_id}} */, :P2 /* {{GetMDT.mdt_balance}} */, :P3 /* {{GetRechTrans.amount}} */, :P4 /* {{MDTNetAmt}} */, :P5 /* {{MDTClosingBal}} */, :P6 /* {{'Recharge Comm'}} */, :P7 /* {{NOW}} */, :P8 /* {{$_SERVER.REMOTE_ADDR}} */, :P9 /* {{'Credit'}} */, :P10 /* {{GetRechTrans.id}} */, :P11 /* {{'Recharge Comm | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+MDTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}} */, :P12 /* {{identity}} */, :P13 /* {{NOW}} */)",
+                                          "params": [
+                                            {
+                                              "name": ":P1",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.md_id}}"
+                                            },
+                                            {
+                                              "name": ":P2",
+                                              "type": "expression",
+                                              "value": "{{GetMDT.mdt_balance}}"
+                                            },
+                                            {
+                                              "name": ":P3",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.amount}}"
+                                            },
+                                            {
+                                              "name": ":P4",
+                                              "type": "expression",
+                                              "value": "{{MDTNetAmt}}"
+                                            },
+                                            {
+                                              "name": ":P5",
+                                              "type": "expression",
+                                              "value": "{{MDTClosingBal}}"
+                                            },
+                                            {
+                                              "name": ":P6",
+                                              "type": "expression",
+                                              "value": "{{'Recharge Comm'}}"
+                                            },
+                                            {
+                                              "name": ":P7",
+                                              "type": "expression",
+                                              "value": "{{NOW}}"
+                                            },
+                                            {
+                                              "name": ":P8",
+                                              "type": "expression",
+                                              "value": "{{$_SERVER.REMOTE_ADDR}}"
+                                            },
+                                            {
+                                              "name": ":P9",
+                                              "type": "expression",
+                                              "value": "{{'Credit'}}"
+                                            },
+                                            {
+                                              "name": ":P10",
+                                              "type": "expression",
+                                              "value": "{{GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "name": ":P11",
+                                              "type": "expression",
+                                              "value": "{{'Recharge Comm | Amount:  '+GetRechTrans.amount+' | Charge & Comm Debit: '+MDTNetAmt+' | Ref. Id:\\n '+GetRechTrans.id}}"
+                                            },
+                                            {
+                                              "name": ":P12",
+                                              "type": "expression",
+                                              "value": "{{identity}}"
+                                            },
+                                            {
+                                              "name": ":P13",
+                                              "type": "expression",
+                                              "value": "{{NOW}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "meta": [
+                                        {
+                                          "name": "identity",
+                                          "type": "text"
+                                        },
+                                        {
+                                          "name": "affected",
+                                          "type": "number"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "UpMDTBal",
+                                      "module": "dbupdater",
+                                      "action": "update",
+                                      "options": {
+                                        "connection": "postgres_gcpServer",
+                                        "sql": {
+                                          "type": "update",
+                                          "values": [
+                                            {
+                                              "table": "m_users",
+                                              "column": "balance_amt",
+                                              "type": "text",
+                                              "value": "{{MDTClosingBal}}"
+                                            }
+                                          ],
+                                          "table": "m_users",
+                                          "wheres": {
+                                            "condition": "AND",
+                                            "rules": [
+                                              {
+                                                "id": "id",
+                                                "field": "id",
+                                                "type": "double",
+                                                "operator": "equal",
+                                                "value": "{{GetRechTrans.md_id}}",
+                                                "data": {
+                                                  "column": "id"
+                                                },
+                                                "operation": "="
+                                              }
+                                            ],
+                                            "conditional": null,
+                                            "valid": true
+                                          },
+                                          "returning": "id",
+                                          "query": "UPDATE m_users\nSET balance_amt = :P1 /* {{MDTClosingBal}} */\nWHERE id = :P2 /* {{GetRechTrans.md_id}} */",
+                                          "params": [
+                                            {
+                                              "name": ":P1",
+                                              "type": "expression",
+                                              "value": "{{MDTClosingBal}}"
+                                            },
+                                            {
+                                              "operator": "equal",
+                                              "type": "expression",
+                                              "name": ":P2",
+                                              "value": "{{GetRechTrans.md_id}}"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "meta": [
+                                        {
+                                          "name": "affected",
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "outputType": "boolean"
+                            }
+                          ]
+                        }
+                      },
+                      "outputType": "boolean"
+                    },
+                    {
+                      "name": "apiLive",
+                      "module": "api",
+                      "action": "send",
+                      "options": {
+                        "url": "https://portal.swpay.in/api/RefreshTrans"
+                      },
+                      "output": true
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "$index",
+                  "type": "number"
+                },
+                {
+                  "name": "$number",
+                  "type": "number"
+                },
+                {
+                  "name": "$name",
+                  "type": "text"
+                },
+                {
+                  "name": "$value",
+                  "type": "object"
+                },
+                {
+                  "name": "RTClosingBalOld",
+                  "type": "text",
+                  "sub": []
+                },
+                {
+                  "name": "RTClosingBal",
+                  "type": "text",
+                  "sub": []
+                },
+                {
+                  "name": "apiLive",
+                  "type": "text"
+                }
+              ],
+              "outputType": "array"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "TPIN",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 403,
+                "data": "T-Pin Mismatched"
+              },
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

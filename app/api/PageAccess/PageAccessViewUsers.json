@@ -1,0 +1,97 @@
+[
+  {
+    "name": "",
+    "module": "auth",
+    "action": "restrict",
+    "options": {
+      "provider": "securityLogin",
+      "permissions": [
+        "write"
+      ],
+      "loginUrl": "/login",
+      "forbiddenUrl": "/403-forbidden"
+    }
+  },
+  {
+    "name": "identity",
+    "module": "auth",
+    "action": "identify",
+    "options": {
+      "provider": "securityLogin"
+    },
+    "output": false,
+    "meta": []
+  },
+  {
+    "name": "",
+    "module": "core",
+    "action": "condition",
+    "options": {
+      "if": "{{identity}}",
+      "then": {
+        "steps": [
+          {
+            "name": "custom",
+            "module": "dbupdater",
+            "action": "custom",
+            "options": {
+              "connection": "postgres_gcpServer",
+              "sql": {
+                "query": "SELECT cp.access_page5 as access, mu.user_type\nFROM m_users mu\nleft join cc_pageaccess cp on (cp.ccuser_id = mu.id)\nWHERE mu.id = @user AND (mu.user_type = 0 OR mu.user_type = 4) AND mu.u_status = '1'\ngroup by cp.access_page5, mu.user_type ;",
+                "params": [
+                  {
+                    "name": "@user",
+                    "value": "{{identity}}",
+                    "test": "12"
+                  }
+                ]
+              }
+            },
+            "output": true,
+            "meta": [
+              {
+                "name": "access",
+                "type": "text"
+              },
+              {
+                "name": "user_type",
+                "type": "number"
+              }
+            ],
+            "outputType": "array"
+          },
+          {
+            "name": "",
+            "module": "core",
+            "action": "condition",
+            "options": {
+              "if": "{{(custom[0].user_type==4&&custom[0].access!=1)||(custom[0].user_type==0&&custom[0].access!=null)}}",
+              "then": {
+                "steps": {
+                  "name": "UnableAccess",
+                  "module": "core",
+                  "action": "redirect",
+                  "options": {
+                    "url": "/403-forbidden"
+                  }
+                }
+              }
+            },
+            "outputType": "boolean"
+          }
+        ]
+      },
+      "else": {
+        "steps": {
+          "name": "Login",
+          "module": "core",
+          "action": "redirect",
+          "options": {
+            "url": "/login"
+          }
+        }
+      }
+    },
+    "outputType": "boolean"
+  }
+]

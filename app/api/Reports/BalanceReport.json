@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "tr_date"
+      },
+      {
+        "type": "text",
+        "name": "user_type"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "/login",
+          "forbiddenUrl": "/403-forbidden"
+        }
+      },
+      {
+        "name": "BalReportDateType",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "postgres_gcpServer",
+          "sql": {
+            "query": "select distinct trt.user_id, mu.user_fname, mu.user_mobile, mu.created_on, mu.u_status, trt.closing_balance, trt.tr_date, mu2.user_fname as parent_name, \nmu2.user_mobile as parent_mobile from m_users mu \nleft join m_users mu2 on (mu2.id = mu.created_by)\nleft join tt_recharge_trans trt on (trt.user_id = mu.id) where mu.user_type = @user_type and to_char(trt.tr_date, 'yyyy-MM-dd') = @trans_date\ngroup by mu.user_fname, mu.user_mobile, mu.created_on, mu.u_status, trt.closing_balance, trt.tr_date, trt.user_id, mu2.user_fname, mu2.user_mobile \norder by trt.tr_date desc limit 1;",
+            "params": [
+              {
+                "name": "@user_type",
+                "value": "{{$_GET.user_type.default(0)}}",
+                "test": "3"
+              },
+              {
+                "name": "@trans_date",
+                "value": "{{$_GET.tr_date}}",
+                "test": "2021-10-28"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "user_id",
+            "type": "number"
+          },
+          {
+            "name": "user_fname",
+            "type": "text"
+          },
+          {
+            "name": "user_mobile",
+            "type": "text"
+          },
+          {
+            "name": "created_on",
+            "type": "text"
+          },
+          {
+            "name": "u_status",
+            "type": "text"
+          },
+          {
+            "name": "closing_balance",
+            "type": "text"
+          },
+          {
+            "name": "tr_date",
+            "type": "text"
+          },
+          {
+            "name": "parent_name",
+            "type": "text"
+          },
+          {
+            "name": "parent_mobile",
+            "type": "text"
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

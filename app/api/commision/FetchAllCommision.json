@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "offset"
+      },
+      {
+        "type": "text",
+        "name": "limit"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "scheme_id"
+      },
+      {
+        "type": "text",
+        "name": "service_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "securityLogin",
+          "permissions": [
+            "write"
+          ],
+          "loginUrl": "login",
+          "forbiddenUrl": "403-forbidden"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.service_id==0}}",
+          "then": {
+            "steps": {
+              "name": "AllCommisionScheme",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "query": "select mo.service_id, mo.id as op_id, mo.operator_name, ms.service_name, mc.id as commision_id, mc.scheme_id, mc.comm_per, mc.comm_val, mc.service_charge_per, mc.service_charge_val, mc.is_active \nfrom m_operator mo \ninner join m_service ms on ms.id = mo.service_id \nleft join m_commission mc on mc.operator_id = mo.id and mc.scheme_id = @scheme \norder by mo.operator_name asc ",
+                  "params": [
+                    {
+                      "name": "@scheme",
+                      "value": "{{$_GET.scheme_id}}",
+                      "test": "1"
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "service_id",
+                  "type": "number"
+                },
+                {
+                  "name": "op_id",
+                  "type": "number"
+                },
+                {
+                  "name": "operator_name",
+                  "type": "text"
+                },
+                {
+                  "name": "service_name",
+                  "type": "text"
+                },
+                {
+                  "name": "commision_id",
+                  "type": "text"
+                },
+                {
+                  "name": "scheme_id",
+                  "type": "text"
+                },
+                {
+                  "name": "comm_per",
+                  "type": "text"
+                },
+                {
+                  "name": "comm_val",
+                  "type": "text"
+                },
+                {
+                  "name": "service_charge_per",
+                  "type": "text"
+                },
+                {
+                  "name": "service_charge_val",
+                  "type": "text"
+                },
+                {
+                  "name": "is_active",
+                  "type": "text"
+                }
+              ],
+              "outputType": "array"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "AllCommisionScheme",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "postgres_gcpServer",
+                "sql": {
+                  "query": "select mo.service_id, mo.id as op_id, mo.operator_name, ms.service_name, mc.id as commision_id, mc.scheme_id, mc.comm_per, mc.comm_val, mc.service_charge_per, mc.service_charge_val, mc.is_active \nfrom m_operator mo \ninner join m_service ms on ms.id = mo.service_id \nleft join m_commission mc on mc.operator_id = mo.id WHERE mc.scheme_id = @scheme and mo.service_id=@service\norder by mo.operator_name asc ",
+                  "params": [
+                    {
+                      "name": "@scheme",
+                      "value": "{{$_GET.scheme_id}}",
+                      "test": "1"
+                    },
+                    {
+                      "name": "@service",
+                      "value": "{{$_GET.service_id}}",
+                      "test": "1"
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "op_id",
+                  "type": "number"
+                },
+                {
+                  "name": "operator_name",
+                  "type": "text"
+                },
+                {
+                  "name": "service_name",
+                  "type": "text"
+                },
+                {
+                  "name": "commision_id",
+                  "type": "number"
+                },
+                {
+                  "name": "scheme_id",
+                  "type": "number"
+                },
+                {
+                  "name": "comm_per",
+                  "type": "text"
+                },
+                {
+                  "name": "comm_val",
+                  "type": "text"
+                },
+                {
+                  "name": "service_charge_per",
+                  "type": "text"
+                },
+                {
+                  "name": "service_charge_val",
+                  "type": "text"
+                },
+                {
+                  "name": "is_active",
+                  "type": "number"
+                }
+              ],
+              "outputType": "array"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta name="ac:route" content="/login">
+    <base href="/">
+    <script src="dmxAppConnect/dmxAppConnect.js"></script>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="bootstrap/5/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="fontawesome5/css/all.min.css" />
+    <!-- <link rel="stylesheet" href="../public/css/style.css" /> -->
+    <link rel="stylesheet" href="dmxAppConnect/dmxValidator/dmxValidator.css" />
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="dmxAppConnect/dmxValidator/dmxValidator.js" defer=""></script>
+    <script src="dmxAppConnect/dmxStateManagement/dmxStateManagement.js" defer=""></script>
+    <script src="dmxAppConnect/dmxBrowser/dmxBrowser.js" defer=""></script>
+
+    <link rel="stylesheet" href="dmxAppConnect/dmxNotifications/dmxNotifications.css" />
+    <script src="dmxAppConnect/dmxNotifications/dmxNotifications.js" defer=""></script>
+</head>
+
+<body is="dmx-app" id="login" class="bg-primary">
+    <script is="dmx-flow" id="flowfocus" type="text/dmx-flow" autorun>[
+  {
+    wait: {delay: 100}
+  },
+  {
+    run: {action: "{{crLogin.formLogin.Email.focus()}}"}
+  }
+]</script>
+    <dmx-session-manager id="sessionLogin"></dmx-session-manager>
+    <dmx-cookie-manager id="cookiesLogin"></dmx-cookie-manager>
+    <div is="dmx-browser" id="browser1"></div>
+    <dmx-value id="varLogin" dmx-bind:value="'Login'"></dmx-value>
+    <dmx-value id="varInvalidLogin" dmx-bind:value="0"></dmx-value>
+    <dmx-value id="varCountUser" dmx-bind:value="0"></dmx-value>
+    <dmx-notifications id="Notification" newest-on-top="true">
+    </dmx-notifications>
+    <header class="text-center">
+        <div class="p-3">
+            <a href="#" internal><img src="assets/images/swpay.png" alt="SW Infotech" width="100" height="100" class="img-fluid img-thumbnail align-self-center"></a>
+        </div>
+    </header>
+    <div class="container-fluid py-3 bg-gray-200 text-info">
+        <div class="sd-login mx-2 mx-md-0">
+            <div class="row align-items-center justify-content-center w-auto h-100">
+                <div class="col-12 d-flex justify-content-center">
+
+                    <div id="crLogin" is="dmx-if" dmx-bind:condition="varLogin.value=='Login' ">
+                        <div class="card sd-login-card">
+                            <div class="card-body px-5">
+                                <h1 class="sd-fs-45 sd-fs-35 sd-fw-500 text-black mb-3">Login</h1>
+                                <p class="px-1 mb-3 sd-fs-12 sd-fw-500 text-black">Enter your credentials below</p>
+                                <form id="formLogin" is="dmx-serverconnect-form" method="post" action="api/Users/login" dmx-on:success="browser1.goto('dashboard')" dmx-on:unauthorized="varInvalidLogin.setValue(1);formLogin.reset;" dmx-on:forbidden="Notification.danger('This user doesnot exists, please try again!')">
+                                    <div class="input-group mb-4">
+                                        <span class="input-group-text border-1 border-end-0 bg-transparent"><i class="fa fa-user"></i></span>
+                                        <input type="text" class="border-1 border-start-0 form-control" id="Mobile" name="Mobile" placeholder="Enter User Name" required="true">
+                                    </div>
+                                    <div class="input-group mb-4">
+                                        <span class="input-group-text border-1 border-end-0 bg-transparent"><i class="fa fa-lock"></i></span>
+                                        <input type="password" class="border-1 border-start-0 form-control" id="" name="Password" placeholder="Password" required="true" data-msg-required="Please enter your password">
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" value="1" id="inputRemember" name="remember">
+                                        <label class="form-check-label" for="inputRemember">Keep me logged in</label>
+                                    </div>
+                                    <p class="mb-4 sd-fs-12 sd-fw-500 text-center text-danger mb-4" dmx-hide="!varInvalidLogin.value">Invalid email or password. Try again.
+                                    </p>
+                                    <p class="mb-4 sd-fs-12 sd-fw-500 text-center text-danger mb-4" dmx-hide="!varCountUser.value">User Already Exists. Please Try again.
+                                    </p>
+                                    <button id="submitLogin" class="btn btn-primary text-white w-100 mt-2 mb-3" type="submit" dmx-bind:disabled="state.executing">LogIn<span class="spinner-border spinner-border-sm" role="status" dmx-show="state.executing"></span>
+                                    </button>
+                                    <a href="#" class="d-flex justify-content-center sd-fs-12 sd-fw-500 text-primary" internal data-bs-toggle="button" dmx-on:click="varLogin.setValue('ForgotPass')">Forgot password?</a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="crForgotPassword" is="dmx-if" dmx-bind:condition="varLogin.value == 'ForgotPass'">
+                        <div class="card sd-login-card">
+                            <div class="card-body p-5">
+                                <h1 class="sd-fs-45 sd-fw-500 text-black mb-4">Reset Password</h1>
+                                <p class="px-1 mb-4 sd-fs-18 sd-fw-500 text-black">Don’t worry, happens to the best of us</p>
+                                <form id="formForgotPass" is="dmx-serverconnect-form" method="post" action="/api/Users/SendRecoveryLink" dmx-on:success="varLogin.setValue('ResetEmailSent')">
+                                    <div class="input-group mb-4">
+                                        <span class="input-group-text border-1 border-end-0 bg-transparent"><i class="fa fa-user"></i></span>
+                                        <input type="email" class="border-1 border-start-0 form-control" id="txtEmailForgotPass" name="Email" placeholder="Email ID">
+                                    </div>
+                                    <button id="submitResetPass" class="btn btn-primary text-white w-100 my-4" type="submit" dmx-bind:disabled="state.executing">Email me a recovery link<span class="spinner-border spinner-border-sm ms-2" role="status" dmx-show="state.executing"></span>
+                                    </button>
+                                    <a href="#" class="d-flex justify-content-center sd-fs-12 sd-fw-500 text-primary" internal data-bs-toggle="button" dmx-on:click="varLogin.setValue('Login')">Back to Login</a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="crRecoverPassword" is="dmx-if" dmx-bind:condition="varLogin.value == 'ResetEmailSent'">
+                        <div class="card sd-login-card">
+                            <div class="card-body p-5">
+                                <h1 class="sd-fs-45 sd-fw-500 text-black mb-4">You're Almost There!</h1>
+                                <p class="px-1 mb-5 sd-fs-18 sd-fw-500 text-black">If an account exists in our system with this email, you will get an email with a link to reset your password.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="bootstrap/5/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
